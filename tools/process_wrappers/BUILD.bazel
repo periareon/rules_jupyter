@@ -1,0 +1,56 @@
+# Note that this package exists outside of `//jupyter` to avoid conflicting
+# with the existing `jupyter` import path.
+
+load("@rules_venv//python:py_binary.bzl", "py_binary")
+
+# buildifier: disable=bzl-visibility
+load(
+    "//jupyter/private:toolchain.bzl",
+    "current_jupyter_toolchain",
+    "current_jupytext_toolchain",
+)
+
+exports_files([
+    "reporter.py",
+    "tester.py",
+    "compiler.py",
+    "playwright_install.py",
+])
+
+current_jupyter_toolchain(
+    name = "current_jupyter_toolchain",
+)
+
+current_jupytext_toolchain(
+    name = "current_jupytext_toolchain",
+)
+
+py_binary(
+    name = "compiler",
+    srcs = ["compiler.py"],
+    visibility = ["//visibility:public"],
+    deps = [":current_jupytext_toolchain"],
+)
+
+py_binary(
+    name = "reporter",
+    srcs = ["reporter.py"],
+    visibility = ["//visibility:public"],
+    deps = [":current_jupyter_toolchain"],
+)
+
+py_binary(
+    name = "tester",
+    srcs = ["tester.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":reporter",
+        "@rules_venv//python/runfiles",
+    ],
+)
+
+py_binary(
+    name = "playwright_install",
+    srcs = ["playwright_install.py"],
+    visibility = ["//visibility:public"],
+)

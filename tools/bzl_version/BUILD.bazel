@@ -1,0 +1,13 @@
+load("@rules_venv//python/pytest:defs.bzl", "py_pytest_test")
+load("//:version.bzl", "VERSION")
+
+py_pytest_test(
+    name = "bzl_version_test",
+    srcs = ["bzl_version_test.py"],
+    data = ["//:MODULE.bazel"],
+    env = {
+        "MODULE_BAZEL": "$(rlocationpath //:MODULE.bazel)",
+        "VERSION": VERSION,
+    },
+    deps = ["@rules_venv//python/runfiles"],
+)

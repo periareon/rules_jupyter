@@ -1,0 +1,12 @@
+load("//jupyter:defs.bzl", "jupyter_notebook")
+
+jupyter_notebook(
+    name = "simple_notebook",
+    src = "simple.ipynb",
+)
+
+jupyter_notebook(
+    name = "simple_notebook_with_kernel",
+    src = "simple.ipynb",
+    kernel = "python3",
+)

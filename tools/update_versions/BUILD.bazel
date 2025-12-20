@@ -1,0 +1,11 @@
+load("@rules_venv//python:py_binary.bzl", "py_binary")
+
+py_binary(
+    name = "update_pandoc",
+    srcs = ["update_pandoc.py"],
+)
+
+py_binary(
+    name = "update_playwright_browsers",
+    srcs = ["update_playwright_browsers.py"],
+)

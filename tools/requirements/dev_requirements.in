@@ -1,0 +1,9 @@
+# Development requirements
+
+-r ../../jupyter/requirements.in
+
+black
+isort
+mypy
+pylint
+pytest-cov

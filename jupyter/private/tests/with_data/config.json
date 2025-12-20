@@ -1,0 +1,10 @@
+{
+  "name": "test_config",
+  "version": "1.0",
+  "settings": {
+    "value1": 42,
+    "value2": "test",
+    "enabled": true
+  }
+}
+

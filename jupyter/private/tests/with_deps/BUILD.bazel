@@ -1,0 +1,75 @@
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_test", "jupyter_report")
+
+# Test notebook from .ipynb file with pytest dependency
+jupyter_notebook(
+    name = "notebook_ipynb",
+    src = "notebook.ipynb",
+    deps = ["@pip_deps//pytest"],
+)
+
+# Test notebook from .py file (Jupytext format) with pytest dependency
+jupyter_notebook(
+    name = "notebook_py",
+    src = "notebook.py",
+    deps = ["@pip_deps//pytest"],
+)
+
+# Reports for .ipynb notebook
+jupyter_report(
+    name = "report_ipynb",
+    notebook = ":notebook_ipynb",
+)
+
+jupyter_report(
+    name = "report_ipynb_markdown",
+    notebook = ":notebook_ipynb",
+    out_markdown = "report_ipynb.md",
+)
+
+jupyter_report(
+    name = "report_ipynb_html",
+    notebook = ":notebook_ipynb",
+    out_html = "report_ipynb.html",
+)
+
+# Reports for .py notebook
+jupyter_report(
+    name = "report_py",
+    notebook = ":notebook_py",
+)
+
+jupyter_report(
+    name = "report_py_markdown",
+    notebook = ":notebook_py",
+    out_markdown = "report_py.md",
+)
+
+jupyter_report(
+    name = "report_py_html",
+    notebook = ":notebook_py",
+    out_html = "report_py.html",
+)
+
+# Tests for .ipynb notebook
+jupyter_notebook_test(
+    name = "test_ipynb",
+    notebook = ":notebook_ipynb",
+)
+
+jupyter_notebook_test(
+    name = "test_ipynb_with_markdown",
+    notebook = ":notebook_ipynb",
+    reports = ["markdown"],
+)
+
+# Tests for .py notebook
+jupyter_notebook_test(
+    name = "test_py",
+    notebook = ":notebook_py",
+)
+
+jupyter_notebook_test(
+    name = "test_py_with_markdown",
+    notebook = ":notebook_py",
+    reports = ["markdown"],
+)

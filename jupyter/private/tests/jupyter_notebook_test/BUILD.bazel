@@ -1,0 +1,48 @@
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_test")
+
+jupyter_notebook(
+    name = "passing_notebook",
+    src = "passing_notebook.ipynb",
+)
+
+# Basic test - just executes the notebook
+jupyter_notebook_test(
+    name = "passing_test",
+    notebook = ":passing_notebook",
+)
+
+# Test with HTML report generation
+jupyter_notebook_test(
+    name = "passing_test_with_html_report",
+    notebook = ":passing_notebook",
+    reports = ["html"],
+)
+
+# Test with Markdown report generation
+jupyter_notebook_test(
+    name = "passing_test_with_markdown_report",
+    notebook = ":passing_notebook",
+    reports = ["markdown"],
+)
+
+# Test with multiple report formats
+jupyter_notebook_test(
+    name = "passing_test_with_multi_reports",
+    notebook = ":passing_notebook",
+    reports = [
+        "html",
+        "markdown",
+    ],
+)
+
+jupyter_notebook_test(
+    name = "passing_test_with_pdf_report",
+    notebook = ":passing_notebook",
+    reports = ["webpdf"],
+)
+
+# Test with explicit kernel
+jupyter_notebook_test(
+    name = "passing_test_with_kernel",
+    notebook = ":passing_notebook",
+)

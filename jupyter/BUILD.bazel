@@ -1,0 +1,64 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+exports_files([
+    "defs.bzl",
+    "extensions.bzl",
+    "jupyter_notebook_test.bzl",
+    "jupyter_notebook.bzl",
+    "jupyter_report.bzl",
+    "jupyter_toolchain.bzl",
+    "requirements.in",
+])
+
+toolchain_type(
+    name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//jupyter:jupyter_notebook_bzl",
+        "//jupyter:jupyter_notebook_test_bzl",
+        "//jupyter:jupyter_report_bzl",
+        "//jupyter:jupyter_toolchain_bzl",
+    ],
+)
+
+bzl_library(
+    name = "jupyter_notebook_bzl",
+    srcs = ["jupyter_notebook.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//jupyter/private:bzl_lib",
+    ],
+)
+
+bzl_library(
+    name = "jupyter_notebook_test_bzl",
+    srcs = ["jupyter_notebook_test.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//jupyter/private:bzl_lib",
+    ],
+)
+
+bzl_library(
+    name = "jupyter_report_bzl",
+    srcs = ["jupyter_report.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//jupyter/private:bzl_lib",
+    ],
+)
+
+bzl_library(
+    name = "jupyter_toolchain_bzl",
+    srcs = ["jupyter_toolchain.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//jupyter/private:bzl_lib",
+    ],
+)

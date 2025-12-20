@@ -1,0 +1,6 @@
+Hello from data file!
+This is a test data file that the notebook will read.
+
+Line 3: Some more content
+Line 4: Numbers: 1, 2, 3, 4, 5
+

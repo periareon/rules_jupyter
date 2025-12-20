@@ -1,0 +1,94 @@
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_test", "jupyter_report")
+
+# Data files that will be accessed by the notebook
+filegroup(
+    name = "data_files",
+    srcs = [
+        "config.json",
+        "data.txt",
+    ],
+)
+
+# Test notebook from .py file with data files
+jupyter_notebook(
+    name = "notebook_with_data_py",
+    src = "notebook_with_data.py",
+    data = [":data_files"],
+)
+
+# Test notebook from .ipynb file with data files
+jupyter_notebook(
+    name = "notebook_with_data_ipynb",
+    src = "notebook_with_data.ipynb",
+    data = [":data_files"],
+)
+
+# Reports for .py notebook with data
+jupyter_report(
+    name = "report_with_data_py",
+    data = [":data_files"],
+    notebook = ":notebook_with_data_py",
+)
+
+jupyter_report(
+    name = "report_with_data_py_markdown",
+    data = [":data_files"],
+    notebook = ":notebook_with_data_py",
+    out_markdown = "report_with_data_py.md",
+)
+
+# Reports for .ipynb notebook with data
+jupyter_report(
+    name = "report_with_data_ipynb",
+    data = [":data_files"],
+    notebook = ":notebook_with_data_ipynb",
+)
+
+jupyter_report(
+    name = "report_with_data_ipynb_markdown",
+    data = [":data_files"],
+    notebook = ":notebook_with_data_ipynb",
+    out_markdown = "report_with_data_ipynb.md",
+)
+
+# The test targets expect either an execroot or a runfiles tree.
+# Because windows doesn't support symlinks by default, we lack
+# the runfiles tree. This should be improved to work with both
+# but for now is a common issue with windows and shouldn't
+# meaningfully impact test coverage to disable.
+WINDOWS_INCOMPATIBLE = select({
+    "@platforms//os:windows": ["@platforms//:incompatible"],
+    "//conditions:default": [],
+})
+
+# Tests for .py notebook with data
+jupyter_notebook_test(
+    name = "test_with_data_py",
+    data = [":data_files"],
+    notebook = ":notebook_with_data_py",
+    target_compatible_with = WINDOWS_INCOMPATIBLE,
+)
+
+jupyter_notebook_test(
+    name = "test_with_data_py_with_markdown",
+    data = [":data_files"],
+    notebook = ":notebook_with_data_py",
+    reports = ["markdown"],
+    target_compatible_with = WINDOWS_INCOMPATIBLE,
+)
+
+# Tests for .ipynb notebook with data
+jupyter_notebook_test(
+    name = "test_with_data_ipynb",
+    data = [":data_files"],
+    notebook = ":notebook_with_data_ipynb",
+    target_compatible_with = WINDOWS_INCOMPATIBLE,
+)
+
+jupyter_notebook_test(
+    name = "test_with_data_ipynb_with_markdown",
+    data = [":data_files"],
+    notebook = ":notebook_with_data_ipynb",
+    reports = ["markdown"],
+    target_compatible_with = WINDOWS_INCOMPATIBLE,
+)

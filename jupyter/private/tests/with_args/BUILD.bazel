@@ -1,0 +1,63 @@
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_test", "jupyter_report")
+
+# Test notebook with command-line arguments (.py format)
+jupyter_notebook(
+    name = "notebook_with_args_py",
+    src = "notebook_with_args.py",
+)
+
+# Test notebook with command-line arguments (.ipynb format)
+jupyter_notebook(
+    name = "notebook_with_args_ipynb",
+    src = "notebook_with_args.ipynb",
+)
+
+# Test with args for .py notebook
+jupyter_notebook_test(
+    name = "test_with_args_py",
+    args = [
+        "--input=test_input",
+        "--output=test_output",
+        "--flag",
+        "--count=42",
+    ],
+    notebook = ":notebook_with_args_py",
+)
+
+# Test with args for .ipynb notebook
+jupyter_notebook_test(
+    name = "test_with_args_ipynb",
+    args = [
+        "--input=test_input",
+        "--output=test_output",
+        "--flag",
+        "--count=42",
+    ],
+    notebook = ":notebook_with_args_ipynb",
+)
+
+# Report with args for .py notebook
+jupyter_report(
+    name = "report_with_args_py",
+    args = [
+        "--input=test_input",
+        "--output=test_output",
+        "--flag",
+        "--count=42",
+    ],
+    notebook = ":notebook_with_args_py",
+    out_markdown = "report_with_args_py.md",
+)
+
+# Report with args for .ipynb notebook
+jupyter_report(
+    name = "report_with_args_ipynb",
+    args = [
+        "--input=test_input",
+        "--output=test_output",
+        "--flag",
+        "--count=42",
+    ],
+    notebook = ":notebook_with_args_ipynb",
+    out_markdown = "report_with_args_ipynb.md",
+)

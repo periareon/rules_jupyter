@@ -1,0 +1,302 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>rules_jupyter</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rules_jupyter</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/periareon/rules_jupyter" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="rules_jupyter"><a class="header" href="#rules_jupyter">rules_jupyter</a></h1>
+<p>Bazel rules for running <a href="https://jupyter.org/">Jupyter notebooks</a>.</p>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<pre><code class="language-python">bazel_dep(name = "rules_jupyter", version = "{version}")
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter-rules"><a class="header" href="#jupyter-rules">Jupyter rules</a></h1>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
+<ul>
+<li><a href="rules.html#jupyter_notebook">jupyter_notebook</a></li>
+<li><a href="rules.html#jupyter_notebook_test">jupyter_notebook_test</a></li>
+<li><a href="rules.html#jupyter_report">jupyter_report</a></li>
+<li><a href="rules.html#jupyter_toolchain">jupyter_toolchain</a></li>
+</ul>
+<p><a id="jupyter_notebook"></a></p>
+<h2 id="jupyter_notebook"><a class="header" href="#jupyter_notebook">jupyter_notebook</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:defs.bzl", "jupyter_notebook")
+
+jupyter_notebook(<a href="rules.html#jupyter_notebook-name">name</a>, <a href="rules.html#jupyter_notebook-deps">deps</a>, <a href="rules.html#jupyter_notebook-src">src</a>, <a href="rules.html#jupyter_notebook-data">data</a>, <a href="rules.html#jupyter_notebook-kernel">kernel</a>)
+</pre>
+<p>Compiles a Jupyter notebook from source and prepares it for execution.</p>
+<p>This rule processes notebook source files and converts them to the standard .ipynb format.
+If the source is a .py file in Jupytext format (with # %% cell markers), it will be converted
+to .ipynb format. If the source is already a .ipynb file, it is used directly.</p>
+<p>The rule returns a JupyterNotebookInfo provider that can be used by jupyter_report or
+jupyter_notebook_test rules to execute the notebook and generate reports.</p>
+<p>Example:
+<code>bazel     jupyter_notebook(         name = "my_notebook",         src = "notebook.py",  # or "notebook.ipynb"         kernel = "python3",   # optional         deps = ["@pip_deps//numpy"],         data = ["data.csv"],     )     </code></p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter_notebook-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook-deps"></a>deps</td><td style="text-align: left">Python dependencies required by the notebook. These are typically Python packages needed for code execution.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook-src"></a>src</td><td style="text-align: left">The notebook source file. Can be either a .ipynb file or a .py file in Jupytext format (with # %% cell markers).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook-data"></a>data</td><td style="text-align: left">Additional data files required by the notebook (e.g., input data files, images, configuration files).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook-kernel"></a>kernel</td><td style="text-align: left">The name of the Jupyter kernel to use for executing the notebook (e.g., 'python3', 'rust'). If not specified, the default kernel from the toolchain is used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="jupyter_notebook_test"></a></p>
+<h2 id="jupyter_notebook_test"><a class="header" href="#jupyter_notebook_test">jupyter_notebook_test</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:defs.bzl", "jupyter_notebook_test")
+
+jupyter_notebook_test(<a href="rules.html#jupyter_notebook_test-name">name</a>, <a href="rules.html#jupyter_notebook_test-data">data</a>, <a href="rules.html#jupyter_notebook_test-env">env</a>, <a href="rules.html#jupyter_notebook_test-env_inherit">env_inherit</a>, <a href="rules.html#jupyter_notebook_test-notebook">notebook</a>, <a href="rules.html#jupyter_notebook_test-reports">reports</a>)
+</pre>
+<p>A test rule that executes a Jupyter notebook and optionally generates reports. The test fails if any notebook cell raises an error.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter_notebook_test-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_test-data"></a>data</td><td style="text-align: left">Additional data files required by the notebook (e.g., input data files, images, configuration files).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_test-env"></a>env</td><td style="text-align: left">Environment variables to set when executing the notebook. Values support location expansion (e.g., $(location :target)).</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_test-env_inherit"></a>env_inherit</td><td style="text-align: left">Specifies additional environment variables to inherit from the external environment when the test is executed by <code>bazel test</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_test-notebook"></a>notebook</td><td style="text-align: left">The notebook to execute and test. Must be a jupyter_notebook target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_test-reports"></a>reports</td><td style="text-align: left">List of report types to generate after successful notebook execution. Valid values: 'html', 'markdown', 'latex'.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>["webpdf"]</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="jupyter_report"></a></p>
+<h2 id="jupyter_report"><a class="header" href="#jupyter_report">jupyter_report</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:defs.bzl", "jupyter_report")
+
+jupyter_report(<a href="rules.html#jupyter_report-name">name</a>, <a href="rules.html#jupyter_report-data">data</a>, <a href="rules.html#jupyter_report-args">args</a>, <a href="rules.html#jupyter_report-env">env</a>, <a href="rules.html#jupyter_report-notebook">notebook</a>, <a href="rules.html#jupyter_report-out_html">out_html</a>, <a href="rules.html#jupyter_report-out_html_template_type">out_html_template_type</a>, <a href="rules.html#jupyter_report-out_latex">out_latex</a>,
+               <a href="rules.html#jupyter_report-out_latex_template_type">out_latex_template_type</a>, <a href="rules.html#jupyter_report-out_markdown">out_markdown</a>, <a href="rules.html#jupyter_report-out_notebook">out_notebook</a>, <a href="rules.html#jupyter_report-out_rst">out_rst</a>, <a href="rules.html#jupyter_report-out_webpdf">out_webpdf</a>)
+</pre>
+<p>Executes a Jupyter notebook and generates reports in various formats (HTML, Markdown, LaTeX, PDF, RST, WebPDF).</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter_report-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-data"></a>data</td><td style="text-align: left">Additional data files required by the notebook (e.g., input data files, images, configuration files).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-args"></a>args</td><td style="text-align: left">Additional command-line arguments to pass to the notebook execution.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-env"></a>env</td><td style="text-align: left">Environment variables to set when executing the notebook. Values support location expansion (e.g., $(location :target)).</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-notebook"></a>notebook</td><td style="text-align: left">The notebook to execute and convert. Must be a jupyter_notebook target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_html"></a>out_html</td><td style="text-align: left">Output path for an HTML report. If specified, the notebook will be converted to HTML format.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_html_template_type"></a>out_html_template_type</td><td style="text-align: left">Template type for HTML output. Options: 'full' (full HTML document) or 'basic' (minimal HTML).</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_latex"></a>out_latex</td><td style="text-align: left">Output path for a LaTeX report. If specified, the notebook will be converted to LaTeX format.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_latex_template_type"></a>out_latex_template_type</td><td style="text-align: left">Template type for LaTeX output. Options: 'article', 'report', or 'basic'.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_markdown"></a>out_markdown</td><td style="text-align: left">Output path for a Markdown report. If specified, the notebook will be converted to Markdown format.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_notebook"></a>out_notebook</td><td style="text-align: left">Output path for the executed notebook (.ipynb file with cell outputs). If not specified, a default name is generated.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_rst"></a>out_rst</td><td style="text-align: left">Output path for a reStructuredText report. If specified, the notebook will be converted to RST format.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_webpdf"></a>out_webpdf</td><td style="text-align: left">Output path for a WebPDF report (generated via Playwright/Chromium). If specified, the notebook will be converted to PDF format using headless browser rendering.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="jupyter_toolchain"></a></p>
+<h2 id="jupyter_toolchain"><a class="header" href="#jupyter_toolchain">jupyter_toolchain</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:defs.bzl", "jupyter_toolchain")
+
+jupyter_toolchain(<a href="rules.html#jupyter_toolchain-name">name</a>, <a href="rules.html#jupyter_toolchain-chromium">chromium</a>, <a href="rules.html#jupyter_toolchain-jupyter">jupyter</a>, <a href="rules.html#jupyter_toolchain-jupytext">jupytext</a>, <a href="rules.html#jupyter_toolchain-kernel">kernel</a>, <a href="rules.html#jupyter_toolchain-pandoc">pandoc</a>)
+</pre>
+<p>Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, and Playwright browser support.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-chromium"></a>chromium</td><td style="text-align: left">Chromium browser executable (deprecated, use playwright_browsers_dir from playwright toolchain instead).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-jupyter"></a>jupyter</td><td style="text-align: left">The Jupyter Python package providing notebook execution capabilities.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-jupytext"></a>jupytext</td><td style="text-align: left">The Jupytext Python package for converting between notebook formats (e.g., .py to .ipynb).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-kernel"></a>kernel</td><td style="text-align: left">Default kernel name to use for notebook execution if not specified in the notebook (e.g., 'python3', 'rust').</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-pandoc"></a>pandoc</td><td style="text-align: left">The Pandoc executable for converting notebooks to various output formats (HTML, LaTeX, PDF, etc.).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

@@ -243,7 +243,7 @@ jupyter_report(<a href="rules.html#jupyter_report-name">name</a>, <a href="rules
 <pre>
 load("@rules_jupyter//jupyter:defs.bzl", "jupyter_toolchain")
 
-jupyter_toolchain(<a href="rules.html#jupyter_toolchain-name">name</a>, <a href="rules.html#jupyter_toolchain-chromium">chromium</a>, <a href="rules.html#jupyter_toolchain-jupyter">jupyter</a>, <a href="rules.html#jupyter_toolchain-jupytext">jupytext</a>, <a href="rules.html#jupyter_toolchain-kernel">kernel</a>, <a href="rules.html#jupyter_toolchain-pandoc">pandoc</a>)
+jupyter_toolchain(<a href="rules.html#jupyter_toolchain-name">name</a>, <a href="rules.html#jupyter_toolchain-chromium">chromium</a>, <a href="rules.html#jupyter_toolchain-jupyter">jupyter</a>, <a href="rules.html#jupyter_toolchain-jupytext">jupytext</a>, <a href="rules.html#jupyter_toolchain-kernel">kernel</a>, <a href="rules.html#jupyter_toolchain-pandoc">pandoc</a>, <a href="rules.html#jupyter_toolchain-playwright_browsers_dir">playwright_browsers_dir</a>)
 </pre>
 <p>Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, and Playwright browser support.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -254,6 +254,7 @@ jupyter_toolchain(<a href="rules.html#jupyter_toolchain-name">name</a>, <a href=
 <tr><td style="text-align: left"><a id="jupyter_toolchain-jupytext"></a>jupytext</td><td style="text-align: left">The Jupytext Python package for converting between notebook formats (e.g., .py to .ipynb).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-kernel"></a>kernel</td><td style="text-align: left">Default kernel name to use for notebook execution if not specified in the notebook (e.g., 'python3', 'rust').</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-pandoc"></a>pandoc</td><td style="text-align: left">The Pandoc executable for converting notebooks to various output formats (HTML, LaTeX, PDF, etc.).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-playwright_browsers_dir"></a>playwright_browsers_dir</td><td style="text-align: left">A directory containing the results of <code>playwright install</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
 </div>
                     </main>

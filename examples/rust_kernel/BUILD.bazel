@@ -1,0 +1,38 @@
+load("@rules_jupyter//jupyter:jupyter_notebook.bzl", "jupyter_notebook")
+load("@rules_jupyter//jupyter:jupyter_report.bzl", "jupyter_report")
+load("@rules_jupyter//jupyter:jupyter_toolchain.bzl", "jupyter_toolchain")
+
+# Define a jupyter toolchain.
+jupyter_toolchain(
+    name = "py_jupyter_toolchain",
+    jupyter = "@pip_deps//jupyter",
+    jupytext = "@pip_deps//jupytext",
+    pandoc = "@pandoc",
+)
+
+toolchain(
+    name = "jupyter_toolchain",
+    toolchain = ":py_jupyter_toolchain",
+    toolchain_type = "@rules_jupyter//jupyter:toolchain_type",
+)
+
+# Use the notebook with Rust kernel
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.ipynb",
+    kernel = "rust",  # Use the Rust kernel (evcxr)
+)
+
+# Generate a markdown report from the notebook
+jupyter_report(
+    name = "report_markdown",
+    notebook = ":notebook",
+    out_markdown = "report.md",
+)
+
+# Generate a pdf report from the notebook
+jupyter_report(
+    name = "report_pdf",
+    notebook = ":notebook",
+    out_webpdf = "report.pdf",
+)

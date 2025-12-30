@@ -1,0 +1,5 @@
+# Python requirements
+
+jupyter
+jupytext
+nbconvert[webpdf]

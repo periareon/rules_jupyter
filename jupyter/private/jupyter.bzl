@@ -133,13 +133,7 @@ def _create_executable(ctx, notebook, runner, runner_main, cfg = "target"):
 
     return executable, runfiles
 
-def _expand_args(ctx, args, targets):
-    known_variables = {}
-    for target in ctx.attr.toolchains:
-        if platform_common.TemplateVariableInfo in target:
-            variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
-            known_variables.update(variables)
-
+def _expand_args(ctx, args, targets, known_variables):
     expanded = []
     for arg in args:
         expanded.append(ctx.expand_make_variables(
@@ -149,6 +143,16 @@ def _expand_args(ctx, args, targets):
         ))
 
     return expanded
+
+def _expand_env(ctx, env, targets, known_variables):
+    expanded_env = {}
+    for key, value in env.items():
+        expanded_env[key] = ctx.expand_make_variables(
+            key,
+            ctx.expand_location(value, targets),
+            known_variables,
+        )
+    return expanded_env
 
 def _jupyter_report_impl(ctx):
     toolchain = ctx.toolchains[TOOLCHAIN_TYPE]
@@ -223,10 +227,19 @@ def _jupyter_report_impl(ctx):
         outputs.update({"jupiter_report_webpdf": out_webpdf})
         args.add("--out_webpdf", out_webpdf)
 
-    notebook_args = _expand_args(ctx, ctx.attr.args, ctx.attr.data)
-
     args.add("--")
+
+    known_variables = {}
+    for target in ctx.attr.toolchains:
+        if platform_common.TemplateVariableInfo in target:
+            variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
+            known_variables.update(variables)
+
+    notebook_args = _expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables)
+
     args.add_all(notebook_args)
+
+    env = _expand_env(ctx, ctx.attr.env, ctx.attr.data, known_variables)
 
     reporter, runfiles = _create_executable(
         ctx = ctx,
@@ -244,7 +257,7 @@ def _jupyter_report_impl(ctx):
         inputs = depset([notebook_info.notebook] + ctx.files.data, transitive = [notebook_info.data, toolchain.all_files]),
         outputs = outputs.values(),
         tools = depset(transitive = [runfiles.files, toolchain.all_files]),
-        env = ctx.configuration.default_shell_env,
+        env = env | ctx.configuration.default_shell_env,
     )
 
     return [
@@ -338,7 +351,7 @@ jupyter_report = rule(
     toolchains = [TOOLCHAIN_TYPE],
 )
 
-def _create_run_environment_info(ctx, env, env_inherit, targets):
+def _create_run_environment_info(ctx, env, env_inherit, targets, known_variables):
     """Create an environment info provider
 
     This macro performs location expansions.
@@ -348,16 +361,11 @@ def _create_run_environment_info(ctx, env, env_inherit, targets):
         env (dict): Environment variables to set.
         env_inherit (list): Environment variables to inehrit from the host.
         targets (List[Target]): Targets to use in location expansion.
+        known_variables (dict): A map of `TemplateVariableInfo` variables.
 
     Returns:
         RunEnvironmentInfo: The provider.
     """
-
-    known_variables = {}
-    for target in ctx.attr.toolchains:
-        if platform_common.TemplateVariableInfo in target:
-            variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
-            known_variables.update(variables)
 
     expanded_env = {}
     for key, value in env.items():
@@ -438,7 +446,13 @@ def _jupyter_notebook_test_impl(ctx):
         args.add("--report", report)
     args.add("--")
 
-    notebook_args = _expand_args(ctx, ctx.attr.args, ctx.attr.data)
+    known_variables = {}
+    for target in ctx.attr.toolchains:
+        if platform_common.TemplateVariableInfo in target:
+            variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
+            known_variables.update(variables)
+
+    notebook_args = _expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables)
     args.add_all(notebook_args)
 
     args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
@@ -473,6 +487,7 @@ def _jupyter_notebook_test_impl(ctx):
             },
             env_inherit = ctx.attr.env_inherit,
             targets = ctx.attr.data,
+            known_variables = known_variables,
         ),
     ]
 

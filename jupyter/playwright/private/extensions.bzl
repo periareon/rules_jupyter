@@ -17,6 +17,10 @@ load(
     "firefox_archive",
     "webkit_archive",
 )
+load(
+    ":requirements_parser.bzl",
+    _parse_playwright_version_from_requirements_content = "parse_playwright_version_from_requirements",
+)
 
 # Platform to constraint mapping
 PLATFORM_TO_CONSTRAINTS = {
@@ -53,21 +57,7 @@ def _parse_playwright_version_from_requirements(module_ctx, requirements_file):
         Version string (e.g., "1.57.0") or None if not found
     """
     content = module_ctx.read(requirements_file)
-    for line in content.split("\n"):
-        line = line.strip()
-
-        # Look for lines like: playwright==1.57.0 \
-        # or: playwright==1.57.0
-        # Handle continuation lines (lines ending with \)
-        if line.startswith("playwright=="):
-            # Extract version after ==, handle backslash continuation
-            version_part = line.split("==")[1]
-
-            # Remove backslash and any trailing whitespace
-            version = version_part.split()[0].rstrip("\\").strip()
-            if version:
-                return version
-    return None
+    return _parse_playwright_version_from_requirements_content(content)
 
 # Template for BUILD file that creates playwright_toolchain rule for a specific platform
 _TOOLCHAIN_BUILD_TEMPLATE = """\
@@ -253,14 +243,14 @@ def _playwright_impl(module_ctx):
 
     for attrs in toolchains:
         # Determine version - either from explicit version or from requirements.txt
-        if attrs.version_from_requirements_txt:
-            version = _parse_playwright_version_from_requirements(module_ctx, attrs.version_from_requirements_txt)
+        if attrs.version_from_requirements:
+            version = _parse_playwright_version_from_requirements(module_ctx, attrs.version_from_requirements)
             if not version:
-                fail("Could not find playwright version in requirements file: {}".format(attrs.version_from_requirements_txt))
+                fail("Could not find playwright version in requirements file: {}".format(attrs.version_from_requirements))
         elif attrs.version:
             version = attrs.version
         else:
-            fail("Either 'version' or 'version_from_requirements_txt' must be specified")
+            fail("Either 'version' or 'version_from_requirements' must be specified")
 
         name = attrs.name
 
@@ -423,12 +413,20 @@ _TOOLCHAIN_TAG = tag_class(
             default = "playwright_toolchains",
         ),
         "version": attr.string(
-            doc = "Playwright version (e.g., '1.57.0'). Browser versions will be auto-selected based on this. Mutually exclusive with version_from_requirements_txt.",
+            doc = "Playwright version (e.g., '1.57.0'). Browser versions will be auto-selected based on this. Mutually exclusive with `version_from_requirements`.",
         ),
-        "version_from_requirements_txt": attr.label(
+        "version_from_requirements": attr.label(
             doc = "A python `requirements.txt` file used for parsing the desired `playwright` version. Mutually exclusive with version.",
             allow_single_file = True,
         ),
+        # "version_from_package_json": attr.label(
+        #     doc = "A python `requirements.txt` file used for parsing the desired `playwright` version. Mutually exclusive with version.",
+        #     allow_single_file = True,
+        # ),
+        # "version_from_pnpm_lock": attr.label(
+        #     doc = "A python `requirements.txt` file used for parsing the desired `playwright` version. Mutually exclusive with version.",
+        #     allow_single_file = True,
+        # ),
     },
 )
 

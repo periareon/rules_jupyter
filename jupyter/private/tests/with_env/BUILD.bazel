@@ -1,0 +1,102 @@
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_test", "jupyter_report")
+
+# Test notebook from .py file
+jupyter_notebook(
+    name = "notebook_with_env_py",
+    src = "notebook_with_env.py",
+    tags = ["no-pylint"],
+)
+
+# Test notebook from .ipynb file
+jupyter_notebook(
+    name = "notebook_with_env_ipynb",
+    src = "notebook_with_env.ipynb",
+)
+
+# Reports for .py notebook with env
+jupyter_report(
+    name = "report_with_env_py",
+    env = {
+        "TEST_ENV_VAR": "test_value",
+        "TEST_FLAG": "true",
+        "TEST_NUMBER": "42",
+    },
+    notebook = ":notebook_with_env_py",
+)
+
+jupyter_report(
+    name = "report_with_env_py_markdown",
+    env = {
+        "TEST_ENV_VAR": "test_value",
+        "TEST_FLAG": "true",
+        "TEST_NUMBER": "42",
+    },
+    notebook = ":notebook_with_env_py",
+    out_markdown = "report_with_env_py.md",
+)
+
+# Reports for .ipynb notebook with env
+jupyter_report(
+    name = "report_with_env_ipynb",
+    env = {
+        "TEST_ENV_VAR": "test_value",
+        "TEST_FLAG": "true",
+        "TEST_NUMBER": "42",
+    },
+    notebook = ":notebook_with_env_ipynb",
+)
+
+jupyter_report(
+    name = "report_with_env_ipynb_markdown",
+    env = {
+        "TEST_ENV_VAR": "test_value",
+        "TEST_FLAG": "true",
+        "TEST_NUMBER": "42",
+    },
+    notebook = ":notebook_with_env_ipynb",
+    out_markdown = "report_with_env_ipynb.md",
+)
+
+# Tests for .py notebook with env
+jupyter_notebook_test(
+    name = "test_with_env_py",
+    env = {
+        "TEST_ENV_VAR": "test_value",
+        "TEST_FLAG": "true",
+        "TEST_NUMBER": "42",
+    },
+    notebook = ":notebook_with_env_py",
+)
+
+jupyter_notebook_test(
+    name = "test_with_env_py_with_markdown",
+    env = {
+        "TEST_ENV_VAR": "test_value",
+        "TEST_FLAG": "true",
+        "TEST_NUMBER": "42",
+    },
+    notebook = ":notebook_with_env_py",
+    reports = ["markdown"],
+)
+
+# Tests for .ipynb notebook with env
+jupyter_notebook_test(
+    name = "test_with_env_ipynb",
+    env = {
+        "TEST_ENV_VAR": "test_value",
+        "TEST_FLAG": "true",
+        "TEST_NUMBER": "42",
+    },
+    notebook = ":notebook_with_env_ipynb",
+)
+
+jupyter_notebook_test(
+    name = "test_with_env_ipynb_with_markdown",
+    env = {
+        "TEST_ENV_VAR": "test_value",
+        "TEST_FLAG": "true",
+        "TEST_NUMBER": "42",
+    },
+    notebook = ":notebook_with_env_ipynb",
+    reports = ["markdown"],
+)

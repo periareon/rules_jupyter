@@ -4,6 +4,7 @@ load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_test", "jupyter
 jupyter_notebook(
     name = "notebook_with_args_py",
     src = "notebook_with_args.py",
+    tags = ["no-pylint"],
 )
 
 # Test notebook with command-line arguments (.ipynb format)

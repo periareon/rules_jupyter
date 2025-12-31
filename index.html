@@ -156,9 +156,51 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="rules_jupyter"><a class="header" href="#rules_jupyter">rules_jupyter</a></h1>
-<p>Bazel rules for running <a href="https://jupyter.org/">Jupyter notebooks</a>.</p>
+<p>Bazel rules for running <a href="https://jupyter.org/">Jupyter notebooks</a> and generating reports.</p>
 <h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<p>To use the rules, add the following to your <code>MODULE.bazelrc</code>.</p>
 <pre><code class="language-python">bazel_dep(name = "rules_jupyter", version = "{version}")
+</code></pre>
+<h3 id="toolchains"><a class="header" href="#toolchains">Toolchains</a></h3>
+<p>These rules rely heavily on a <a href="./rules.html#jupyter_toolchain"><code>jupyter_toolchain</code></a> which will need to be setup.</p>
+<p>In your <code>MODULE.bazel</code>, configure the convenience extensions. If <a href="https://pandoc.org/">Pandoc</a> and <a href="https://playwright.dev/">Playwright browsers</a>
+are available by some other means this can be skipped:</p>
+<pre><code class="language-python"># Configure Pandoc (required for markdown reports)
+jupyter = use_extension("@rules_jupyter//jupyter:extensions.bzl", "jupyter")
+jupyter.pandoc(name = "pandoc")
+use_repo(jupyter, "pandoc")
+
+# Configure Playwright (required for WebPDF reports)
+playwright = use_extension("@rules_jupyter//jupyter:extensions.bzl", "playwright")
+playwright.toolchain(name = "playwright_toolchains", version = "1.57.0")
+use_repo(playwright, "playwright_toolchains")
+register_toolchains("@playwright_toolchains//:all")
+</code></pre>
+<p>Python dependencies will also be required for the toolchain. Rules such as <a href="https://github.com/periareon/req-compile">rules_req_compile</a> can be
+used for this.</p>
+<p>In your <code>BUILD.bazel</code>:</p>
+<pre><code class="language-python">load("@rules_jupyter//jupyter:jupyter_toolchain.bzl", "jupyter_toolchain")
+
+jupyter_toolchain(
+    name = "jupyter_toolchain",
+    jupyter = "@pip_deps//jupyter",
+    jupytext = "@pip_deps//jupytext",
+    # Produced by rules_jupyter module extension.
+    pandoc = "@pandoc",
+    # Produced by rules_jupyter module extension.
+    playwright_browsers_dir = "@rules_jupyter//jupyter/playwright:current_browsers_dir",
+)
+
+toolchain(
+    name = "jupyter_toolchain",
+    toolchain = ":jupyter_toolchain",
+    toolchain_type = "@rules_jupyter//jupyter:toolchain_type",
+)
+</code></pre>
+<p>Register it in <code>MODULE.bazel</code>:</p>
+<pre><code class="language-python">register_toolchains(
+    "//:jupyter_toolchain",
+)
 </code></pre>
 
                     </main>

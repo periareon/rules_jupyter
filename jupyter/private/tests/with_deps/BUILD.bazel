@@ -11,6 +11,7 @@ jupyter_notebook(
 jupyter_notebook(
     name = "notebook_py",
     src = "notebook.py",
+    tags = ["no-pylint"],
     deps = ["@pip_deps//pytest"],
 )
 

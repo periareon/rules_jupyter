@@ -3,6 +3,7 @@ load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_report")
 jupyter_notebook(
     name = "notebook",
     src = "notebook.py",
+    tags = ["no-pylint"],
 )
 
 jupyter_report(

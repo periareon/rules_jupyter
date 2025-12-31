@@ -44,6 +44,10 @@ def _jupyter_notebook_impl(ctx):
         notebook = out_notebook
 
     return [
+        DefaultInfo(
+            files = depset([notebook]),
+            runfiles = ctx.runfiles(files = ctx.files.data).merge(dep_info.runfiles),
+        ),
         JupyterNotebookInfo(
             kernel = ctx.attr.kernel,
             notebook = notebook,
@@ -67,7 +71,7 @@ jupyter_notebook(
     name = "my_notebook",
     src = "notebook.py",  # or "notebook.ipynb"
     kernel = "python3",   # optional
-    deps = ["@pip_deps//numpy"],
+    deps = ["@pip_deps//polars"],
     data = ["data.csv"],
 )
 ```

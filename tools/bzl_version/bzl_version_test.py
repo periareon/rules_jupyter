@@ -47,6 +47,4 @@ def test_versions() -> None:
     )
     assert module_version, f"Failed to parse version from {module_bazel}"
 
-    assert (
-        bzl_version == module_version[0]
-    ), f"{bzl_version} == {module_version[0]}"
+    assert bzl_version == module_version[0], f"{bzl_version} == {module_version[0]}"

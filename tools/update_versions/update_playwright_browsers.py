@@ -1,9 +1,22 @@
 """A script for fetching Playwright browser releases and computing integrity hashes.
 
 Generates a *_versions.bzl file for each browser type.
+
+URL Discovery Approach:
+This script uses browsers.json from the Playwright npm package to get browser revisions,
+but browsers.json does not directly contain download URLs. Playwright's browser installer
+constructs URLs from the revision number using internal logic. Since we cannot easily
+import Playwright's internal code here, we construct URLs using known patterns.
+
+The script tries multiple base URLs and path patterns to handle different Playwright versions.
+If URLs are not found, check the debug logs to see the full browser metadata from browsers.json,
+which may provide hints about URL structure differences in older versions.
 """
 
+# pylint: disable=too-many-lines
+
 import argparse
+import ast
 import base64
 import binascii
 import hashlib
@@ -16,6 +29,7 @@ import tarfile
 import time
 import urllib.request
 from pathlib import Path
+from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -174,14 +188,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--min-version",
         type=str,
-        default="1.50.0",
+        default="1.21.0",
         help="Minimum Playwright version to fetch.",
     )
     parser.add_argument(
-        "--max-versions",
-        type=int,
-        default=20,
-        help="Maximum number of versions to fetch (most recent first).",
+        "--clean",
+        action="store_true",
+        help="Ignore existing bzl files and regenerate everything from scratch.",
     )
 
     return parser.parse_args()
@@ -263,7 +276,10 @@ def compute_sha512(url: str) -> str:
 def _extract_browser_revisions_from_tarball(
     tar: tarfile.TarFile,
 ) -> dict[str, str] | None:
-    """Extract browser revisions from browsers.json in tarball."""
+    """Extract browser revisions from browsers.json in tarball.
+
+    Also extracts full browser metadata for potential future use in URL discovery.
+    """
     browsers_json_path = None
     for member in tar.getmembers():
         if member.name.endswith("browsers.json"):
@@ -285,6 +301,12 @@ def _extract_browser_revisions_from_tarball(
             revision = browser.get("revision")
             if browser_name and revision:
                 browser_revisions[browser_name] = str(revision)
+                # Log full browser metadata for debugging URL issues
+                logging.debug(
+                    "Browser metadata for %s: %s",
+                    browser_name,
+                    json.dumps(browser, indent=2),
+                )
     return browser_revisions
 
 
@@ -373,12 +395,11 @@ def _process_release_for_version(
     return version
 
 
-def get_playwright_versions(min_version: str, max_versions: int) -> list[str]:
+def get_playwright_versions(min_version: str) -> list[str]:
     """Get list of Playwright versions from GitHub releases.
 
     Args:
         min_version: Minimum Playwright version to include (e.g., "1.30.0").
-        max_versions: Maximum number of versions to fetch.
 
     Returns:
         List of Playwright version strings, sorted from newest to oldest.
@@ -388,12 +409,11 @@ def get_playwright_versions(min_version: str, max_versions: int) -> list[str]:
     version_regex = re.compile(PLAYWRIGHT_RELEASE_NAME_REGEX)
 
     logging.info(
-        "Fetching Playwright versions >= %s (max %d versions)",
+        "Fetching Playwright versions >= %s",
         min_version,
-        max_versions,
     )
 
-    while len(versions) < max_versions:
+    while True:
         url = urlparse(PLAYWRIGHT_GITHUB_RELEASES_API_TEMPLATE.format(page=page))
         req = urllib.request.Request(url.geturl(), headers=REQUEST_HEADERS)
         logging.debug("Releases url: %s", url.geturl())
@@ -405,9 +425,6 @@ def get_playwright_versions(min_version: str, max_versions: int) -> list[str]:
                     break
 
                 for release in json_data:
-                    if len(versions) >= max_versions:
-                        break
-
                     version = _process_release_for_version(
                         release, version_regex, min_version
                     )
@@ -461,33 +478,145 @@ def _check_url_availability(test_url: str) -> bool:
         return False
 
 
-def _find_working_urls(download_path: str) -> list[str]:
-    """Find all working URLs for a download path."""
+def _get_url_path_patterns(
+    browser_type: str, browser_revision: str, archive_name: str
+) -> list[str]:
+    """Get multiple URL path patterns to try, handling different Playwright versions.
+
+    Different versions of Playwright may have used different URL path patterns.
+    This function returns multiple patterns to try in order of likelihood.
+
+    Note: Playwright's browsers.json doesn't contain download URLs directly. The URLs
+    are constructed by Playwright's browser installer code, which we cannot easily
+    import here. This function uses known patterns that have been observed.
+
+    If you find that certain Playwright versions require different URL patterns,
+    you can add them here as fallbacks. Check the debug logs for browser metadata
+    that might indicate the correct pattern.
+
+    Args:
+        browser_type: Browser type (e.g., "chromium", "firefox").
+        browser_revision: Browser revision (e.g., "1200").
+        archive_name: Archive filename (e.g., "chromium-linux.zip").
+
+    Returns:
+        List of URL paths to try (without base URL), in order of likelihood.
+    """
+    # Determine the URL path component (chromium-headless-shell uses "chromium")
+    url_path = "chromium" if browser_type == "chromium-headless-shell" else browser_type
+
+    patterns = []
+
+    # Current standard pattern: {browser}/{revision}/{archive}
+    # This is the pattern used by recent Playwright versions
+    patterns.append(f"{url_path}/{browser_revision}/{archive_name}")
+
+    # Some older versions might have used different patterns
+    # Add alternative patterns here as fallbacks if needed
+    # Example for older versions (uncomment if needed):
+    # patterns.append(f"{url_path}-{browser_revision}/{archive_name}")
+    # patterns.append(f"builds/{url_path}/{browser_revision}/{archive_name}")
+
+    return patterns
+
+
+def _find_working_urls(
+    browser_type: str, browser_revision: str, archive_name: str
+) -> list[str]:
+    """Find all working URLs by trying multiple path patterns and base URLs.
+
+    Args:
+        browser_type: Browser type (e.g., "chromium", "firefox").
+        browser_revision: Browser revision (e.g., "1200").
+        archive_name: Archive filename (e.g., "chromium-linux.zip").
+
+    Returns:
+        List of working URLs (may be empty if none found).
+    """
+    url_paths = _get_url_path_patterns(browser_type, browser_revision, archive_name)
     working_urls = []
-    for base_url in PLAYWRIGHT_BROWSER_BASE_URLS:
-        test_url = f"{base_url}/{download_path}"
-        if _check_url_availability(test_url):
-            working_urls.append(test_url)
+
+    for download_path in url_paths:
+        for base_url in PLAYWRIGHT_BROWSER_BASE_URLS:
+            test_url = f"{base_url}/{download_path}"
+            if _check_url_availability(test_url):
+                working_urls.append(test_url)
+        # If we found URLs with this path pattern, return early
+        # (don't try alternative patterns if standard one works)
+        if working_urls:
+            return working_urls
+
     return working_urls
 
 
-def _process_platform_artifact(
+def _process_platform_artifact(  # pylint: disable=too-many-locals
     browser_type: str,
     platform: str,
-    download_path: str,
+    archive_name: str,
     browser_revision: str,
-) -> dict[str, str | list[str]] | None:
-    """Process a single platform artifact."""
-    working_urls = _find_working_urls(download_path)
+    existing_data: dict[str, str | list[str]] | None = None,
+) -> tuple[dict[str, str | list[str]] | None, bool]:
+    """Process a single platform artifact.
+
+    Args:
+        browser_type: Browser type (e.g., "chromium").
+        platform: Platform (e.g., "linux-x86_64").
+        archive_name: Archive filename.
+        browser_revision: Browser revision.
+        existing_data: Existing artifact data, if any.
+
+    Returns:
+        Tuple of (artifact data or None, was_integrity_missing).
+        was_integrity_missing is True if integrity was missing and couldn't be computed.
+    """
+    # Check if we already have integrity value
+    if existing_data and existing_data.get("integrity"):
+        logging.debug(
+            "Reusing existing integrity for %s %s revision %s",
+            browser_type,
+            platform,
+            browser_revision,
+        )
+        # Return existing data but ensure all fields are present
+        result = {
+            "urls": existing_data.get("urls", []),
+            "integrity": existing_data["integrity"],
+            "strip_prefix": existing_data.get("strip_prefix", ""),
+        }
+        return result, False
+
+    # Need to compute integrity
+    working_urls = _find_working_urls(browser_type, browser_revision, archive_name)
     if not working_urls:
-        tried_urls = ", ".join(
-            [f"{base_url}/{download_path}" for base_url in PLAYWRIGHT_BROWSER_BASE_URLS]
+        # Build list of all URLs we tried for better error messages
+        url_paths = _get_url_path_patterns(browser_type, browser_revision, archive_name)
+        tried_urls = []
+        for download_path in url_paths:
+            for base_url in PLAYWRIGHT_BROWSER_BASE_URLS:
+                tried_urls.append(f"{base_url}/{download_path}")
+        tried_urls_str = ", ".join(tried_urls)
+        logging.warning(
+            "Artifact not found for %s %s (revision %s, archive %s). "
+            "Tried URLs: %s. Skipping entry.",
+            browser_type,
+            platform,
+            browser_revision,
+            archive_name,
+            tried_urls_str,
         )
-        raise ValueError(
-            f"Artifact not found for {browser_type} {platform} "
-            f"(tried all URLs for path {download_path}). "
-            f"Tried URLs: {tried_urls}"
-        )
+        # If we have existing data, preserve it even if URLs aren't found now
+        # Otherwise, skip this entry entirely (artifact may not exist for this platform)
+        if existing_data:
+            strip_prefix = STRIP_PREFIX.get(browser_type, {}).get(platform, "")
+            return {
+                "urls": existing_data.get("urls", []),
+                "integrity": existing_data.get(
+                    "integrity", ""
+                ),  # Preserve existing or empty
+                "strip_prefix": existing_data.get("strip_prefix", strip_prefix),
+            }, not existing_data.get("integrity")
+        # No existing data and URLs not found - skip this entry
+        return None, False
 
     download_url = working_urls[0]
     strip_prefix = STRIP_PREFIX.get(browser_type, {}).get(platform, "")
@@ -500,53 +629,78 @@ def _process_platform_artifact(
             "urls": working_urls,
             "integrity": integrity(sha256_hex),
             "strip_prefix": strip_prefix,
-            "revision": browser_revision,
-        }
+        }, False
     except (HTTPError, URLError, OSError, ValueError) as e:
-        logging.error("Failed to download/hash %s: %s", download_url, e)
-        return None
+        logging.error(
+            "Failed to download/hash %s: %s. Skipping entry.", download_url, e
+        )
+        # If we have existing data, preserve it even if hash computation fails now
+        # Otherwise, skip this entry entirely
+        if existing_data:
+            return {
+                "urls": existing_data.get("urls", working_urls),
+                "integrity": existing_data.get(
+                    "integrity", ""
+                ),  # Preserve existing or empty
+                "strip_prefix": existing_data.get("strip_prefix", strip_prefix),
+            }, not existing_data.get("integrity")
+        # No existing data and hash computation failed - skip this entry
+        return None, False
 
 
 def query_browser_for_version(
-    playwright_version: str,
     browser_type: str,
     browser_revision: str,
-) -> dict[str, dict[str, str | list[str]]] | None:
-    """Query and compute integrity hashes for a browser at a specific Playwright version.
+    existing_revision_data: dict[str, dict[str, str | list[str]]] | None = None,
+) -> tuple[dict[str, dict[str, str | list[str]]] | None, list[tuple[str, str, str]]]:
+    """Query and compute integrity hashes for a browser revision.
 
     Args:
-        playwright_version: Playwright version (e.g., "1.57.0").
         browser_type: Browser type (e.g., "chromium", "firefox").
         browser_revision: Browser revision (e.g., "1200").
+        existing_revision_data: Existing data for this revision, if any.
 
     Returns:
-        A dict mapping platform -> {urls, integrity, strip_prefix, revision}, or None if failed.
+        Tuple of (artifacts dict or None, list of (browser_type, revision, platform) with missing integrity).
     """
     archive_patterns = BROWSER_ARCHIVE_PATTERNS.get(browser_type)
     if not archive_patterns:
         raise ValueError(f"Unknown browser type: {browser_type}")
 
     artifacts: dict[str, dict[str, str | list[str]]] = {}
-    url_path = "chromium" if browser_type == "chromium-headless-shell" else browser_type
+    missing_integrity: list[tuple[str, str, str]] = []
 
     for platform, archive_name in archive_patterns.items():
-        download_path = f"{url_path}/{browser_revision}/{archive_name}"
-
         logging.debug(
-            "Checking artifact for %s %s: %s", browser_type, platform, download_path
+            "Checking artifact for %s %s (revision %s): %s",
+            browser_type,
+            platform,
+            browser_revision,
+            archive_name,
+        )
+
+        existing_platform_data = (
+            existing_revision_data.get(platform) if existing_revision_data else None
         )
 
         try:
-            platform_data = _process_platform_artifact(
-                browser_type, platform, download_path, browser_revision
+            platform_data, integrity_missing = _process_platform_artifact(
+                browser_type,
+                platform,
+                archive_name,
+                browser_revision,
+                existing_platform_data,
             )
-            if platform_data:
+            # Always include platform_data if returned (it may have empty integrity)
+            if platform_data is not None:
                 artifacts[platform] = platform_data
+                if integrity_missing:
+                    missing_integrity.append((browser_type, browser_revision, platform))
                 logging.debug(
-                    "Computed integrity for %s %s: %s",
+                    "Integrity for %s %s: %s",
                     browser_type,
                     platform,
-                    platform_data["integrity"],
+                    platform_data["integrity"] or "(missing)",
                 )
         except ValueError:
             # Artifact not found - skip this platform
@@ -554,20 +708,18 @@ def query_browser_for_version(
 
     if artifacts:
         logging.info(
-            "Collected %d artifacts for %s revision %s (Playwright %s)",
+            "Collected %d artifacts for %s revision %s",
             len(artifacts),
             browser_type,
             browser_revision,
-            playwright_version,
         )
-        return artifacts
+        return artifacts, missing_integrity
     logging.warning(
-        "No artifacts collected for %s revision %s (Playwright %s)",
+        "No artifacts collected for %s revision %s",
         browser_type,
         browser_revision,
-        playwright_version,
     )
-    return None
+    return None, missing_integrity
 
 
 BROWSER_VERSIONS_TEMPLATE = """\
@@ -587,6 +739,115 @@ This is used to automatically select browser versions based on Playwright versio
 
 BROWSER_VERSIONS = {versions_placeholder}
 """
+
+
+def _extract_dict_from_assign_node(
+    node: ast.Assign, var_name: str, bzl_file: Path
+) -> dict[str, Any] | None:
+    """Extract dictionary from an AST Assign node if it matches var_name.
+
+    Args:
+        node: AST Assign node to check.
+        var_name: Name of the variable to look for.
+        bzl_file: Path to the bzl file (for error context).
+
+    Returns:
+        The dictionary if found and valid, None otherwise.
+    """
+    for target in node.targets:
+        if not isinstance(target, ast.Name):
+            continue
+        if target.id != var_name:
+            continue
+        # Compile the value node (which should be a dict literal)
+        # and evaluate it with no builtins for safety
+        code = compile(ast.Expression(node.value), str(bzl_file), "eval")
+        # pylint: disable=eval-used
+        result = eval(code, {"__builtins__": {}})
+        # Type check: ensure result is a dict
+        if isinstance(result, dict):
+            return result
+        return None
+    return None
+
+
+def _parse_bzl_file(bzl_file: Path, var_name: str) -> dict[str, Any] | None:
+    """Parse a bzl file and extract the dictionary assigned to var_name.
+
+    The bzl files contain Python dictionary literals, which we parse using AST
+    and then safely evaluate using restricted eval (no builtins).
+
+    Args:
+        bzl_file: Path to the bzl file.
+        var_name: Name of the variable containing the dictionary.
+
+    Returns:
+        The dictionary, or None if the file doesn't exist or parsing fails.
+    """
+    if not bzl_file.exists():
+        return None
+
+    try:
+        content = bzl_file.read_text()
+        # Parse the AST to find the assignment
+        tree = ast.parse(content, filename=str(bzl_file))
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Assign):
+                continue
+            result = _extract_dict_from_assign_node(node, var_name, bzl_file)
+            if result is not None:
+                return result
+        return None
+    except (OSError, SyntaxError, ValueError, TypeError, KeyError, AttributeError) as e:
+        logging.warning("Failed to parse %s: %s", bzl_file, e)
+        return None
+
+
+def _load_existing_browser_versions(
+    output_dir: Path, browser_types: list[str]
+) -> dict[str, dict[str, dict[str, dict[str, str | list[str]]]]]:
+    """Load existing browser version data from bzl files.
+
+    Args:
+        output_dir: Directory containing the bzl files.
+        browser_types: List of browser types to load.
+
+    Returns:
+        Dict mapping browser_type -> revision -> platform -> artifact data.
+    """
+    existing_data: dict[str, dict[str, dict[str, dict[str, str | list[str]]]]] = {}
+
+    for browser_type in browser_types:
+        browser_name = browser_type.replace("-", "_")
+        var_name = f"{browser_name.upper()}_VERSIONS"
+        bzl_file = output_dir / f"{browser_name}_versions.bzl"
+
+        data = _parse_bzl_file(bzl_file, var_name)
+        if data:
+            existing_data[browser_type] = data
+            logging.info(
+                "Loaded existing data for %s: %d revisions",
+                browser_type,
+                len(data),
+            )
+
+    return existing_data
+
+
+def _load_existing_browser_versions_map(
+    output_dir: Path,
+) -> dict[str, dict[str, str]] | None:
+    """Load existing browser_versions.bzl mapping.
+
+    Args:
+        output_dir: Directory containing the bzl file.
+
+    Returns:
+        Dict mapping Playwright version -> browser type -> revision, or None.
+    """
+    bzl_file = output_dir / "browser_versions.bzl"
+    return _parse_bzl_file(bzl_file, "BROWSER_VERSIONS")
 
 
 def _write_browser_version_files(
@@ -631,7 +892,9 @@ def _write_browser_versions_file(
     logging.info("Done writing %s", browser_versions_file)
 
 
-def main() -> None:
+def main() -> (
+    None
+):  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """The main entrypoint."""
     args = parse_args()
 
@@ -643,11 +906,32 @@ def main() -> None:
     # Ensure output directory exists
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Load existing data unless --clean flag is set
+    existing_browser_data: dict[
+        str, dict[str, dict[str, dict[str, str | list[str]]]]
+    ] = {}
+    existing_browser_versions_map: dict[str, dict[str, str]] | None = None
+
+    if not args.clean:
+        logging.info("Loading existing browser version data...")
+        existing_browser_data = _load_existing_browser_versions(
+            args.output_dir, BROWSER_TYPES
+        )
+        existing_browser_versions_map = _load_existing_browser_versions_map(
+            args.output_dir
+        )
+        if existing_browser_versions_map:
+            logging.info(
+                "Loaded existing browser versions map: %d Playwright versions",
+                len(existing_browser_versions_map),
+            )
+    else:
+        logging.info("--clean flag set, ignoring existing bzl files")
+
     # First, get all Playwright versions
     logging.info("Fetching Playwright versions from GitHub...")
     playwright_versions = get_playwright_versions(
         min_version=args.min_version,
-        max_versions=args.max_versions,
     )
 
     if not playwright_versions:
@@ -656,14 +940,13 @@ def main() -> None:
 
     logging.info("Found %d Playwright versions", len(playwright_versions))
 
-    # Initialize data structures: browser_type -> revision -> platform -> data
-    # Revisions are the root keys, not Playwright versions
-    browser_releases: dict[str, dict[str, dict[str, dict[str, str | list[str]]]]] = {
-        browser_type: {} for browser_type in BROWSER_TYPES
-    }
-    browser_versions_map: dict[str, dict[str, str]] = {}
+    # Phase 1: Build mapping of Playwright version -> browser versions
+    browser_versions_map: dict[str, dict[str, str]] = (
+        existing_browser_versions_map.copy() if existing_browser_versions_map else {}
+    )
+    unique_browser_revisions: set[tuple[str, str]] = set()
 
-    # Iterate over Playwright versions and query all browsers at once
+    logging.info("Phase 1: Building Playwright -> browser version mappings...")
     for playwright_version in playwright_versions:
         logging.info("Processing Playwright version %s", playwright_version)
 
@@ -682,46 +965,67 @@ def main() -> None:
             browser_revisions,
         )
 
-        # Store browser versions for browser_versions.bzl
+        # Store browser versions for browser_versions.bzl (merge with existing)
         browser_versions_map[playwright_version] = browser_revisions
 
-        # Query each browser for this version
+        # Collect unique browser revisions
         for browser_type in BROWSER_TYPES:
             browser_revision = browser_revisions.get(browser_type)
-            if not browser_revision:
-                logging.warning(
-                    "No revision found for %s in Playwright %s, skipping",
-                    browser_type,
-                    playwright_version,
-                )
-                continue
+            if browser_revision:
+                unique_browser_revisions.add((browser_type, browser_revision))
 
-            # Skip if we already have this revision
-            # (multiple Playwright versions may use the same revision)
-            if browser_revision in browser_releases[browser_type]:
-                logging.debug(
-                    "Revision %s for %s already processed, skipping",
-                    browser_revision,
-                    browser_type,
-                )
-                continue
+    logging.info(
+        "Phase 1 complete: Found %d unique browser revisions across %d Playwright versions",
+        len(unique_browser_revisions),
+        len(browser_versions_map),
+    )
 
-            # Query and download artifacts for this browser/version
-            artifacts = query_browser_for_version(
-                playwright_version,
+    # Phase 2: Download and hash each unique browser revision once
+    # Start with existing data and update/merge with new data
+    browser_releases: dict[str, dict[str, dict[str, dict[str, str | list[str]]]]] = {
+        browser_type: (
+            existing_browser_data.get(browser_type, {}).copy() if not args.clean else {}
+        )
+        for browser_type in BROWSER_TYPES
+    }
+
+    all_missing_integrity: list[tuple[str, str, str]] = []
+
+    logging.info("Phase 2: Downloading and hashing browser artifacts...")
+    for browser_type, browser_revision in sorted(unique_browser_revisions):
+        logging.info(
+            "Processing %s revision %s",
+            browser_type,
+            browser_revision,
+        )
+
+        # Get existing data for this revision if available
+        existing_revision_data = None
+        if not args.clean and browser_type in existing_browser_data:
+            existing_revision_data = existing_browser_data[browser_type].get(
+                browser_revision
+            )
+
+        # Query and download artifacts for this browser/version
+        artifacts, missing_integrity = query_browser_for_version(
+            browser_type,
+            browser_revision,
+            existing_revision_data,
+        )
+        if artifacts:
+            browser_releases[browser_type][browser_revision] = artifacts
+            all_missing_integrity.extend(missing_integrity)
+        else:
+            logging.warning(
+                "Failed to download artifacts for %s revision %s",
                 browser_type,
                 browser_revision,
             )
-            if artifacts:
-                # Key by revision instead of Playwright version
-                # Remove revision field from platform data since it's now the key
-                artifacts_by_revision = {}
-                for platform, platform_data in artifacts.items():
-                    # Create a copy without the revision field
-                    artifacts_by_revision[platform] = {
-                        k: v for k, v in platform_data.items() if k != "revision"
-                    }
-                browser_releases[browser_type][browser_revision] = artifacts_by_revision
+
+    logging.info(
+        "Phase 2 complete: Processed %d browser revisions",
+        len(unique_browser_revisions),
+    )
 
     # Write individual browser version files
     _write_browser_version_files(args.output_dir, browser_releases)
@@ -729,6 +1033,20 @@ def main() -> None:
     # Write browser_versions.bzl
     if browser_versions_map:
         _write_browser_versions_file(args.output_dir, browser_versions_map)
+
+    # Log missing integrity values
+    if all_missing_integrity:
+        logging.warning(
+            "\n%s\nMISSING INTEGRITY VALUES:\nThe following browser/version/platform combinations have empty integrity values:\n",
+            "=" * 80,
+        )
+        for browser_type, revision, platform in sorted(all_missing_integrity):
+            logging.warning(
+                "  - %s, revision %s, platform %s", browser_type, revision, platform
+            )
+        logging.warning("=" * 80)
+    else:
+        logging.info("All integrity values computed successfully!")
 
 
 if __name__ == "__main__":

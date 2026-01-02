@@ -1,6 +1,0 @@
-# Tests for jupyter rules
-#
-# Test subdirectories:
-#   - jupyter_notebook/       Tests for jupyter_notebook rule
-#   - jupyter_report/         Tests for jupyter_report rule
-#   - jupyter_notebook_test/  Tests for jupyter_notebook_test rule

@@ -25,7 +25,7 @@ use_repo(
 
 playwright = use_extension("//jupyter:extensions.bzl", "playwright")
 playwright.toolchain(
-    version = "1.57.0",
+    version_from_requirements = "//tools/requirements:requirements_linux_x86_64.txt",
 )
 use_repo(
     playwright,

@@ -3,6 +3,7 @@
 load("@rules_venv//python:py_info.bzl", "PyInfo")
 load("@rules_venv//python/venv:defs.bzl", "py_venv_common")
 load(":providers.bzl", "JupyterNotebookInfo")
+load(":rules_venv_aspects.bzl", "aspects_provider")
 load(":toolchain.bzl", "TOOLCHAIN_TYPE")
 
 def _jupyter_notebook_impl(ctx):
@@ -53,6 +54,7 @@ def _jupyter_notebook_impl(ctx):
             notebook = notebook,
             data = depset(ctx.files.data),
         ),
+        aspects_provider(ctx, ctx.file.src),
         py_info,
     ]
 

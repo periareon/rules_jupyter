@@ -20,7 +20,9 @@ print(f"TEST_FLAG: {test_flag}")
 
 # %%
 # Verify expected values
-assert test_env_var == "test_value", f"Expected TEST_ENV_VAR='test_value', got '{test_env_var}'"
+assert (
+    test_env_var == "test_value"
+), f"Expected TEST_ENV_VAR='test_value', got '{test_env_var}'"
 assert test_number == "42", f"Expected TEST_NUMBER='42', got '{test_number}'"
 assert test_flag == "true", f"Expected TEST_FLAG='true', got '{test_flag}'"
 
@@ -32,4 +34,3 @@ print("\nAll environment variables containing 'TEST':")
 for key, value in sorted(os.environ.items()):
     if "TEST" in key.upper():
         print(f"{key}={value}")
-

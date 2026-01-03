@@ -3,3 +3,8 @@
 jupyter
 jupytext
 nbconvert[webpdf]
+
+# Playwright is an important dependency for `nbconvert[webpdf]`, pinning
+# is generally not recommended but for this example it's used to demonstrate
+# the range of support in `rules_jupyter`.
+playwright==1.47.0

@@ -5,6 +5,7 @@ compatible with PLAYWRIGHT_BROWSERS_PATH environment variable.
 """
 
 import argparse
+import json
 import logging
 import os
 import shutil
@@ -20,74 +21,218 @@ BROWSER_DIR_MAP = {
 }
 
 
-def infer_platform_from_path(file_path: str) -> str | None:
-    """Infer platform identifier from a file path in browser archives.
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description=__doc__)
 
-    Browser archives contain platform-specific directory names:
-    - chrome-linux/ -> linux-x86_64
-    - chrome-headless-shell-linux64/ -> linux-x86_64
-    - chrome-headless-shell-linux-arm64/ -> linux-aarch64
-    - chrome-mac/ -> macos (need to check for arm64 vs x64)
-    - chrome-headless-shell-mac-arm64/ -> macos-aarch64
-    - chrome-headless-shell-mac-x64/ -> macos-x86_64
-    - chrome-win/ -> windows-x86_64
-    - chrome-headless-shell-win64/ -> windows-x86_64
-    - firefox/Firefox.app/ -> macos
-    - firefox/firefox.exe -> windows-x86_64
-    - firefox/firefox -> linux
-    - webkit/ (check executable names)
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        action="append",
+        required=True,
+        help="JSON manifest file(s) containing browser information (one per browser)",
+    )
+
+    parser.add_argument(
+        "--playwright-version",
+        type=str,
+        required=True,
+        help="Playwright version (e.g., '1.57.0')",
+    )
+
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Output directory for installed browsers (PLAYWRIGHT_BROWSERS_PATH)",
+    )
+
+    return parser.parse_args()
+
+
+def _find_common_root(file_paths: list[str]) -> Path:
+    """Find the common root of all file paths.
+
+    Args:
+        file_paths: List of file paths
+
+    Returns:
+        Path to the common root directory
+
+    Raises:
+        RuntimeError: If no common root can be found
     """
-    path_lower = file_path.lower()
-
-    # Platform detection rules: (platform, indicators)
-    platform_rules = [
-        ("linux-x86_64", ["/chrome-linux/", "/chrome-headless-shell-linux64/"]),
-        ("linux-aarch64", ["/chrome-headless-shell-linux-arm64/", "linux-arm64"]),
-        (
-            "macos-aarch64",
-            ["/chrome-headless-shell-mac-arm64/", "mac-arm64", "/chrome-mac/"],
-        ),
-        (
-            "macos-x86_64",
-            ["/chrome-headless-shell-mac-x64/", "/chrome-headless-shell-mac/"],
-        ),
-        ("windows-x86_64", ["/chrome-win/", "/chrome-headless-shell-win64/", ".exe"]),
-    ]
-
-    # Check platform rules
-    for platform, indicators in platform_rules:
-        if any(indicator in path_lower for indicator in indicators):
-            return platform
-
-    # Browser-specific detection (Firefox and WebKit)
-    result = None
-    if "firefox" in path_lower:
-        if ".exe" in path_lower:
-            result = "windows-x86_64"
-        elif ".app/" in path_lower:
-            result = "macos-aarch64"  # Default to aarch64
-        elif "/firefox/" in path_lower and ".app" not in path_lower:
-            result = "linux-x86_64"  # Default to x86_64
-    elif "webkit" in path_lower:
-        if ".exe" in path_lower or ".bat" in path_lower:
-            result = "windows-x86_64"
-        elif ".app/" in path_lower:
-            result = "macos-aarch64"
+    # Find common root by comparing path components
+    path_components = []
+    for file_path_str in file_paths:
+        file_path = Path(file_path_str)
+        if file_path.exists():
+            path_components.append(file_path.resolve().parts)
         else:
-            result = "linux-x86_64"
+            path_components.append(file_path.parts)
 
-    return result
+    if not path_components:
+        raise ValueError("No valid file paths provided")
+
+    # Find common prefix
+    min_len = min(len(parts) for parts in path_components)
+    common_components = []
+
+    for i in range(min_len):
+        if all(parts[i] == path_components[0][i] for parts in path_components):
+            common_components.append(path_components[0][i])
+        else:
+            break
+
+    if not common_components:
+        raise RuntimeError(f"No common root found for file paths: {file_paths[:3]}...")
+
+    return Path(*common_components)
+
+
+def _find_app_directory_parent(root: Path) -> Path | None:
+    """Find a .app directory above the given root and return its parent.
+
+    Args:
+        root: Root directory to start searching from
+
+    Returns:
+        Parent directory of .app directory if found, None otherwise
+    """
+    current = root
+    for _ in range(10):  # Walk up max 10 levels
+        # Check if current directory contains a .app directory
+        if current.exists() and current.is_dir():
+            for item in current.iterdir():
+                if item.is_dir() and item.name.endswith(".app"):
+                    logging.info(
+                        "Found .app directory above common root: %s (using parent: %s)",
+                        item,
+                        current,
+                    )
+                    return current
+        # Also check if current itself is a .app directory
+        if current.name.endswith(".app"):
+            browser_root = current.parent
+            logging.info(
+                "Common root is inside .app directory, using parent: %s",
+                browser_root,
+            )
+            return browser_root
+
+        # Walk up one level
+        if current.parent == current:
+            break
+        current = current.parent
+
+    return None
+
+
+def find_browser_root(file_paths: list[str]) -> Path:
+    """Find the browser root directory from file paths.
+
+    Finds the common root of all files, then checks if there's a .app directory
+    above that common root. If found, uses the .app directory's parent as the root.
+
+    Args:
+        file_paths: List of file paths
+
+    Returns:
+        Path to the browser root directory
+
+    Raises:
+        RuntimeError: If no common root can be found
+    """
+    if not file_paths:
+        raise ValueError("No file paths provided")
+
+    common_root = _find_common_root(file_paths)
+    app_parent = _find_app_directory_parent(common_root)
+
+    if app_parent:
+        return app_parent
+
+    # No .app directory found above common root, use common root
+    logging.info("Using common root: %s", common_root)
+    return common_root
+
+
+def _calculate_relative_path(source_file: Path, browser_root: Path) -> Path:
+    """Calculate relative path from browser_root to source_file.
+
+    Args:
+        source_file: Source file path
+        browser_root: Browser root directory path
+
+    Returns:
+        Relative path from browser_root to source_file
+    """
+    try:
+        return source_file.relative_to(browser_root)
+    except ValueError:
+        # If relative_to fails, construct relative path from parts
+        browser_root_parts = list(browser_root.parts)
+        source_parts = list(source_file.parts)
+
+        # Find where browser_root_parts matches the start of source_parts
+        if len(source_parts) > len(browser_root_parts):
+            # Check if browser_root is a prefix of source_file
+            if source_parts[: len(browser_root_parts)] == browser_root_parts:
+                return Path(*source_parts[len(browser_root_parts) :])
+            # Find common prefix and construct relative path
+            common_len = 0
+            for i in range(min(len(browser_root_parts), len(source_parts))):
+                if browser_root_parts[i] == source_parts[i]:
+                    common_len += 1
+                else:
+                    break
+            # Calculate relative path
+            up_levels = len(browser_root_parts) - common_len
+            down_path = source_parts[common_len:]
+            return Path(*([".."] * up_levels + list(down_path)))
+        # Source is at or above browser_root, use filename
+        return Path(source_file.name)
+
+
+def _copy_file(source_file: Path, dest_file: Path) -> None:
+    """Copy a single file from source to destination.
+
+    Args:
+        source_file: Source file path
+        dest_file: Destination file path
+    """
+    # Skip if source and destination are the same file
+    try:
+        if source_file.samefile(dest_file):
+            logging.debug("Skipping %s (same as destination)", source_file)
+            return
+    except (OSError, ValueError):
+        # samefile can fail if files don't exist or are on different filesystems
+        pass
+
+    # Create parent directories
+    dest_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Copy file and preserve metadata (copy2 handles executable permissions)
+    try:
+        shutil.copy2(source_file, dest_file)
+        logging.debug("Copied %s -> %s", source_file, dest_file)
+    except (OSError, PermissionError) as exc:
+        logging.warning("Failed to copy %s - %s", source_file, exc)
 
 
 def copy_browser(
-    browser_type: str, revision: str, browser_path: Path, output_dir: Path
+    browser_type: str,
+    revision: str,
+    file_paths: list[str],
+    output_dir: Path,
 ) -> None:
     """Copy browser files to the Playwright directory structure.
 
     Args:
         browser_type: Browser type (e.g., "chromium", "chromium-headless-shell")
         revision: Browser revision (e.g., "1200")
-        browser_path: Path to the browser filegroup directory (may be a subdirectory)
+        file_paths: List of file paths from the manifest
         output_dir: Base output directory (will create browser-specific subdirectories)
     """
     # Create browser directory: PLAYWRIGHT_BROWSERS_PATH/{browser_dir}-{revision}/
@@ -98,147 +243,50 @@ def copy_browser(
     browser_revision_dir = output_dir / f"{browser_dir_name}-{revision}"
     browser_revision_dir.mkdir(parents=True, exist_ok=True)
 
-    if not browser_path.exists():
-        raise RuntimeError(f"Browser path does not exist: {browser_path}")
+    if not file_paths:
+        raise RuntimeError(f"No file paths provided for browser type: {browser_type}")
 
-    # Find the archive root directory
-    # browser_path might be a subdirectory (e.g., firefox/Nightly.app/Contents/MacOS)
-    # We need to find the root (e.g., firefox/)
-    archive_root = browser_path
-    if browser_path.is_dir():
-        # Walk up to find the archive root
-        # Archive roots are typically: firefox/, chrome-headless-shell-mac-arm64/, etc.
-        # They contain platform-specific directories or are the platform directory itself
-        current = browser_path
-        while current.parent != current:  # Not at filesystem root
-            parent = current.parent
-            # Check if parent contains platform-specific indicators
-            # For Firefox: parent should be "firefox"
-            # For Chromium headless shell: current might be "chrome-headless-shell-mac-arm64"
-            # For FFmpeg: current might be the root
-            if browser_type == "firefox" and current.name == "firefox":
-                archive_root = current
-                break
-            if browser_type == "ffmpeg" and current.name in ["ffmpeg", "ffmpeg-mac"]:
-                archive_root = current
-                break
-            # For other browsers, the current directory might be the platform-specific one
-            # (e.g., chrome-headless-shell-mac-arm64)
-            if any(
-                indicator in current.name
-                for indicator in ["chrome", "webkit", "headless"]
-            ):
-                archive_root = current
-                break
-            current = parent
-        else:
-            # If we didn't find a specific root, use browser_path as-is
-            archive_root = browser_path
-
-    # Copy all files from archive_root to browser_revision_dir
     logging.info(
-        "Copying %s revision %s from %s to %s",
+        "Finding common root for %s from %d file paths",
+        browser_type,
+        len(file_paths),
+    )
+    if file_paths:
+        logging.info("Sample file paths: %s", file_paths[:3])
+
+    # Find the browser root (common root, checking for .app directories above it)
+    browser_root = find_browser_root(file_paths)
+
+    # Use the browser root directory name as the normalized name
+    normalized_name = browser_root.name
+
+    logging.info(
+        "Copying %s revision %s from common root %s (normalized: %s) to %s",
         browser_type,
         revision,
-        archive_root,
+        browser_root,
+        normalized_name,
         browser_revision_dir,
     )
 
-    # Copy the entire directory tree
-    # archive_root is the directory containing the browser files (e.g., chrome-headless-shell-mac-arm64 or firefox)
-    # We need to copy the entire archive_root directory into browser_revision_dir
-    # so that browser_revision_dir contains the platform-specific directory
-    if archive_root.is_dir():
-        # copytree(src, dst) copies src INTO dst, creating dst/src/...
-        # We want: browser_revision_dir/archive_root.name/...
-        # So we copy archive_root into browser_revision_dir
-        dest_path = browser_revision_dir / archive_root.name
-        if dest_path.exists():
-            # Remove existing directory if it exists (for dirs_exist_ok behavior)
-            shutil.rmtree(dest_path)
-        shutil.copytree(archive_root, dest_path)
-    else:
-        # If it's a file, copy it to the directory
-        shutil.copy2(archive_root, browser_revision_dir)
+    # Copy contents of browser_root into {browser}-{revision}/{normalized_name}/
+    # The structure should be: {browser}-{revision}/{normalized_name}/contents
+    dest_path = browser_revision_dir / normalized_name
+
+    if dest_path.exists():
+        # Remove existing directory if it exists
+        shutil.rmtree(dest_path)
+
+    dest_path.mkdir(parents=True, exist_ok=True)
+
+    # Copy individual files, preserving directory structure relative to browser_root
+    for file_path_str in file_paths:
+        source_file = Path(file_path_str).resolve()
+        relative_path = _calculate_relative_path(source_file, browser_root)
+        dest_file = dest_path / relative_path
+        _copy_file(source_file, dest_file)
 
     logging.info("Successfully installed %s revision %s", browser_type, revision)
-
-
-def parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        required=True,
-        help="Output directory for installed browsers (PLAYWRIGHT_BROWSERS_PATH)",
-    )
-
-    parser.add_argument(
-        "--playwright-version",
-        type=str,
-        required=True,
-        help="Playwright version (e.g., '1.57.0')",
-    )
-
-    # Browser arguments - each browser has its own path and version
-    parser.add_argument(
-        "--chromium",
-        type=Path,
-        help="Path to Chromium browser files",
-    )
-    parser.add_argument(
-        "--chromium-version",
-        type=str,
-        help="Chromium browser revision (e.g., '1200')",
-    )
-
-    parser.add_argument(
-        "--chromium-headless-shell",
-        type=Path,
-        help="Path to Chromium headless-shell browser files",
-    )
-    parser.add_argument(
-        "--chromium-headless-shell-version",
-        type=str,
-        help="Chromium headless-shell browser revision (e.g., '1200')",
-    )
-
-    parser.add_argument(
-        "--firefox",
-        type=Path,
-        help="Path to Firefox browser files",
-    )
-    parser.add_argument(
-        "--firefox-version",
-        type=str,
-        help="Firefox browser revision (e.g., '1497')",
-    )
-
-    parser.add_argument(
-        "--webkit",
-        type=Path,
-        help="Path to WebKit browser files",
-    )
-    parser.add_argument(
-        "--webkit-version",
-        type=str,
-        help="WebKit browser revision (e.g., '2227')",
-    )
-
-    parser.add_argument(
-        "--ffmpeg",
-        type=Path,
-        help="Path to FFmpeg files",
-    )
-    parser.add_argument(
-        "--ffmpeg-version",
-        type=str,
-        help="FFmpeg revision (e.g., '1011')",
-    )
-
-    return parser.parse_args()
 
 
 def main() -> None:
@@ -251,37 +299,38 @@ def main() -> None:
 
     args = parse_args()
 
-    # Build browser -> (path, version) mapping
-    browsers = []
+    if not args.manifest:
+        raise ValueError("No manifest files provided")
 
-    if args.chromium and args.chromium_version:
-        browsers.append(("chromium", args.chromium_version, args.chromium))
-    if args.chromium_headless_shell and args.chromium_headless_shell_version:
-        browsers.append(
-            (
-                "chromium-headless-shell",
-                args.chromium_headless_shell_version,
-                args.chromium_headless_shell,
-            )
-        )
-    if args.firefox and args.firefox_version:
-        browsers.append(("firefox", args.firefox_version, args.firefox))
-    if args.webkit and args.webkit_version:
-        browsers.append(("webkit", args.webkit_version, args.webkit))
-    if args.ffmpeg and args.ffmpeg_version:
-        browsers.append(("ffmpeg", args.ffmpeg_version, args.ffmpeg))
+    # Load all manifest files
+    browsers_to_install = []
 
-    if not browsers:
+    for manifest_path in args.manifest:
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+
+        browser_type = manifest["browser_type"]
+        version = manifest["version"]
+        files = manifest["files"]
+
+        browsers_to_install.append((browser_type, version, files))
+
+    if not browsers_to_install:
         raise ValueError(
-            "No browsers specified. Provide at least one browser with its version."
+            "No browsers specified in manifests. Provide at least one browser with its version."
         )
 
     # Create output directory
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Copy each browser to the output directory
-    for browser_type, revision, browser_path in browsers:
-        copy_browser(browser_type, revision, browser_path, args.output_dir)
+    for browser_type, revision, file_paths in browsers_to_install:
+        copy_browser(
+            browser_type=browser_type,
+            revision=revision,
+            file_paths=file_paths,
+            output_dir=args.output_dir,
+        )
 
 
 if __name__ == "__main__":

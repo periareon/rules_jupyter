@@ -15,49 +15,28 @@ WEBKIT_VERSIONS = _WEBKIT_VERSIONS
 FFMPEG_VERSIONS = _FFMPEG_VERSIONS
 
 # Chromium BUILD templates
-_CHROMIUM_BUILD_TEMPLATE_LINUX_X86_64 = """\
+_CHROMIUM_BUILD_TEMPLATE_LINUX = """\
 filegroup(
     name = "{name}",
-    srcs = ["chrome-linux64/chrome"],
+    srcs = glob(["chrome-linux*/chrome"]),
     data = glob(
-        ["chrome-linux64/**"],
-        exclude = ["chrome-linux64/chrome"],
+        include = ["chrome-linux*/**"],
+        exclude = ["chrome-linux*/chrome"],
     ),
     visibility = ["//visibility:public"],
 )
 """
 
-_CHROMIUM_BUILD_TEMPLATE_LINUX_AARCH64 = """\
-filegroup(
-    name = "{name}",
-    srcs = ["chrome-linux/chrome"],
-    data = glob(
-        ["chrome-linux/**"],
-        exclude = ["chrome-linux/chrome"],
-    ),
-    visibility = ["//visibility:public"],
-)
-"""
+_CHROMIUM_BUILD_TEMPLATE_MACOS = """\
+CHROME = glob(["chrome-mac*/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"], allow_empty = True)
+CHROMIUM = glob(["chrome-mac*/Chromium.app/Contents/MacOS/Chromium"], allow_empty = True)
 
-_CHROMIUM_BUILD_TEMPLATE_MACOS_X86_64 = """\
 filegroup(
     name = "{name}",
-    srcs = ["chrome-mac/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"],
+    srcs = CHROME if CHROME else CHROMIUM,
     data = glob(
-        ["chrome-mac/**"],
-        exclude = ["chrome-mac/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"],
-    ),
-    visibility = ["//visibility:public"],
-)
-"""
-
-_CHROMIUM_BUILD_TEMPLATE_MACOS_AARCH64 = """\
-filegroup(
-    name = "{name}",
-    srcs = ["chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"],
-    data = glob(
-        ["chrome-mac-arm64/**"],
-        exclude = ["chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"],
+        include = ["chrome-mac*/**"],
+        exclude = CHROME + CHROMIUM,
     ),
     visibility = ["//visibility:public"],
 )
@@ -66,59 +45,38 @@ filegroup(
 _CHROMIUM_BUILD_TEMPLATE_WINDOWS = """\
 filegroup(
     name = "{name}",
-    srcs = ["chrome-win64/chrome.exe"],
+    srcs = glob(["chrome-win*/chrome.exe"]),
     data = glob(
-        ["chrome-win64/**"],
-        exclude = ["chrome-win64/chrome.exe"],
+        include = ["chrome-win*/**"],
+        exclude = ["chrome-win*/chrome.exe"],
     ),
     visibility = ["//visibility:public"],
 )
 """
 
 # Chromium headless-shell BUILD templates
-_CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_LINUX_X86_64 = """\
+_CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_LINUX = """\
+CHROME_HEADLESS = glob(["chrome-headless-shell-linux*/*headless-shell"], allow_empty = True)
+CHROME_LINUX = glob(["chrome-linux*/*headless_shell"], allow_empty = True)
+
 filegroup(
     name = "{name}",
-    srcs = ["chrome-headless-shell-linux64/chrome-headless-shell"],
+    srcs = CHROME_HEADLESS if CHROME_HEADLESS else CHROME_LINUX,
     data = glob(
-        ["chrome-headless-shell-linux64/**"],
-        exclude = ["chrome-headless-shell-linux64/chrome-headless-shell"],
+        include = ["{{}}*/**".format("chrome-headless-shell-linux" if CHROME_HEADLESS else "chrome-linux")],
+        exclude = CHROME_HEADLESS + CHROME_LINUX,
     ),
     visibility = ["//visibility:public"],
 )
 """
 
-_CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_LINUX_AARCH64 = """\
+_CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_MACOS = """\
 filegroup(
     name = "{name}",
-    srcs = ["chrome-linux/headless_shell"],
+    srcs = glob(["chrome-headless-shell-mac*/chrome-headless-shell"]),
     data = glob(
-        ["chrome-linux/**"],
-        exclude = ["chrome-linux/headless_shell"],
-    ),
-    visibility = ["//visibility:public"],
-)
-"""
-
-_CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_MACOS_X86_64 = """\
-filegroup(
-    name = "{name}",
-    srcs = ["chrome-headless-shell-mac-x64/chrome-headless-shell"],
-    data = glob(
-        ["chrome-headless-shell-mac-x64/**"],
-        exclude = ["chrome-headless-shell-mac-x64/chrome-headless-shell"],
-    ),
-    visibility = ["//visibility:public"],
-)
-"""
-
-_CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_MACOS_AARCH64 = """\
-filegroup(
-    name = "{name}",
-    srcs = ["chrome-headless-shell-mac-arm64/chrome-headless-shell"],
-    data = glob(
-        ["chrome-headless-shell-mac-arm64/**"],
-        exclude = ["chrome-headless-shell-mac-arm64/chrome-headless-shell"],
+        include = ["chrome-headless-shell-mac*/**"],
+        exclude = ["chrome-headless-shell-mac*/chrome-headless-shell"],
     ),
     visibility = ["//visibility:public"],
 )
@@ -127,10 +85,10 @@ filegroup(
 _CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_WINDOWS = """\
 filegroup(
     name = "{name}",
-    srcs = ["chrome-headless-shell-win64/chrome-headless-shell.exe"],
+    srcs = glob(["chrome-headless-shell-win*/chrome-headless-shell.exe"]),
     data = glob(
-        ["chrome-headless-shell-win64/**"],
-        exclude = ["chrome-headless-shell-win64/chrome-headless-shell.exe"],
+        include = ["chrome-headless-shell-win*/**"],
+        exclude = ["chrome-headless-shell-win*/chrome-headless-shell.exe"],
     ),
     visibility = ["//visibility:public"],
 )
@@ -142,7 +100,7 @@ filegroup(
     name = "{name}",
     srcs = ["firefox/firefox"],
     data = glob(
-        ["firefox/**"],
+        include = ["firefox/**"],
         exclude = ["firefox/firefox"],
     ),
     visibility = ["//visibility:public"],
@@ -154,7 +112,7 @@ filegroup(
     name = "{name}",
     srcs = ["firefox/Nightly.app/Contents/MacOS/firefox"],
     data = glob(
-        ["firefox/**"],
+        include = ["firefox/**"],
         exclude = ["firefox/Nightly.app/Contents/MacOS/firefox"],
     ),
     visibility = ["//visibility:public"],
@@ -166,7 +124,7 @@ filegroup(
     name = "{name}",
     srcs = ["firefox/firefox.exe"],
     data = glob(
-        ["firefox/**"],
+        include = ["firefox/**"],
         exclude = ["firefox/firefox.exe"],
     ),
     visibility = ["//visibility:public"],
@@ -179,8 +137,8 @@ filegroup(
     name = "{name}",
     srcs = ["pw_run.sh"],
     data = glob(
-        ["**"],
-        exclude = ["pw_run.sh"],
+        include = ["**"],
+        exclude = ["pw_run.sh", "*.bazel"],
     ),
     visibility = ["//visibility:public"],
 )
@@ -191,7 +149,7 @@ filegroup(
     name = "{name}",
     srcs = ["Playwright.exe"],
     data = glob(
-        ["**"],
+        include = ["**"],
         exclude = ["Playwright.exe"],
     ),
     visibility = ["//visibility:public"],
@@ -204,7 +162,7 @@ filegroup(
     name = "{name}",
     srcs = ["ffmpeg-mac"],
     data = glob(
-        ["**"],
+        include = ["**"],
         exclude = [
             "ffmpeg-mac",
             "*.bazel",
@@ -221,7 +179,7 @@ filegroup(
     name = "{name}",
     srcs = ["ffmpeg-linux"],
     data = glob(
-        ["**"],
+        include = ["**"],
         exclude = [
             "ffmpeg-linux",
             "*.bazel",
@@ -238,7 +196,7 @@ filegroup(
     name = "{name}",
     srcs = ["ffmpeg-win64.exe"],
     data = glob(
-        ["**"],
+        include = ["**"],
         exclude = [
             "ffmpeg-win64.exe",
             "*.bazel",
@@ -251,62 +209,66 @@ filegroup(
 """
 
 def _get_chromium_build_template(platform):
-    """Get the BUILD template for Chromium based on platform."""
-    if platform == "linux-x86_64":
-        return _CHROMIUM_BUILD_TEMPLATE_LINUX_X86_64
-    elif platform == "linux-aarch64":
-        return _CHROMIUM_BUILD_TEMPLATE_LINUX_AARCH64
-    elif platform == "macos-x86_64":
-        return _CHROMIUM_BUILD_TEMPLATE_MACOS_X86_64
-    elif platform == "macos-aarch64":
-        return _CHROMIUM_BUILD_TEMPLATE_MACOS_AARCH64
-    elif platform == "windows-x86_64":
+    """Get the BUILD template for Chromium based on platform and revision.
+
+    Args:
+        platform: Platform identifier
+    """
+    if platform.startswith("linux"):
+        return _CHROMIUM_BUILD_TEMPLATE_LINUX
+    if platform.startswith("macos"):
+        return _CHROMIUM_BUILD_TEMPLATE_MACOS
+    if platform.startswith("windows"):
         return _CHROMIUM_BUILD_TEMPLATE_WINDOWS
-    else:
-        fail("Unknown platform: {}".format(platform))
+
+    fail("Unknown platform: {}".format(platform))
 
 def _get_chromium_headless_shell_build_template(platform):
     """Get the BUILD template for Chromium headless-shell based on platform."""
-    if platform == "linux-x86_64":
-        return _CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_LINUX_X86_64
-    elif platform == "linux-aarch64":
-        return _CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_LINUX_AARCH64
-    elif platform == "macos-x86_64":
-        return _CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_MACOS_X86_64
-    elif platform == "macos-aarch64":
-        return _CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_MACOS_AARCH64
-    elif platform == "windows-x86_64":
+    if platform.startswith("linux"):
+        return _CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_LINUX
+    if platform.startswith("macos"):
+        return _CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_MACOS
+    if platform.startswith("windows"):
         return _CHROMIUM_HEADLESS_SHELL_BUILD_TEMPLATE_WINDOWS
-    else:
-        fail("Unknown platform: {}".format(platform))
+
+    fail("Unknown platform: {}".format(platform))
 
 def _get_firefox_build_template(platform):
     """Get the BUILD template for Firefox based on platform."""
-    if "windows" in platform:
+    if platform.startswith("windows"):
         return _FIREFOX_BUILD_TEMPLATE_WINDOWS
-    elif "macos" in platform:
+    elif platform.startswith("macos"):
         return _FIREFOX_BUILD_TEMPLATE_MACOS
     else:
         return _FIREFOX_BUILD_TEMPLATE_LINUX
 
 def _get_webkit_build_template(platform):
     """Get the BUILD template for WebKit based on platform."""
-    if "windows" in platform:
+    if platform.startswith("windows"):
         return _WEBKIT_BUILD_TEMPLATE_WINDOWS
     else:
         return _WEBKIT_BUILD_TEMPLATE_LINUX
 
 def _get_ffmpeg_build_template(platform):
     """Get the BUILD template for FFmpeg based on platform."""
-    if "windows" in platform:
+    if platform.startswith("windows"):
         return _FFMPEG_BUILD_TEMPLATE_WINDOWS
-    elif "macos" in platform:
+    elif platform.startswith("macos"):
         return _FFMPEG_BUILD_TEMPLATE_MACOS
     else:
         return _FFMPEG_BUILD_TEMPLATE_LINUX
 
 def chromium_archive(*, name, platform, urls, integrity, strip_prefix):
-    """Create an http_archive for a Chromium browser archive."""
+    """Create an http_archive for a Chromium browser archive.
+
+    Args:
+        name: Repository name
+        platform: Platform identifier
+        urls: Archive URLs
+        integrity: Archive integrity hash
+        strip_prefix: Strip prefix for archive extraction
+    """
     template = _get_chromium_build_template(platform)
     http_archive(
         name = name,

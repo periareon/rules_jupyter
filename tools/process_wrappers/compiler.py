@@ -73,6 +73,14 @@ def convert_py_to_notebook(
         # Override with specified kernel if explicitly provided
         notebook_node.metadata.kernelspec["name"] = kernel_name
 
+    # Normalize the notebook to add missing cell IDs (required in nbformat 4.5+)
+    # This prevents MissingIDFieldWarning when nbformat validates the notebook
+    try:
+        nbformat.normalize(notebook_node)  # type: ignore[attr-defined]
+    except AttributeError:
+        # normalize() was added in nbformat 5.1.4, fall back gracefully if not available
+        pass
+
     return notebook_node
 
 

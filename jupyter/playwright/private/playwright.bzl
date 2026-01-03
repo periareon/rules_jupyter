@@ -13,36 +13,46 @@ def playwright_install_action(ctx, output_dir, playwright_version, browsers):
         The output directory artifact
     """
 
-    # Build arguments for the installer script
-    args = ctx.actions.args()
-    args.add("--output-dir", output_dir.path)
-    args.add("--playwright-version", playwright_version)
-
     # Collect all browser files for inputs
     all_inputs = []
+    manifest_files = []
 
-    # Add browser arguments and collect files
+    # Create a separate manifest file for each browser
     for browser_type, (filegroup, version) in browsers.items():
         if filegroup and version:
             # Get files from the filegroup
-            all_inputs.extend([
+            browser_files = depset(transitive = [
                 filegroup[DefaultInfo].files,
                 filegroup[DefaultInfo].default_runfiles.files,
             ])
+            all_inputs.append(browser_files)
 
-            # Add browser path and version arguments
-            # For filegroups, files are in the sandbox at their declared paths
-            # We'll use the directory of the first file as the browser source directory
-            # The copy_browser function will handle finding the correct archive root
-            browser_files_list = filegroup[DefaultInfo].files.to_list()
-            if browser_files_list:
-                # Use the directory of the first file as the browser root
-                # The script will copy from this directory structure
-                first_file = browser_files_list[0]
-                browser_dir = first_file.dirname
+            # Collect file paths for the manifest
+            file_paths = [f.path for f in browser_files.to_list()]
 
-                args.add("--{}".format(browser_type), browser_dir)
-                args.add("--{}-version".format(browser_type), version)
+            # Create manifest content for this browser
+            manifest_content = {
+                "browser_type": browser_type,
+                "files": file_paths,
+                "version": version,
+            }
+
+            # Write manifest file for this browser
+            manifest_file = ctx.actions.declare_file("{}_browser_{}.json".format(ctx.label.name, browser_type))
+            ctx.actions.write(
+                output = manifest_file,
+                content = json.encode_indent(manifest_content, indent = " " * 4),
+            )
+            manifest_files.append(manifest_file)
+
+    # Build arguments for the installer script
+    args = ctx.actions.args()
+    args.add("--playwright-version", playwright_version)
+    args.add("--output-dir", output_dir.path)
+
+    # Add each manifest file with --manifest flag
+    for manifest_file in manifest_files:
+        args.add("--manifest", manifest_file)
 
     # Run the installer action using the executable directly
     ctx.actions.run(
@@ -50,7 +60,7 @@ def playwright_install_action(ctx, output_dir, playwright_version, browsers):
         progress_message = "PlaywrightInstall %{label}",
         executable = ctx.executable._installer,
         arguments = [args],
-        inputs = depset(transitive = all_inputs),
+        inputs = depset(manifest_files, transitive = all_inputs),
         outputs = [output_dir],
         env = ctx.configuration.default_shell_env,
     )

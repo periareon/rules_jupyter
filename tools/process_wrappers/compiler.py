@@ -59,23 +59,7 @@ def convert_py_to_notebook(
     Returns:
         A NotebookNode object.
     """
-    # If there is no `#%%` or # %%` then replace the first line with this and treat the entire file
-    # as a notebook.
-    is_jupytext_notebook = False
-    content = py_path.read_text(encoding="utf-8")
-    for line in content.splitlines():
-        if line.startswith(("#%%", "# %%")):
-            is_jupytext_notebook = True
-            break
-
-    if is_jupytext_notebook:
-        notebook = jupytext.read(py_path)
-    else:
-        with tempfile.TemporaryDirectory(prefix="bzl_rj_comp-") as tmp:
-            tmp_file = Path(tmp) / py_path.name
-            tmp_file.parent.mkdir(exist_ok=True, parents=True)
-            tmp_file.write_text("# %%\n" + content, encoding="utf-8")
-            notebook = jupytext.read(py_path)
+    notebook = jupytext.read(py_path)
 
     # Cast to NotebookNode since jupytext.read returns Any
     notebook_node = cast(nbformat.NotebookNode, notebook)

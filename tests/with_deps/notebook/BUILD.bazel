@@ -1,0 +1,68 @@
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_test", "jupyter_report")
+
+# Test notebook that imports from a library in a separate subdirectory (.ipynb format)
+jupyter_notebook(
+    name = "notebook_with_lib_ipynb",
+    src = "notebook_with_lib.ipynb",
+    deps = [
+        "//tests/with_deps/lib",
+    ],
+)
+
+# Test notebook that imports from a library in a separate subdirectory (.py format)
+jupyter_notebook(
+    name = "notebook_with_lib_py",
+    src = "notebook_with_lib.py",
+    tags = ["no-pylint"],
+    deps = [
+        "//tests/with_deps/lib",
+    ],
+)
+
+# Reports for .ipynb notebook
+jupyter_report(
+    name = "report_ipynb",
+    notebook = ":notebook_with_lib_ipynb",
+)
+
+jupyter_report(
+    name = "report_ipynb_markdown",
+    notebook = ":notebook_with_lib_ipynb",
+    out_markdown = "report_ipynb.md",
+)
+
+jupyter_report(
+    name = "report_ipynb_html",
+    notebook = ":notebook_with_lib_ipynb",
+    out_html = "report_ipynb.html",
+)
+
+# Reports for .py notebook
+jupyter_report(
+    name = "report_py",
+    notebook = ":notebook_with_lib_py",
+)
+
+jupyter_report(
+    name = "report_py_markdown",
+    notebook = ":notebook_with_lib_py",
+    out_markdown = "report_py.md",
+)
+
+jupyter_report(
+    name = "report_py_html",
+    notebook = ":notebook_with_lib_py",
+    out_html = "report_py.html",
+)
+
+# Test for the .ipynb notebook
+jupyter_notebook_test(
+    name = "test_ipynb",
+    notebook = ":notebook_with_lib_ipynb",
+)
+
+# Test for the .py notebook
+jupyter_notebook_test(
+    name = "test_py",
+    notebook = ":notebook_with_lib_py",
+)

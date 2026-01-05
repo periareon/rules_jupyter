@@ -10,8 +10,8 @@ from pathlib import Path
 
 # Data files are available in the runfiles directory
 # We can access them using their relative paths from the notebook location
-data_file = Path("jupyter/private/tests/with_data/data.txt")
-config_file = Path("jupyter/private/tests/with_data/config.json")
+data_file = Path("tests/with_data/data.txt")
+config_file = Path("tests/with_data/config.json")
 
 print("Reading data files...")
 

@@ -7,7 +7,6 @@ Uses jupytext to support various formats including percent format (`# %%` marker
 import argparse
 import logging
 import os
-import tempfile
 from pathlib import Path
 from typing import cast
 

@@ -274,17 +274,17 @@ def _playwright_impl(module_ctx):
         ffmpeg_version = browser_versions.get("ffmpeg")
 
         # Collect all platforms that have at least one browser available
-        all_platforms = set()
+        all_platforms = []
         if chromium_version and chromium_version in CHROMIUM_VERSIONS:
-            all_platforms.update(CHROMIUM_VERSIONS[chromium_version].keys())
+            all_platforms.extend(CHROMIUM_VERSIONS[chromium_version].keys())
         if chromium_headless_shell_version and chromium_headless_shell_version in CHROMIUM_HEADLESS_SHELL_VERSIONS:
-            all_platforms.update(CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version].keys())
+            all_platforms.extend(CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version].keys())
         if firefox_version and firefox_version in FIREFOX_VERSIONS:
-            all_platforms.update(FIREFOX_VERSIONS[firefox_version].keys())
+            all_platforms.extend(FIREFOX_VERSIONS[firefox_version].keys())
         if webkit_version and webkit_version in WEBKIT_VERSIONS:
-            all_platforms.update(WEBKIT_VERSIONS[webkit_version].keys())
+            all_platforms.extend(WEBKIT_VERSIONS[webkit_version].keys())
         if ffmpeg_version and ffmpeg_version in FFMPEG_VERSIONS:
-            all_platforms.update(FFMPEG_VERSIONS[ffmpeg_version].keys())
+            all_platforms.extend(FFMPEG_VERSIONS[ffmpeg_version].keys())
 
         # Create platform-specific toolchain repositories
         toolchain_names = []
@@ -292,7 +292,7 @@ def _playwright_impl(module_ctx):
         exec_compatible_with = {}
         target_compatible_with = {}
 
-        for platform in all_platforms:
+        for platform in depset(all_platforms).to_list():
             # Skip platforms that don't have constraint mappings
             if platform not in PLATFORM_TO_CONSTRAINTS:
                 continue

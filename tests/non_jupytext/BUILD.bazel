@@ -1,0 +1,66 @@
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_report")
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.py",
+    tags = ["no-pylint"],
+)
+
+jupyter_report(
+    name = "report",
+    notebook = ":notebook",
+)
+
+jupyter_report(
+    name = "report_html",
+    notebook = ":notebook",
+    out_html = "report_html.html",
+)
+
+jupyter_report(
+    name = "report_latex",
+    notebook = ":notebook",
+    out_latex = "report_latex.tex",
+)
+
+jupyter_report(
+    name = "report_markdown",
+    notebook = ":notebook",
+    out_markdown = "report_markdown.md",
+)
+
+jupyter_report(
+    name = "report_notebook",
+    notebook = ":notebook",
+    out_notebook = "report_notebook.ipynb",
+)
+
+# TODO: Requires a latex toolchain
+# jupyter_report(
+#     name = "report_pdf",
+#     notebook = ":notebook",
+#     out_pdf = "report_pdf.pdf",
+# )
+
+jupyter_report(
+    name = "report_rst",
+    notebook = ":notebook",
+    out_rst = "report_rst.rst",
+)
+
+jupyter_report(
+    name = "report_webpdf",
+    notebook = ":notebook",
+    out_webpdf = "report_webpdf.pdf",
+)
+
+jupyter_report(
+    name = "report_full",
+    notebook = ":notebook",
+    out_html = "report_full.rst",
+    out_latex = "report_full.tex",
+    out_notebook = "report_full.ipynb",
+    # TODO: Requires a latex toolchain
+    # out_pdf = "report_full.tex.pdf",
+    out_webpdf = "report_full.html.pdf",
+)

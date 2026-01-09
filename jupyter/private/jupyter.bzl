@@ -47,7 +47,7 @@ def _jupyter_notebook_impl(ctx):
     return [
         DefaultInfo(
             files = depset([notebook]),
-            runfiles = ctx.runfiles(files = ctx.files.data).merge(dep_info.runfiles),
+            runfiles = ctx.runfiles(files = [ctx.file.src] + ctx.files.data).merge(dep_info.runfiles),
         ),
         JupyterNotebookInfo(
             kernel = ctx.attr.kernel,

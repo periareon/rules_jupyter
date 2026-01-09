@@ -255,6 +255,7 @@ def main() -> None:
             args.notebook,
             cwd,
             kernel_name=args.kernel,
+            suppress_log=False,
             params=args.params,
         )
         logging.debug("Notebook execution completed successfully")

@@ -3,40 +3,25 @@
 
 load("@rules_venv//python:py_binary.bzl", "py_binary")
 
-# buildifier: disable=bzl-visibility
-load(
-    "//jupyter/private:toolchain.bzl",
-    "current_jupyter_toolchain",
-    "current_jupytext_toolchain",
-)
-
 exports_files([
-    "reporter.py",
-    "tester.py",
     "compiler.py",
     "playwright_install.py",
+    "reporter.py",
+    "tester.py",
 ])
-
-current_jupyter_toolchain(
-    name = "current_jupyter_toolchain",
-)
-
-current_jupytext_toolchain(
-    name = "current_jupytext_toolchain",
-)
 
 py_binary(
     name = "compiler",
     srcs = ["compiler.py"],
     visibility = ["//visibility:public"],
-    deps = [":current_jupytext_toolchain"],
+    deps = ["//jupyter:current_jupytext_toolchain"],
 )
 
 py_binary(
     name = "reporter",
     srcs = ["reporter.py"],
     visibility = ["//visibility:public"],
-    deps = [":current_jupyter_toolchain"],
+    deps = ["//jupyter:current_jupyter_toolchain"],
 )
 
 py_binary(

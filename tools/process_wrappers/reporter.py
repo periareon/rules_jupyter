@@ -104,9 +104,10 @@ def configure_jupyter_environment() -> None:
     """
     # Set IPYTHONDIR to a writable temp location
     if "IPYTHONDIR" not in os.environ:
-        ipython_dir = os.path.join(tempfile.gettempdir(), "rules_jupyter_ipython")
-        os.makedirs(ipython_dir, exist_ok=True)
-        os.environ["IPYTHONDIR"] = ipython_dir
+        temp_dir = Path(os.getenv("TEST_TMPDIR", tempfile.gettempdir()))
+        ipython_dir = temp_dir / "rules_jupyter_ipython"
+        ipython_dir.mkdir(exist_ok=True, parents=True)
+        os.environ["IPYTHONDIR"] = str(ipython_dir)
         logging.debug("Set IPYTHONDIR to %s", ipython_dir)
 
     # Find and configure JUPYTER_PATH
@@ -314,7 +315,7 @@ def configure_playwright(browsers_dir: Path) -> None:
     logging.debug("Set PLAYWRIGHT_BROWSERS_PATH to: %s", browsers_dir)
 
 
-def _set_temp_home_env() -> tuple[str | None, str | None, str]:
+def _set_temp_home_env() -> tuple[str | None, str | None, Path]:
     """Set HOME and USERPROFILE to a temporary directory.
 
     Returns:
@@ -322,17 +323,19 @@ def _set_temp_home_env() -> tuple[str | None, str | None, str]:
     """
     original_home = os.environ.get("HOME")
     original_userprofile = os.environ.get("USERPROFILE")
-    temp_home = tempfile.mkdtemp()
-    os.environ["HOME"] = temp_home
+    temp_dir = Path(os.getenv("TEST_TMPDIR", tempfile.mkdtemp()))
+    temp_home = temp_dir / "home"
+    temp_home.mkdir(exist_ok=True, parents=True)
+    os.environ["HOME"] = str(temp_home)
     if platform.system() == "Windows":
-        os.environ["USERPROFILE"] = temp_home
+        os.environ["USERPROFILE"] = str(temp_home)
     return (original_home, original_userprofile, temp_home)
 
 
 def _restore_home_env(
     original_home: str | None,
     original_userprofile: str | None,
-    temp_home: str,
+    temp_home: Path,
 ) -> None:
     """Restore original HOME and USERPROFILE environment variables and cleanup temp directory."""
     if original_home is not None:
@@ -346,11 +349,12 @@ def _restore_home_env(
         del os.environ["USERPROFILE"]
 
     # Clean up temporary directory
-    try:
-        shutil.rmtree(temp_home)
-    except OSError:
-        # Ignore errors during cleanup
-        pass
+    if "TEST_TMPDIR" not in os.environ:
+        try:
+            shutil.rmtree(temp_home)
+        except OSError:
+            # Ignore errors during cleanup
+            pass
 
 
 def _generate_outputs(

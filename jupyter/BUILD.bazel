@@ -1,4 +1,9 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load(
+    "//jupyter/private:toolchain.bzl",
+    "current_jupyter_toolchain",
+    "current_jupytext_toolchain",
+)
 
 exports_files([
     "defs.bzl",
@@ -12,6 +17,16 @@ exports_files([
 
 toolchain_type(
     name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+current_jupyter_toolchain(
+    name = "current_jupyter_toolchain",
+    visibility = ["//visibility:public"],
+)
+
+current_jupytext_toolchain(
+    name = "current_jupytext_toolchain",
     visibility = ["//visibility:public"],
 )
 

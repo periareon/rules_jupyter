@@ -32,6 +32,20 @@ WEBKIT_VERSIONS = {
         },
     },
     "1668": {
+        "linux-aarch64": {
+            "integrity": "sha256-L1Y2zuAE5Gc9cwxANpriZOj31yVm7maZll9n3bBUTK0=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1668/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-V+fqRmZvd2bJOmtx8a1BBr9NjWs0ZjP4A6ydcSeOi/w=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1668/webkit-ubuntu-22.04.zip",
+            ],
+        },
         "windows-x86_64": {
             "integrity": "sha256-45izymagXuCt6xPCibHi5jrzETtgEiyb9ZmSfKOOTGM=",
             "strip_prefix": "",
@@ -41,6 +55,20 @@ WEBKIT_VERSIONS = {
         },
     },
     "1683": {
+        "linux-aarch64": {
+            "integrity": "sha256-r4WLb7AQLCLGHi5ygB53da5kZQJiGRc46ZmoBr5bb+M=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1683/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-Vtavr+Ivol1SzRHLuUs5SmCIpTneccfJxOZLMpsylAY=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1683/webkit-ubuntu-22.04.zip",
+            ],
+        },
         "windows-x86_64": {
             "integrity": "sha256-sS8v9kjul979pQNS2mWMGFXC7NAaU+n5VxzPoa5bJ6I=",
             "strip_prefix": "",
@@ -50,6 +78,20 @@ WEBKIT_VERSIONS = {
         },
     },
     "1699": {
+        "linux-aarch64": {
+            "integrity": "sha256-dBhof5eckSrPLmLUvVcGTmCJ/oP9Tl5OwfoQvt9ZHv0=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1699/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-zmjLmmh/hTsyayC5VyXQ17PfFw0jjc0J1nFg3xZ1vnU=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1699/webkit-ubuntu-22.04.zip",
+            ],
+        },
         "windows-x86_64": {
             "integrity": "sha256-g4FK3jygBgLdjycNxxuMIDLZr4IaVlB9HK15oxobjbk=",
             "strip_prefix": "",
@@ -59,6 +101,20 @@ WEBKIT_VERSIONS = {
         },
     },
     "1715": {
+        "linux-aarch64": {
+            "integrity": "sha256-yUMUYx89OAc1NQH8CaPO/TGlyZ0F42OAovCBNRpDbP8=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1715/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-YAlVLlmsFnEWZohGip1V8dMyEhsCgiTX5EKzCN7zM08=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1715/webkit-ubuntu-22.04.zip",
+            ],
+        },
         "windows-x86_64": {
             "integrity": "sha256-rSLkEumkkl3w2u4JNwuRXFKiuGwgglgyaf7hQ+EuzCQ=",
             "strip_prefix": "",
@@ -68,6 +124,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1724": {
+        "linux-aarch64": {
+            "integrity": "sha256-WMOhYd0fkMkbgskhEGCDLGnU++ozIS/2arT1SPUxJOs=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1724/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-8XOboGS6leR/RTTeJgFZqbPEIz3awAMgC3VUqgjzX7k=",
             "strip_prefix": "",
@@ -84,6 +147,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1735": {
+        "linux-aarch64": {
+            "integrity": "sha256-pS6L/n7loPQpJJ8eMsoHIp7s6WC74nw+VMRbxiyy4PU=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1735/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-6FngV/xsxyoNG/RxHiBQ8hGBRnEq7PG/ejh16Nel7P8=",
             "strip_prefix": "",
@@ -100,6 +170,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1751": {
+        "linux-aarch64": {
+            "integrity": "sha256-Fp7J2WNbVh0fOecilEIyiy6IsmKPiJBaK/ohCnPPgMc=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1751/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-YzQxUiz8AzRx0ckZIkf7fRsPMZiijzgHO34iONVuaQk=",
             "strip_prefix": "",
@@ -116,6 +193,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1767": {
+        "linux-aarch64": {
+            "integrity": "sha256-QmOZXU0k5qU4o4gKoCYyjUTFmt6A1klIP860j4gddGY=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1767/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-0PCVs8tmYePnSCskvcHZwjkUTaYRXrIrYJ1KWWWrvpo=",
             "strip_prefix": "",
@@ -132,6 +216,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1792": {
+        "linux-aarch64": {
+            "integrity": "sha256-i6pWnKcTJ0xsuJxL6wwHZIIDNwQgLIMh75+6Bw4AnQE=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1792/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-zZq1Mlf43l2PEP6iM3Q47fzPo/B8zZoRQqYwsGVXxMg=",
             "strip_prefix": "",
@@ -148,6 +239,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1811": {
+        "linux-aarch64": {
+            "integrity": "sha256-+0NyCsc27ig6odl1pYCME/epK/grEHeNBssiopccHq4=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1811/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-2LKpnYcQH1GjxlbNQlys+S1Muo26kbE/1LSmKnt0sUQ=",
             "strip_prefix": "",
@@ -187,6 +285,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1848": {
+        "linux-aarch64": {
+            "integrity": "sha256-eLFicb5xuUsTlF8i+VIQzhiGh/Jund3PkPLQY0YiAaw=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1848/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-mEmsIuSv/JsQ46zMLWA748869hHbtm3X+u1xQQR19UA=",
             "strip_prefix": "",
@@ -203,6 +308,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1860": {
+        "linux-aarch64": {
+            "integrity": "sha256-G86gzu9pL4If7WbkjOwa0seR323ig7DGqwaGjIZ8Fis=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1860/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-+hGQPp8XYUSICOlCUjO8oPhYRk1C9G/oHk7lUxkPfmY=",
             "strip_prefix": "",
@@ -219,6 +331,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1869": {
+        "linux-aarch64": {
+            "integrity": "sha256-JZyTMJ3KoOAb1DW/WLyaG0jkqQNHLM9GiinB0sAlRJ4=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1869/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-tkJXhM/zo/sbmr5KkUh0h/AkRzmRcXwFh/UhoIBc7OE=",
             "strip_prefix": "",
@@ -235,6 +354,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "1883": {
+        "linux-aarch64": {
+            "integrity": "sha256-CBUAuvgzfBs3apzdpj0MNRwFNDffPL9JkvFxiZU0i3c=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/1883/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-ZraeMJlumJRA4DpuGkaRvrdRbKdkXqqHjFZHrop0PWU=",
             "strip_prefix": "",
@@ -422,6 +548,13 @@ WEBKIT_VERSIONS = {
         },
     },
     "2035": {
+        "linux-aarch64": {
+            "integrity": "sha256-ure+Ei75JpCJq5R3DZa55OGBkMarKfAGuDzd9Yytn2A=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/builds/webkit/2035/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
         "linux-x86_64": {
             "integrity": "sha256-XoNFLcHYtqfPP0W/LQkUvy6KwMEHcPSMv9d6WnGYSUg=",
             "strip_prefix": "",
@@ -949,6 +1082,53 @@ WEBKIT_VERSIONS = {
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2227/webkit-win64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2227/webkit-win64.zip",
                 "https://cdn.playwright.dev/builds/webkit/2227/webkit-win64.zip",
+            ],
+        },
+    },
+    "2248": {
+        "linux-aarch64": {
+            "integrity": "sha256-oBiW1/VG9c9QyQn6RKBby8dQPEjC8y5j/RwhloQLpRM=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2248/webkit-ubuntu-22.04-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2248/webkit-ubuntu-22.04-arm64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2248/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-Tk128hEVp5vRZoCJMc773+KFK/I9WLYc/xR57aX5glU=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2248/webkit-ubuntu-22.04.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2248/webkit-ubuntu-22.04.zip",
+                "https://cdn.playwright.dev/builds/webkit/2248/webkit-ubuntu-22.04.zip",
+            ],
+        },
+        "macos-aarch64": {
+            "integrity": "sha256-MD+O0QDH20t4SgoKahPWUOKrsPuThdqV+p9PwYCSKY8=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2248/webkit-mac-15-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2248/webkit-mac-15-arm64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2248/webkit-mac-15-arm64.zip",
+            ],
+        },
+        "macos-x86_64": {
+            "integrity": "sha256-a4OEo6aKpLP1nRdQXZurOM9qF/Hwzmxu7NgKXkF/HgY=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2248/webkit-mac-15.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2248/webkit-mac-15.zip",
+                "https://cdn.playwright.dev/builds/webkit/2248/webkit-mac-15.zip",
+            ],
+        },
+        "windows-x86_64": {
+            "integrity": "sha256-EYB5aN6TlWGZGpc4HTVBPGNjjF6rTSfF8tIkinhvsjg=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2248/webkit-win64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2248/webkit-win64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2248/webkit-win64.zip",
             ],
         },
     },

@@ -1,0 +1,32 @@
+load("@rules_venv//python/pytest:defs.bzl", "py_pytest_test")
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_report")
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.py",
+    tags = ["no-pylint"],
+    deps = [
+        "@pip_deps//matplotlib",
+        "@pip_deps//plotly",
+    ],
+)
+
+jupyter_report(
+    name = "report",
+    notebook = ":notebook",
+    out_html = "report.html",
+    out_webpdf = "report.pdf",
+)
+
+py_pytest_test(
+    name = "validate_report_test",
+    srcs = ["validate_report_test.py"],
+    data = [
+        ":report.html",
+        ":report.pdf",
+    ],
+    tags = ["no-pylint"],
+    deps = [
+        "@rules_venv//python/runfiles",
+    ],
+)

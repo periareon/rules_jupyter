@@ -48,6 +48,31 @@ PLAYWRIGHT_BROWSER_BASE_URLS = [
     "https://cdn.playwright.dev/builds",
 ]
 
+# Chrome for Testing CDN base URLs (used for Chromium starting with Playwright 1.58.0)
+# Playwright mirrors Google's CDN at cdn.playwright.dev/chrome-for-testing-public.
+CHROME_FOR_TESTING_BASE_URLS = [
+    "https://cdn.playwright.dev/chrome-for-testing-public",
+    "https://storage.googleapis.com/chrome-for-testing-public",
+]
+
+# Chrome for Testing archive URL suffixes keyed by (browser_type, platform).
+# Format: "{cft_platform}/{archive_name}" appended to "{base}/{browserVersion}/".
+# Linux ARM64 is not available on Chrome for Testing.
+CHROME_FOR_TESTING_ARCHIVE_PATTERNS: dict[str, dict[str, str]] = {
+    "chromium": {
+        "macos-aarch64": "mac-arm64/chrome-mac-arm64.zip",
+        "macos-x86_64": "mac-x64/chrome-mac-x64.zip",
+        "linux-x86_64": "linux64/chrome-linux64.zip",
+        "windows-x86_64": "win64/chrome-win64.zip",
+    },
+    "chromium-headless-shell": {
+        "macos-aarch64": "mac-arm64/chrome-headless-shell-mac-arm64.zip",
+        "macos-x86_64": "mac-x64/chrome-headless-shell-mac-x64.zip",
+        "linux-x86_64": "linux64/chrome-headless-shell-linux64.zip",
+        "windows-x86_64": "win64/chrome-headless-shell-win64.zip",
+    },
+}
+
 # Browser types to process
 BROWSER_TYPES = [
     "chromium",
@@ -275,10 +300,12 @@ def compute_sha512(url: str) -> str:
 
 def _extract_browser_revisions_from_tarball(
     tar: tarfile.TarFile,
-) -> dict[str, str] | None:
-    """Extract browser revisions from browsers.json in tarball.
+) -> dict[str, dict[str, str]] | None:
+    """Extract browser revisions and metadata from browsers.json in tarball.
 
-    Also extracts full browser metadata for potential future use in URL discovery.
+    Returns:
+        Dict mapping browser name to metadata dict with keys "revision" and
+        optionally "browserVersion", or None if browsers.json is not found.
     """
     browsers_json_path = None
     for member in tar.getmembers():
@@ -294,23 +321,28 @@ def _extract_browser_revisions_from_tarball(
         return None
 
     browsers_data = json.loads(browsers_file.read())
-    browser_revisions = {}
+    browser_info: dict[str, dict[str, str]] = {}
     if "browsers" in browsers_data:
         for browser in browsers_data["browsers"]:
             browser_name = browser.get("name")
             revision = browser.get("revision")
             if browser_name and revision:
-                browser_revisions[browser_name] = str(revision)
-                # Log full browser metadata for debugging URL issues
+                entry: dict[str, str] = {"revision": str(revision)}
+                browser_version = browser.get("browserVersion")
+                if browser_version:
+                    entry["browserVersion"] = str(browser_version)
+                browser_info[browser_name] = entry
                 logging.debug(
                     "Browser metadata for %s: %s",
                     browser_name,
                     json.dumps(browser, indent=2),
                 )
-    return browser_revisions
+    return browser_info
 
 
-def get_all_browser_revisions(playwright_version: str) -> dict[str, str] | None:
+def get_all_browser_revisions(
+    playwright_version: str,
+) -> dict[str, dict[str, str]] | None:
     """Get all browser revisions for a given Playwright version.
 
     This fetches browsers.json from the npm package tarball to determine all browser revisions.
@@ -319,8 +351,9 @@ def get_all_browser_revisions(playwright_version: str) -> dict[str, str] | None:
         playwright_version: Playwright version string (e.g., "1.57.0").
 
     Returns:
-        A dict mapping browser_type -> revision (e.g., {"chromium": "1200", "firefox": "1497"}),
-        or None if not found.
+        A dict mapping browser_type -> {"revision": "...", "browserVersion": "..."},
+        or None if not found. "browserVersion" is present when browsers.json includes it
+        (Playwright >= 1.58.0 for Chromium/Chrome for Testing).
     """
     npm_registry_url = (
         f"https://registry.npmjs.org/playwright-core/{playwright_version}"
@@ -349,14 +382,14 @@ def get_all_browser_revisions(playwright_version: str) -> dict[str, str] | None:
                 tarball_data = io.BytesIO(tarball_response.read())
 
                 with tarfile.open(fileobj=tarball_data, mode="r:gz") as tar:
-                    browser_revisions = _extract_browser_revisions_from_tarball(tar)
-                    if browser_revisions is None:
+                    browser_info = _extract_browser_revisions_from_tarball(tar)
+                    if browser_info is None:
                         logging.warning(
                             "browsers.json not found in tarball for Playwright %s",
                             playwright_version,
                         )
                         return None
-                    return browser_revisions
+                    return browser_info
     except (HTTPError, URLError, OSError, ValueError, json.JSONDecodeError) as e:
         logging.warning(
             "Failed to fetch browser revisions for Playwright %s: %s",
@@ -521,49 +554,72 @@ def _get_url_path_patterns(
 
 
 def _find_working_urls(
-    browser_type: str, browser_revision: str, archive_name: str
+    browser_type: str,
+    browser_revision: str,
+    archive_name: str,
+    platform: str,
+    browser_version: str | None = None,
 ) -> list[str]:
     """Find all working URLs by trying multiple path patterns and base URLs.
+
+    For Chromium browsers with a known browserVersion, Chrome for Testing CDN
+    URLs are tried first. Falls back to the legacy Playwright CDN.
 
     Args:
         browser_type: Browser type (e.g., "chromium", "firefox").
         browser_revision: Browser revision (e.g., "1200").
-        archive_name: Archive filename (e.g., "chromium-linux.zip").
+        archive_name: Archive filename for Playwright CDN (e.g., "chromium-linux.zip").
+        platform: Target platform (e.g., "linux-x86_64", "macos-aarch64").
+        browser_version: Chrome version string (e.g., "145.0.7632.6") when available.
 
     Returns:
         List of working URLs (may be empty if none found).
     """
+    working_urls: list[str] = []
+
+    # Try Chrome for Testing CDN first when browserVersion is available
+    cft_patterns = CHROME_FOR_TESTING_ARCHIVE_PATTERNS.get(browser_type, {})
+    cft_suffix = cft_patterns.get(platform) if browser_version else None
+    if browser_version and cft_suffix:
+        for base_url in CHROME_FOR_TESTING_BASE_URLS:
+            test_url = f"{base_url}/{browser_version}/{cft_suffix}"
+            if _check_url_availability(test_url):
+                working_urls.append(test_url)
+        if working_urls:
+            return working_urls
+
+    # Fall back to legacy Playwright CDN
     url_paths = _get_url_path_patterns(browser_type, browser_revision, archive_name)
-    working_urls = []
 
     for download_path in url_paths:
         for base_url in PLAYWRIGHT_BROWSER_BASE_URLS:
             test_url = f"{base_url}/{download_path}"
             if _check_url_availability(test_url):
                 working_urls.append(test_url)
-        # If we found URLs with this path pattern, return early
-        # (don't try alternative patterns if standard one works)
         if working_urls:
             return working_urls
 
     return working_urls
 
 
-def _process_platform_artifact(  # pylint: disable=too-many-locals
+def _process_platform_artifact(
     browser_type: str,
     platform: str,
     archive_name: str,
     browser_revision: str,
+    *,
     existing_data: dict[str, str | list[str]] | None = None,
+    browser_version: str | None = None,
 ) -> tuple[dict[str, str | list[str]] | None, bool]:
     """Process a single platform artifact.
 
     Args:
         browser_type: Browser type (e.g., "chromium").
         platform: Platform (e.g., "linux-x86_64").
-        archive_name: Archive filename.
+        archive_name: Archive filename for Playwright CDN.
         browser_revision: Browser revision.
         existing_data: Existing artifact data, if any.
+        browser_version: Chrome version string for CfT CDN (e.g., "145.0.7632.6").
 
     Returns:
         Tuple of (artifact data or None, was_integrity_missing).
@@ -577,7 +633,6 @@ def _process_platform_artifact(  # pylint: disable=too-many-locals
             platform,
             browser_revision,
         )
-        # Return existing data but ensure all fields are present
         result = {
             "urls": existing_data.get("urls", []),
             "integrity": existing_data["integrity"],
@@ -586,14 +641,13 @@ def _process_platform_artifact(  # pylint: disable=too-many-locals
         return result, False
 
     # Need to compute integrity
-    working_urls = _find_working_urls(browser_type, browser_revision, archive_name)
+    working_urls = _find_working_urls(
+        browser_type, browser_revision, archive_name, platform, browser_version
+    )
     if not working_urls:
-        # Build list of all URLs we tried for better error messages
-        url_paths = _get_url_path_patterns(browser_type, browser_revision, archive_name)
-        tried_urls = []
-        for download_path in url_paths:
-            for base_url in PLAYWRIGHT_BROWSER_BASE_URLS:
-                tried_urls.append(f"{base_url}/{download_path}")
+        tried_urls = _build_tried_urls_list(
+            browser_type, browser_revision, archive_name, platform, browser_version
+        )
         tried_urls_str = ", ".join(tried_urls)
         logging.warning(
             "Artifact not found for %s %s (revision %s, archive %s). "
@@ -604,18 +658,13 @@ def _process_platform_artifact(  # pylint: disable=too-many-locals
             archive_name,
             tried_urls_str,
         )
-        # If we have existing data, preserve it even if URLs aren't found now
-        # Otherwise, skip this entry entirely (artifact may not exist for this platform)
         if existing_data:
             strip_prefix = STRIP_PREFIX.get(browser_type, {}).get(platform, "")
             return {
                 "urls": existing_data.get("urls", []),
-                "integrity": existing_data.get(
-                    "integrity", ""
-                ),  # Preserve existing or empty
+                "integrity": existing_data.get("integrity", ""),
                 "strip_prefix": existing_data.get("strip_prefix", strip_prefix),
             }, not existing_data.get("integrity")
-        # No existing data and URLs not found - skip this entry
         return None, False
 
     download_url = working_urls[0]
@@ -634,24 +683,41 @@ def _process_platform_artifact(  # pylint: disable=too-many-locals
         logging.error(
             "Failed to download/hash %s: %s. Skipping entry.", download_url, e
         )
-        # If we have existing data, preserve it even if hash computation fails now
-        # Otherwise, skip this entry entirely
         if existing_data:
             return {
                 "urls": existing_data.get("urls", working_urls),
-                "integrity": existing_data.get(
-                    "integrity", ""
-                ),  # Preserve existing or empty
+                "integrity": existing_data.get("integrity", ""),
                 "strip_prefix": existing_data.get("strip_prefix", strip_prefix),
             }, not existing_data.get("integrity")
-        # No existing data and hash computation failed - skip this entry
         return None, False
+
+
+def _build_tried_urls_list(
+    browser_type: str,
+    browser_revision: str,
+    archive_name: str,
+    platform: str,
+    browser_version: str | None,
+) -> list[str]:
+    """Build the list of all URLs that would be attempted for error reporting."""
+    tried: list[str] = []
+    cft_patterns = CHROME_FOR_TESTING_ARCHIVE_PATTERNS.get(browser_type, {})
+    cft_suffix = cft_patterns.get(platform) if browser_version else None
+    if browser_version and cft_suffix:
+        for base_url in CHROME_FOR_TESTING_BASE_URLS:
+            tried.append(f"{base_url}/{browser_version}/{cft_suffix}")
+    url_paths = _get_url_path_patterns(browser_type, browser_revision, archive_name)
+    for download_path in url_paths:
+        for base_url in PLAYWRIGHT_BROWSER_BASE_URLS:
+            tried.append(f"{base_url}/{download_path}")
+    return tried
 
 
 def query_browser_for_version(
     browser_type: str,
     browser_revision: str,
     existing_revision_data: dict[str, dict[str, str | list[str]]] | None = None,
+    browser_version: str | None = None,
 ) -> tuple[dict[str, dict[str, str | list[str]]] | None, list[tuple[str, str, str]]]:
     """Query and compute integrity hashes for a browser revision.
 
@@ -659,6 +725,7 @@ def query_browser_for_version(
         browser_type: Browser type (e.g., "chromium", "firefox").
         browser_revision: Browser revision (e.g., "1200").
         existing_revision_data: Existing data for this revision, if any.
+        browser_version: Chrome version string for CfT CDN (e.g., "145.0.7632.6").
 
     Returns:
         Tuple of (artifacts dict or None, list of (browser_type, revision, platform) with missing integrity).
@@ -689,9 +756,9 @@ def query_browser_for_version(
                 platform,
                 archive_name,
                 browser_revision,
-                existing_platform_data,
+                existing_data=existing_platform_data,
+                browser_version=browser_version,
             )
-            # Always include platform_data if returned (it may have empty integrity)
             if platform_data is not None:
                 artifacts[platform] = platform_data
                 if integrity_missing:
@@ -703,7 +770,6 @@ def query_browser_for_version(
                     platform_data["integrity"] or "(missing)",
                 )
         except ValueError:
-            # Artifact not found - skip this platform
             continue
 
     if artifacts:
@@ -944,15 +1010,15 @@ def main() -> (
     browser_versions_map: dict[str, dict[str, str]] = (
         existing_browser_versions_map.copy() if existing_browser_versions_map else {}
     )
-    unique_browser_revisions: set[tuple[str, str]] = set()
+    # Maps (browser_type, revision) -> browserVersion (Chrome version for CfT CDN)
+    unique_browser_revisions: dict[tuple[str, str], str | None] = {}
 
     logging.info("Phase 1: Building Playwright -> browser version mappings...")
     for playwright_version in playwright_versions:
         logging.info("Processing Playwright version %s", playwright_version)
 
-        # Get all browser revisions for this Playwright version (single npm tarball download)
-        browser_revisions = get_all_browser_revisions(playwright_version)
-        if not browser_revisions:
+        browser_info = get_all_browser_revisions(playwright_version)
+        if not browser_info:
             logging.warning(
                 "Could not determine browser revisions for Playwright %s, skipping",
                 playwright_version,
@@ -960,19 +1026,23 @@ def main() -> (
             continue
 
         logging.info(
-            "Found browser revisions for Playwright %s: %s",
+            "Found browser info for Playwright %s: %s",
             playwright_version,
-            browser_revisions,
+            {name: info["revision"] for name, info in browser_info.items()},
         )
 
-        # Store browser versions for browser_versions.bzl (merge with existing)
-        browser_versions_map[playwright_version] = browser_revisions
+        # Store revision-only map for browser_versions.bzl
+        browser_versions_map[playwright_version] = {
+            name: info["revision"] for name, info in browser_info.items()
+        }
 
-        # Collect unique browser revisions
+        # Collect unique browser revisions with associated browserVersion
         for browser_type in BROWSER_TYPES:
-            browser_revision = browser_revisions.get(browser_type)
-            if browser_revision:
-                unique_browser_revisions.add((browser_type, browser_revision))
+            info = browser_info.get(browser_type)
+            if info:
+                key = (browser_type, info["revision"])
+                if key not in unique_browser_revisions:
+                    unique_browser_revisions[key] = info.get("browserVersion")
 
     logging.info(
         "Phase 1 complete: Found %d unique browser revisions across %d Playwright versions",
@@ -992,11 +1062,14 @@ def main() -> (
     all_missing_integrity: list[tuple[str, str, str]] = []
 
     logging.info("Phase 2: Downloading and hashing browser artifacts...")
-    for browser_type, browser_revision in sorted(unique_browser_revisions):
+    for (browser_type, browser_revision), browser_version in sorted(
+        unique_browser_revisions.items()
+    ):
         logging.info(
-            "Processing %s revision %s",
+            "Processing %s revision %s (browserVersion=%s)",
             browser_type,
             browser_revision,
+            browser_version or "N/A",
         )
 
         # Get existing data for this revision if available
@@ -1011,6 +1084,7 @@ def main() -> (
             browser_type,
             browser_revision,
             existing_revision_data,
+            browser_version,
         )
         if artifacts:
             browser_releases[browser_type][browser_revision] = artifacts

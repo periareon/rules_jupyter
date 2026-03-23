@@ -471,4 +471,47 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
     },
+    "1208": {
+        "linux-aarch64": {
+            "integrity": "sha256-a9tDSUKewz58Amfg6qA5whMfoLOymX3sDslrDUD1ef0=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-headless-shell-linux-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1208/chromium-headless-shell-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1208/chromium-headless-shell-linux-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-JTbpfY9BDfA5Sz58QlLojOnyOfBPOvTiR6Jsr0W69J4=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/linux64/chrome-headless-shell-linux64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/linux64/chrome-headless-shell-linux64.zip",
+            ],
+        },
+        "macos-aarch64": {
+            "integrity": "sha256-hRC5sVdVOKpqCS7RbZgXOLLr9SxeQepMVKfOFnVs3PU=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/mac-arm64/chrome-headless-shell-mac-arm64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/mac-arm64/chrome-headless-shell-mac-arm64.zip",
+            ],
+        },
+        "macos-x86_64": {
+            "integrity": "sha256-Qxb3+YIToXPiNWQGIDNZzUq1srLbNsshm52Z7ex0aBk=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/mac-x64/chrome-headless-shell-mac-x64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/mac-x64/chrome-headless-shell-mac-x64.zip",
+            ],
+        },
+        "windows-x86_64": {
+            "integrity": "sha256-g5UA254bCGWWHOiwUTS6PT1xuCvl3sI21sh+zZPggs0=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/win64/chrome-headless-shell-win64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/win64/chrome-headless-shell-win64.zip",
+            ],
+        },
+    },
 }

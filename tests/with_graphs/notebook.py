@@ -26,7 +26,7 @@ plt.title("Matplotlib Test")
 plt.show()
 
 # %%
-import plotly.graph_objects as go
+import plotly.graph_objects as go  # type: ignore[import-untyped]
 
 fig = go.Figure(data=go.Scatter(x=list(range(10)), y=[i**2 for i in range(10)]))
 fig.update_layout(title="Plotly Test")

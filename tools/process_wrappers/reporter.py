@@ -9,11 +9,12 @@ import platform
 import shutil
 import sys
 import tempfile
+from collections.abc import Generator
 from contextlib import contextmanager
 from enum import StrEnum
 from io import StringIO
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import nbformat
 
@@ -218,7 +219,7 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
     # notebook execution, then restore so Playwright (WebPDF) can use
     # subprocess_exec which requires ProactorEventLoop.
     _original_policy = None
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         _original_policy = asyncio.get_event_loop_policy()
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -247,7 +248,9 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
 
 
 @contextmanager
-def _plotly_pdf_workaround(notebook: nbformat.NotebookNode, exporter_class: type):
+def _plotly_pdf_workaround(
+    notebook: nbformat.NotebookNode, exporter_class: type
+) -> Generator[None, None, None]:
     """Strip interactive plotly HTML for PDF export so nbconvert uses image/png.
 
     WebPDFExporter captures the page before plotly.js finishes rendering,
@@ -257,7 +260,7 @@ def _plotly_pdf_workaround(notebook: nbformat.NotebookNode, exporter_class: type
         yield
         return
 
-    saved: list[tuple[dict, str]] = []
+    saved: list[tuple[dict[str, Any], str]] = []
     for cell in notebook.cells:
         if cell.cell_type != "code":
             continue
@@ -445,7 +448,7 @@ def _postprocess_plotly_outputs(notebook: nbformat.NotebookNode) -> None:
     actually produced plotly outputs. The notebook's own deps are available
     at runtime because the reporter venv merges notebook and tool deps.
     """
-    plotly_outputs: list[dict] = []
+    plotly_outputs: list[dict[str, Any]] = []
     for cell in notebook.cells:
         if cell.cell_type != "code":
             continue
@@ -459,7 +462,7 @@ def _postprocess_plotly_outputs(notebook: nbformat.NotebookNode) -> None:
 
     # pylint: disable=import-outside-toplevel
     try:
-        import plotly.graph_objects as go  # type: ignore[import-untyped]
+        import plotly.graph_objects as go  # type: ignore[import-not-found]
     except ImportError:
         logging.warning(
             "Notebook cell outputs contain plotly data but plotly is not "

@@ -602,7 +602,7 @@ def _find_working_urls(
     return working_urls
 
 
-def _process_platform_artifact(
+def _process_platform_artifact(  # pylint: disable=too-many-arguments
     browser_type: str,
     platform: str,
     archive_name: str,

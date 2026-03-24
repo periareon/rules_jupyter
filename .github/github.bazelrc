@@ -6,9 +6,15 @@ common --announce_rc
 # Show errors in CI
 test --test_output=errors
 
+# Show all errors before exiting
+build --keep_going
+
 # Show more information about failures
 build --verbose_failures
 
 # UI for cleaner CI output
 common --color=no
 common --show_timestamps
+
+# Enable all linters and formatters
+build --config=strict

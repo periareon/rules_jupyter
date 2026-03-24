@@ -17,6 +17,7 @@ jobs:
   ci:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -39,10 +40,6 @@ jobs:
           echo "TMP=$env:RUNNER_TEMP" >> "$env:GITHUB_ENV"
           echo "startup --output_user_root=D:/bzl" > ./user.bazelrc
         if: startswith(runner.os, 'Windows')
-      - name: Setup Bazelrc
-        run: |
-          echo "common --keep_going" >> ./user.bazelrc
-          echo "common --config=strict" >> ./user.bazelrc
 
       # Build and Test the code
       - name: Test (Unix)

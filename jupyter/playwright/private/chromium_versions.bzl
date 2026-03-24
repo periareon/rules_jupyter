@@ -1649,4 +1649,47 @@ CHROMIUM_VERSIONS = {
             ],
         },
     },
+    "1208": {
+        "linux-aarch64": {
+            "integrity": "sha256-cLRiBSGxraNgR14QWd/p1UmmRhp5uTQvhbfUfkQSMHc=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-linux-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1208/chromium-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1208/chromium-linux-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-teMZUEGvNFpmjREPXa9VgZYfo2CGJupYjJfdD+gcTjg=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/linux64/chrome-linux64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/linux64/chrome-linux64.zip",
+            ],
+        },
+        "macos-aarch64": {
+            "integrity": "sha256-Pb8E4ooCB5FI6cdBeECgwdOQM2Hs7u5+frWe93AhvbI=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/mac-arm64/chrome-mac-arm64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/mac-arm64/chrome-mac-arm64.zip",
+            ],
+        },
+        "macos-x86_64": {
+            "integrity": "sha256-Dej4dq9TqT+IMuVEkP995BqbZkghFZAoDLUCie1F8kA=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/mac-x64/chrome-mac-x64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/mac-x64/chrome-mac-x64.zip",
+            ],
+        },
+        "windows-x86_64": {
+            "integrity": "sha256-CEdub+VQzLwNEdGrAwKS/E4y1Jh0AMd7LRkFpr0TtPY=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/win64/chrome-win64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/win64/chrome-win64.zip",
+            ],
+        },
+    },
 }

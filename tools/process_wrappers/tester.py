@@ -21,6 +21,7 @@ from tools.process_wrappers.reporter import (
     configure_playwright,
     execute_notebook,
     export_notebook,
+    postprocess_notebook_outputs,
     save_notebook,
 )
 
@@ -259,6 +260,9 @@ def main() -> None:
             params=args.params,
         )
         logging.debug("Notebook execution completed successfully")
+
+        # Convert non-standard MIME types (e.g. plotly) to renderable formats
+        postprocess_notebook_outputs(notebook)
 
         # Generate reports into the TEST_UNDECLARED_OUTPUTS_DIR if available
         if args.report:

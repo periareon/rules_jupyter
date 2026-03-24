@@ -1,5 +1,5 @@
 load("@rules_venv//python/pytest:defs.bzl", "py_pytest_test")
-load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_report")
+load("//jupyter:defs.bzl", "jupyter_lab", "jupyter_notebook", "jupyter_report")
 
 jupyter_notebook(
     name = "notebook",
@@ -29,4 +29,9 @@ py_pytest_test(
     deps = [
         "@rules_venv//python/runfiles",
     ],
+)
+
+jupyter_lab(
+    name = "lab",
+    notebook = ":notebook",
 )

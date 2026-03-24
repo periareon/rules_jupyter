@@ -1,0 +1,8 @@
+{
+  "@jupyterlab/apputils-extension:themes": {
+    "theme": "JupyterLab Dark"
+  },
+  "@jupyterlab/docmanager-extension:plugin": {
+    "autosaveInterval": 5
+  }
+}

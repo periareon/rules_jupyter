@@ -213,13 +213,16 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
         stream = StringIO()
         sys.stdout = stream
         sys.stderr = stream
-    try:
-        # Windows defaults to ProactorEventLoop which lacks add_reader/add_writer
-        # support required by ZMQ. Switch to SelectorEventLoop to avoid
-        # "not a socket" errors during kernel communication.
-        if platform.system() == "Windows":
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    # Windows defaults to ProactorEventLoop which lacks add_reader/add_writer
+    # support required by ZMQ. Temporarily switch to SelectorEventLoop for
+    # notebook execution, then restore so Playwright (WebPDF) can use
+    # subprocess_exec which requires ProactorEventLoop.
+    _original_policy = None
+    if platform.system() == "Windows":
+        _original_policy = asyncio.get_event_loop_policy()
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
+    try:
         # Import ExecutePreprocessor here so environment variables can take effect
         # pylint: disable=import-outside-toplevel
         import nbconvert.preprocessors  # isort: skip
@@ -234,6 +237,8 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
             print(stream.getvalue(), file=old_stderr)
         raise
     finally:
+        if _original_policy is not None:
+            asyncio.set_event_loop_policy(_original_policy)
         if suppress_log:
             sys.stdout = old_stdout
             sys.stderr = old_stderr

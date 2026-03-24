@@ -4,19 +4,21 @@ This example demonstrates how to use the evcxr Rust kernel with `rules_jupyter` 
 
 ## Prerequisites
 
-The evcxr_jupyter kernel must be installed and registered with Jupyter. You can install it using:
+You must have the Rust toolchain installed (via [rustup](https://rustup.rs/)).
+
+The `rust-src` component is required by evcxr for interactive compilation:
 
 ```bash
-cargo install --locked evcxr_jupyter
-evcxr_jupyter --install
+rustup component add rust-src
 ```
 
-This registers the Rust kernel with Jupyter, making it available as the "rust" kernel.
+The evcxr binary is fetched automatically by Bazel via the module extension in `extensions.bzl` — no manual `cargo install` is needed.
 
 ## Files
 
 - `notebook.ipynb` - A Jupyter notebook with Rust code cells
-- `BUILD.bazel` - Bazel build file showing how to use `jupyter_notebook` and `jupyter_report` with the Rust kernel
+- `BUILD.bazel` - Bazel build file showing `jupyter_kernel`, `jupyter_notebook`, and `jupyter_report` with the Rust kernel
+- `extensions.bzl` - Module extension that fetches the prebuilt evcxr_jupyter binary per platform
 - `MODULE.bazel` - Module configuration
 
 ## Usage
@@ -33,28 +35,32 @@ The generated markdown report will be at:
 bazel-bin/report.md
 ```
 
-## What This Example Shows
+## How It Works
 
-1. **Using Rust in Jupyter**: The notebook uses the evcxr Rust kernel to execute Rust code cells.
+1. **`jupyter_kernel` rule**: Declares the evcxr Rust kernel with its binary, argv pattern, and metadata. This generates a `kernel.json` template at build time.
 
-2. **Rust code execution**: The notebook demonstrates:
-   - Basic Rust operations and variables
-   - Working with vectors and iterators
-   - Defining and calling functions
-   - String formatting and output
+2. **`jupyter_toolchain`**: Registers the Rust kernel via the `kernels` attribute so it is available to all report and test rules.
 
-3. **Generating reports**: The `jupyter_report` rule executes the notebook with the Rust kernel and generates markdown and PDF reports.
+3. **Runtime kernel discovery**: When a report or test executes, the runner creates a temporary kernelspec directory, substitutes the real binary path into the `kernel.json` template, and prepends the directory to `JUPYTER_PATH`. This lets Jupyter's `ExecutePreprocessor` discover and launch the kernel.
+
+4. **`jupyter_notebook`**: Sets `kernel = "rust"` to tell Jupyter to use the Rust kernelspec.
+
+5. **`jupyter_report`**: Executes the notebook with the Rust kernel and converts the output to Markdown and/or WebPDF.
 
 ## Kernel Configuration
 
-The notebook is configured to use the "rust" kernel by specifying `kernel = "rust"` in the `jupyter_notebook` rule. This tells Jupyter to use the evcxr kernel for executing the cells.
+The `jupyter_kernel` rule in `BUILD.bazel` defines the evcxr kernel:
 
-## Note on evcxr_jupyter Binary
+```python
+jupyter_kernel(
+    name = "rust_kernel",
+    kernel_name = "rust",
+    display_name = "Rust",
+    language = "rust",
+    binary = "@evcxr_jupyter",
+    args = ["--control_file", "{connection_file}"],
+    interrupt_mode = "message",
+)
+```
 
-The current BUILD.bazel includes a placeholder for building evcxr_jupyter. In a production setup, you would:
-
-1. Add evcxr_jupyter as a Rust dependency using rules_rust
-2. Build it as a binary target
-3. Ensure it's available in the Jupyter kernel path
-
-For this example, we assume evcxr_jupyter is installed system-wide via `cargo install`.
+The `binary` attribute points to the evcxr_jupyter binary fetched by the module extension. The `args` list specifies the arguments passed after the binary in the kernel.json `argv` field — `{connection_file}` is a Jupyter protocol placeholder that gets replaced with the actual connection file at runtime.

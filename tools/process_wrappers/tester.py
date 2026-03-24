@@ -17,6 +17,7 @@ from python.runfiles import Runfiles
 from tools.process_wrappers.reporter import (
     CwdMode,
     configure_jupyter_environment,
+    configure_kernel_specs,
     configure_pandoc,
     configure_playwright,
     execute_notebook,
@@ -97,6 +98,14 @@ def parse_args(
     )
     parser.add_argument(
         "--kernel", type=str, help="An optional kernel to explicitly use."
+    )
+    parser.add_argument(
+        "--kernel_spec",
+        nargs=3,
+        action="append",
+        default=[],
+        metavar=("NAME", "JSON_TEMPLATE", "BINARY"),
+        help="An alternate kernel spec: <name> <kernel.json template path> <binary path>.",
     )
     parser.add_argument(
         "--report",
@@ -233,6 +242,13 @@ def main() -> None:
         args = parse_args(argv + sys.argv[1:], runfiles)
 
         configure_jupyter_environment()
+
+        # Resolve kernel spec paths via runfiles and configure them
+        resolved_kernel_specs = [
+            (name, _rlocation(runfiles, jp), _rlocation(runfiles, bp))
+            for name, jp, bp in args.kernel_spec
+        ]
+        configure_kernel_specs(resolved_kernel_specs)
 
         configure_pandoc(args.pandoc)
 

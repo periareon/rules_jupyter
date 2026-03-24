@@ -1,6 +1,7 @@
 """Jupyter toolchain"""
 
 load("@rules_venv//python:py_info.bzl", "PyInfo")
+load(":providers.bzl", "JupyterKernelInfo")
 
 TOOLCHAIN_TYPE = str(Label("//jupyter:toolchain_type"))
 
@@ -31,6 +32,13 @@ def _jupyter_toolchain_impl(ctx):
         playwright_browsers_dir = ctx.file.playwright_browsers_dir
         all_files.append(depset([playwright_browsers_dir]))
 
+    kernels = []
+    for kernel_target in ctx.attr.kernels:
+        kernel_info = kernel_target[JupyterKernelInfo]
+        kernels.append(kernel_info)
+        all_files.append(depset([kernel_info.kernel_json, kernel_info.binary]))
+        all_files.append(kernel_info.data)
+
     providers = [
         platform_common.ToolchainInfo(
             label = ctx.label,
@@ -38,6 +46,7 @@ def _jupyter_toolchain_impl(ctx):
             default_kernel = ctx.attr.kernel if ctx.attr.kernel else None,
             jupyter = jupyter_target,
             jupytext = jupytext_target,
+            kernels = kernels,
             pandoc = pandoc,
             playwright_browsers_dir = playwright_browsers_dir,
             all_files = depset(transitive = all_files),
@@ -54,7 +63,7 @@ def _jupyter_toolchain_impl(ctx):
     return providers
 
 jupyter_toolchain = rule(
-    doc = "Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, and Playwright browser support.",
+    doc = "Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, Playwright browser support, and alternate kernel support.",
     implementation = _jupyter_toolchain_impl,
     attrs = {
         "cwd_mode": attr.string(
@@ -77,6 +86,10 @@ jupyter_toolchain = rule(
         ),
         "kernel": attr.string(
             doc = "Default kernel name to use for notebook execution if not specified in the notebook (e.g., 'python3', 'rust').",
+        ),
+        "kernels": attr.label_list(
+            doc = "List of `jupyter_kernel` targets providing alternate kernel binaries and specs for sandboxed execution. Each kernel is made available to Jupyter's kernel discovery mechanism at runtime.",
+            providers = [JupyterKernelInfo],
         ),
         "pandoc": attr.label(
             doc = "The Pandoc executable for converting notebooks to various output formats (HTML, LaTeX, PDF, etc.).",

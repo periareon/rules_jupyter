@@ -41,7 +41,7 @@ evcxr = use_extension("//:extensions.bzl", "evcxr")
 evcxr.jupyter(
     name = "evcxr_jupyter",
 )
-use_repo(evcxr, "evcxr_jupyter")
+use_repo(evcxr, "evcxr_jupyter", "evcxr_jupyter_0.21.1_linux-x86_64", "evcxr_jupyter_0.21.1_macos-aarch64", "evcxr_jupyter_0.21.1_windows-x86_64")
 
 # Use the requirements extension to set up Python dependencies
 requirements = use_extension("@rules_req_compile//extensions:python.bzl", "requirements")

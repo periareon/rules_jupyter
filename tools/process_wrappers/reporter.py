@@ -7,6 +7,7 @@ import logging
 import os
 import platform
 import shutil
+import stat
 import sys
 import tempfile
 from collections.abc import Generator
@@ -58,6 +59,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--kernel", type=str, help="An optional kernel to explicitly use."
+    )
+    parser.add_argument(
+        "--kernel_spec",
+        nargs=3,
+        action="append",
+        default=[],
+        metavar=("NAME", "JSON_TEMPLATE", "BINARY"),
+        help="An alternate kernel spec: <name> <kernel.json template path> <binary path>.",
     )
     parser.add_argument(
         "--out_html", type=Path, help="The output path to an html report."
@@ -151,6 +160,62 @@ def configure_jupyter_environment() -> None:
         logging.debug(
             "Configured JUPYTER_PATH with %d directories", len(jupyter_data_dirs)
         )
+
+
+_KERNEL_BINARY_PLACEHOLDER = "__KERNEL_BINARY__"
+_KERNEL_BINARY_DIR_PLACEHOLDER = "__KERNEL_BINARY_DIR__"
+
+
+def configure_kernel_specs(
+    kernel_specs: list[tuple[str, Path, Path]],
+) -> None:
+    """Set up kernel spec directories so Jupyter can discover alternate kernels.
+
+    For each kernel spec triplet (name, json_template, binary), this function:
+    1. Creates a temp directory ``<base>/kernels/<name>/``
+    2. Reads the kernel.json template and substitutes placeholders with resolved
+       absolute paths (``__KERNEL_BINARY__`` and ``__KERNEL_BINARY_DIR__``)
+    3. Ensures the binary is executable
+    4. Prepends the base directory to ``JUPYTER_PATH``
+
+    Args:
+        kernel_specs: List of (kernel_name, json_template_path, binary_path) tuples.
+    """
+    if not kernel_specs:
+        return
+
+    temp_dir = Path(os.getenv("TEST_TMPDIR", tempfile.gettempdir()))
+    kernels_base = temp_dir / "rules_jupyter_kernels"
+
+    for name, json_template_path, binary_path in kernel_specs:
+        kernel_dir = kernels_base / "kernels" / name
+        kernel_dir.mkdir(parents=True, exist_ok=True)
+
+        template = json_template_path.read_text(encoding="utf-8")
+        resolved_binary = str(binary_path.resolve())
+        resolved_binary_dir = str(binary_path.resolve().parent)
+        kernel_json = template.replace(
+            _KERNEL_BINARY_PLACEHOLDER, resolved_binary
+        ).replace(_KERNEL_BINARY_DIR_PLACEHOLDER, resolved_binary_dir)
+
+        (kernel_dir / "kernel.json").write_text(kernel_json, encoding="utf-8")
+
+        current_mode = binary_path.stat().st_mode
+        binary_path.chmod(current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+        logging.debug(
+            "Configured kernel spec '%s' at %s (binary: %s)",
+            name,
+            kernel_dir,
+            resolved_binary,
+        )
+
+    existing = os.environ.get("JUPYTER_PATH", "")
+    paths = [str(kernels_base)] + ([existing] if existing else [])
+    os.environ["JUPYTER_PATH"] = os.pathsep.join(paths)
+    logging.debug(
+        "Added %d kernel spec(s) to JUPYTER_PATH", len(kernel_specs)
+    )
 
 
 _ARGV_CELL_TEMPLATE = """\
@@ -558,6 +623,11 @@ def main() -> None:
     try:
         # Configure Jupyter paths for Bazel's non-standard layout
         configure_jupyter_environment()
+
+        # Configure alternate kernel specs (creates temp kernelspec dirs)
+        configure_kernel_specs(
+            [(name, Path(jp), Path(bp)) for name, jp, bp in args.kernel_spec]
+        )
 
         # Configure pandoc path for nbconvert (injects to PATH)
         configure_pandoc(args.pandoc)

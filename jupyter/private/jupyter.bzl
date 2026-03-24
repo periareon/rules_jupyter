@@ -186,6 +186,12 @@ def _jupyter_report_impl(ctx):
     if toolchain.playwright_browsers_dir:
         args.add("--playwright_browsers_dir", toolchain.playwright_browsers_dir.path)
 
+    for kernel_info in toolchain.kernels:
+        args.add("--kernel_spec")
+        args.add(kernel_info.kernel_name)
+        args.add(kernel_info.kernel_json)
+        args.add(kernel_info.binary)
+
     if ctx.outputs.out_html:
         out_html = ctx.outputs.out_html
         outputs.update({"jupiter_report_html": out_html})
@@ -429,6 +435,12 @@ def _jupyter_notebook_test_impl(ctx):
     args.add("--cwd_mode", cwd_mode)
     if kernel:
         args.add("--kernel", kernel)
+
+    for kernel_info in toolchain.kernels:
+        args.add("--kernel_spec")
+        args.add(kernel_info.kernel_name)
+        args.add(_rlocationpath(kernel_info.kernel_json, ctx.workspace_name))
+        args.add(_rlocationpath(kernel_info.binary, ctx.workspace_name))
 
     for report in ctx.attr.reports:
         if report not in _REPORT_VALUES:

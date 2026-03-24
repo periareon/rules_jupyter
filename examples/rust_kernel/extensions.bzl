@@ -107,29 +107,17 @@ def evcxr_archive(*, name, platform, url, integrity, strip_prefix):
     )
     return name
 
-def _find_modules(module_ctx):
-    root = None
-    rules_module = None
+def _evcxr_impl(module_ctx):
+    root_mod = None
     for mod in module_ctx.modules:
         if mod.is_root:
-            root = mod
-        if mod.name == "rules_jupyter":
-            rules_module = mod
-    if root == None:
-        root = rules_module
-    if rules_module == None:
-        fail("Unable to find rules_jupyter module")
+            root_mod = mod
+    if root_mod == None:
+        fail("Unable to find root module")
 
-    return root, rules_module
-
-def _evcxr_impl(module_ctx):
-    root_mod, rules_mod = _find_modules(module_ctx)
-
-    # Process evcxr_jupyter tags
     evcxrs = root_mod.tags.jupyter
-    if not evcxrs:
-        evcxrs = rules_mod.tags.jupyter
 
+    direct_deps = []
     for attrs in evcxrs:
         version = attrs.version
         name = attrs.name

@@ -8,6 +8,7 @@ load(
 exports_files([
     "defs.bzl",
     "extensions.bzl",
+    "jupyter_kernel.bzl",
     "jupyter_notebook_test.bzl",
     "jupyter_notebook.bzl",
     "jupyter_report.bzl",
@@ -35,10 +36,20 @@ bzl_library(
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "//jupyter:jupyter_kernel_bzl",
         "//jupyter:jupyter_notebook_bzl",
         "//jupyter:jupyter_notebook_test_bzl",
         "//jupyter:jupyter_report_bzl",
         "//jupyter:jupyter_toolchain_bzl",
+    ],
+)
+
+bzl_library(
+    name = "jupyter_kernel_bzl",
+    srcs = ["jupyter_kernel.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//jupyter/private:bzl_lib",
     ],
 )
 

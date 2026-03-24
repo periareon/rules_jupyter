@@ -1,6 +1,7 @@
 """The `JupyterReport` action runner."""
 
 import argparse
+import asyncio
 import json
 import logging
 import os
@@ -213,6 +214,12 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
         sys.stdout = stream
         sys.stderr = stream
     try:
+        # Windows defaults to ProactorEventLoop which lacks add_reader/add_writer
+        # support required by ZMQ. Switch to SelectorEventLoop to avoid
+        # "not a socket" errors during kernel communication.
+        if platform.system() == "Windows":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
         # Import ExecutePreprocessor here so environment variables can take effect
         # pylint: disable=import-outside-toplevel
         import nbconvert.preprocessors  # isort: skip

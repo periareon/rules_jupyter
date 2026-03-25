@@ -210,7 +210,7 @@ def _jupyter_report_impl(ctx):
         outputs.update({"jupiter_report_markdown": out_markdown})
         args.add("--out_markdown", out_markdown)
 
-    # TODO: Requires a latex toolchain
+    # TODO(periareon/rules_jupyter#8): Requires a latex toolchain
     # if ctx.outputs.out_pdf:
     #     out_pdf = ctx.outputs.out_pdf
     #     outputs.update({"jupiter_report_pdf": out_pdf})
@@ -326,7 +326,7 @@ jupyter_report = rule(
         "out_notebook": attr.output(
             doc = "Output path for the executed notebook (`.ipynb` file with cell outputs). If not specified, a default name is generated.",
         ),
-        # TODO: Requires a latex toolchain
+        # TODO(periareon/rules_jupyter#8): Requires a latex toolchain
         # "out_pdf": attr.output(
         #     doc = "Output path for a PDF report (generated via LaTeX). If specified, the notebook will be converted to PDF format using LaTeX.",
         # ),
@@ -405,7 +405,7 @@ _REPORT_VALUES = [
     "latex",
     "html",
     "webpdf",
-    # TODO: Requires a latex toolchain
+    # TODO(periareon/rules_jupyter#8): Requires a latex toolchain
     # "pdf",
 ]
 
@@ -535,6 +535,167 @@ jupyter_notebook_test = rule(
         ),
     },
     test = True,
+    toolchains = [
+        TOOLCHAIN_TYPE,
+        py_venv_common.TOOLCHAIN_TYPE,
+    ],
+)
+
+def _jupyter_notebook_binary_impl(ctx):
+    toolchain = ctx.toolchains[TOOLCHAIN_TYPE]
+    notebook_info = ctx.attr.notebook[JupyterNotebookInfo]
+
+    kernel = notebook_info.kernel
+    if not kernel:
+        kernel = toolchain.default_kernel
+
+    cwd_mode = ctx.attr.cwd_mode
+    if not cwd_mode:
+        cwd_mode = toolchain.default_cwd_mode
+
+    args = ctx.actions.args()
+    args.set_param_file_format("multiline")
+    args.add("--pandoc", _rlocationpath(toolchain.pandoc, ctx.workspace_name))
+    if toolchain.playwright_browsers_dir:
+        args.add("--playwright_browsers_dir", _rlocationpath(toolchain.playwright_browsers_dir, ctx.workspace_name))
+    args.add("--notebook", _rlocationpath(notebook_info.notebook, ctx.workspace_name))
+    args.add("--cwd_mode", cwd_mode)
+    if kernel:
+        args.add("--kernel", kernel)
+
+    for report in ctx.attr.reports:
+        if report not in _REPORT_VALUES:
+            fail("Invalid `jupyter_notebook_binary.report` value `{}`. Please update `{}` to use one of the available types: {}".format(
+                report,
+                ctx.label,
+                _REPORT_VALUES,
+            ))
+        if report == "markdown" and not toolchain.pandoc:
+            fail("`jupyter_toolchain.pandoc` is not set on the current toolchain yet markdown reports were requested. Please update `{}`".format(
+                toolchain.label,
+            ))
+        if report == "webpdf" and not toolchain.playwright_browsers_dir:
+            fail("`jupyter_toolchain.playwright_browsers_dir` is not set on the current toolchain yet webpdf reports were requested. Please update `{}`".format(
+                toolchain.label,
+            ))
+        args.add("--report", report)
+    if ctx.attr.out_dir:
+        args.add("--out-dir", ctx.attr.out_dir)
+    args.add("--")
+
+    known_variables = {}
+    for target in ctx.attr.toolchains:
+        if platform_common.TemplateVariableInfo in target:
+            variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
+            known_variables.update(variables)
+
+    notebook_args = _expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables)
+    args.add_all(notebook_args)
+
+    args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
+    ctx.actions.write(
+        output = args_file,
+        content = args,
+    )
+
+    executable, runfiles = _create_executable(
+        ctx = ctx,
+        cfg = "target",
+        runner = ctx.attr._runner,
+        runner_main = ctx.file._runner_main,
+        notebook = ctx.attr.notebook,
+    )
+
+    runfiles = runfiles.merge(ctx.runfiles(
+        [executable, args_file, notebook_info.notebook] + ctx.files.data,
+        transitive_files = depset(transitive = [notebook_info.data, toolchain.all_files]),
+    ))
+
+    return [
+        DefaultInfo(
+            executable = executable,
+            runfiles = runfiles,
+        ),
+        _create_run_environment_info(
+            ctx = ctx,
+            env = ctx.attr.env | {
+                "RULES_JUPYTER_ARGS_FILE": _rlocationpath(args_file, ctx.workspace_name),
+                "RULES_JUPYTER_BINARY_NAME": ctx.label.name,
+            },
+            env_inherit = ctx.attr.env_inherit,
+            targets = ctx.attr.data,
+            known_variables = known_variables,
+        ),
+    ]
+
+jupyter_notebook_binary = rule(
+    doc = """\
+An executable rule that runs a Jupyter notebook and optionally generates reports.
+
+Unlike `jupyter_notebook_test`, this rule creates an executable target for use with `bazel run`.
+Outputs (executed notebook and reports) are written to a configurable output directory, defaulting
+to the caller's working directory (`BUILD_WORKING_DIRECTORY`).
+
+Example:
+
+```python
+jupyter_notebook(
+    name = "my_notebook",
+    src = "notebook.py",
+    deps = ["@pip_deps//polars"],
+)
+
+jupyter_notebook_binary(
+    name = "run_notebook",
+    notebook = ":my_notebook",
+    reports = ["html"],
+)
+```
+
+Then run: `bazel run :run_notebook` or `bazel run :run_notebook -- --out-dir /tmp/results`
+""",
+    implementation = _jupyter_notebook_binary_impl,
+    attrs = {
+        "cwd_mode": attr.string(
+            doc = "The working directory mode for notebook execution. If not specified, uses the toolchain's `default_cwd`. `workspace_root` sets the working directory to the workspace root, while `notebook_root` sets it to the notebook's parent directory. This affects how relative paths in the notebook are resolved.",
+            values = [
+                "workspace_root",
+                "notebook_root",
+            ],
+        ),
+        "data": attr.label_list(
+            doc = "Additional data files required by the notebook (e.g., input data files, images, configuration files).",
+            allow_files = True,
+        ),
+        "env": attr.string_dict(
+            doc = "Environment variables to set when executing the notebook. Values support location expansion (e.g., `$(location :target)`).",
+        ),
+        "env_inherit": attr.string_list(
+            doc = "Specifies additional environment variables to inherit from the external environment.",
+        ),
+        "notebook": attr.label(
+            doc = "The notebook to execute. Must be a `jupyter_notebook` target.",
+            providers = [JupyterNotebookInfo, PyInfo],
+            mandatory = True,
+        ),
+        "out_dir": attr.string(
+            doc = "Directory to write output files to. If not specified, outputs are written to a subdirectory named after the target under the caller's working directory (e.g., `bazel run :run_notebook` writes to `./run_notebook/`). Absolute paths (e.g., `/tmp`) are used as-is; relative paths are resolved against the caller's working directory.",
+        ),
+        "reports": attr.string_list(
+            doc = "List of report types to generate after successful notebook execution. Valid values: 'html', 'markdown', 'latex', 'webpdf'.",
+            default = [],
+        ),
+        "_runner": attr.label(
+            cfg = "target",
+            default = Label("//tools/process_wrappers:runner"),
+        ),
+        "_runner_main": attr.label(
+            cfg = "target",
+            allow_single_file = True,
+            default = Label("//tools/process_wrappers:runner.py"),
+        ),
+    },
+    executable = True,
     toolchains = [
         TOOLCHAIN_TYPE,
         py_venv_common.TOOLCHAIN_TYPE,

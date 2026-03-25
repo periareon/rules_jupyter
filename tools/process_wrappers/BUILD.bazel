@@ -10,6 +10,7 @@ exports_files([
     "lab_launcher.py",
     "playwright_install.py",
     "reporter.py",
+    "runner.py",
     "tester.py",
 ])
 
@@ -33,6 +34,17 @@ py_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":reporter",
+        "@rules_venv//python/runfiles",
+    ],
+)
+
+py_binary(
+    name = "runner",
+    srcs = ["runner.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":reporter",
+        ":tester",
         "@rules_venv//python/runfiles",
     ],
 )

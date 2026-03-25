@@ -9,6 +9,10 @@ load(
     _jupyter_notebook = "jupyter_notebook",
 )
 load(
+    ":jupyter_notebook_binary.bzl",
+    _jupyter_notebook_binary = "jupyter_notebook_binary",
+)
+load(
     ":jupyter_notebook_test.bzl",
     _jupyter_notebook_test = "jupyter_notebook_test",
 )
@@ -23,6 +27,7 @@ load(
 
 jupyter_lab = _jupyter_lab
 jupyter_notebook = _jupyter_notebook
+jupyter_notebook_binary = _jupyter_notebook_binary
 jupyter_notebook_test = _jupyter_notebook_test
 jupyter_toolchain = _jupyter_toolchain
 jupyter_report = _jupyter_report

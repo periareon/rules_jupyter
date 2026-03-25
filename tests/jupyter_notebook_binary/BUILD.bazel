@@ -1,0 +1,17 @@
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_binary")
+
+jupyter_notebook(
+    name = "passing_notebook",
+    src = "passing_notebook.ipynb",
+)
+
+jupyter_notebook_binary(
+    name = "run_notebook",
+    notebook = ":passing_notebook",
+)
+
+jupyter_notebook_binary(
+    name = "run_notebook_with_reports",
+    notebook = ":passing_notebook",
+    reports = ["html"],
+)

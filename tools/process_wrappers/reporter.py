@@ -545,11 +545,10 @@ def _generate_outputs(
 
 def main() -> None:
     """The main entrypoint."""
-    if "RULES_JUPYTER_DEBUG" in os.environ:
-        logging.basicConfig(
-            format="%(levelname)s: %(message)s",
-            level=logging.DEBUG,
-        )
+    logging.basicConfig(
+        format="%(levelname)s: %(message)s",
+        level=logging.DEBUG if "RULES_JUPYTER_DEBUG" in os.environ else logging.ERROR,
+    )
 
     args = parse_args()
 

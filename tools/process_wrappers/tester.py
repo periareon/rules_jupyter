@@ -36,7 +36,7 @@ class ReportType(StrEnum):
     WEB_PDF = "webpdf"
 
 
-def _rlocation(runfiles: Runfiles, rlocationpath: str) -> Path:
+def rlocation(runfiles: Runfiles, rlocationpath: str) -> Path:
     """Look up a runfile and ensure the file exists
 
     Args:
@@ -59,16 +59,25 @@ def _rlocation(runfiles: Runfiles, rlocationpath: str) -> Path:
     return path
 
 
-def parse_args(
-    argv: Optional[Sequence[str]] = None, runfiles: Optional[Runfiles] = None
-) -> argparse.Namespace:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description=__doc__)
+def create_arg_parser(
+    runfiles: Optional[Runfiles] = None,
+    description: Optional[str] = None,
+) -> argparse.ArgumentParser:
+    """Create an argument parser with the common notebook execution arguments.
+
+    Args:
+        runfiles: If provided, path arguments are resolved via runfiles lookup.
+        description: Parser description. Defaults to this module's docstring.
+
+    Returns:
+        An ArgumentParser pre-populated with the shared flags.
+    """
+    parser = argparse.ArgumentParser(description=description or __doc__)
 
     if runfiles:
 
         def _path(value: str) -> Path:
-            return _rlocation(runfiles, value)
+            return rlocation(runfiles, value)
 
     else:
 
@@ -100,10 +109,11 @@ def parse_args(
     )
     parser.add_argument(
         "--report",
+        dest="reports",
         type=ReportType,
         action="append",
         default=[],
-        help="Report types to generate after the test.",
+        help="Report types to generate.",
     )
     parser.add_argument(
         "params",
@@ -111,13 +121,22 @@ def parse_args(
         help="Additional args to be passed to the jupyter script.",
     )
 
+    return parser
+
+
+def parse_args(
+    argv: Optional[Sequence[str]] = None, runfiles: Optional[Runfiles] = None
+) -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = create_arg_parser(runfiles=runfiles)
+
     if argv is not None:
         return parser.parse_args(argv)
 
     return parser.parse_args()
 
 
-def _set_temp_home_env() -> tuple[str | None, str | None, str]:
+def set_temp_home_env() -> tuple[str | None, str | None, str]:
     """Set HOME and USERPROFILE to a temporary directory.
 
     Returns:
@@ -132,7 +151,7 @@ def _set_temp_home_env() -> tuple[str | None, str | None, str]:
     return (original_home, original_userprofile, temp_home)
 
 
-def _restore_home_env(
+def restore_home_env(
     original_home: str | None,
     original_userprofile: str | None,
     temp_home: str,
@@ -183,9 +202,9 @@ def _get_exporter_map() -> dict[ReportType, tuple[type, str]]:
 def generate_reports(
     notebook: nbformat.NotebookNode,
     notebook_name: str,
-    reports: list[ReportType],
+    report_type: ReportType,
     output_dir: Path,
-) -> None:
+) -> Path:
     """Generate requested reports for the executed notebook.
 
     Args:
@@ -193,30 +212,37 @@ def generate_reports(
         notebook_name: Base name for output files.
         reports: List of report types to generate.
         output_dir: Directory to write reports to.
+    Returns:
+        The path to the generated file.
     """
     exporter_map = _get_exporter_map()
 
-    for report_type in reports:
-        if report_type not in exporter_map:
-            raise ValueError(f"Unknown report type: {report_type}")
+    if report_type not in exporter_map:
+        raise ValueError(f"Unknown report type: {report_type}")
 
-        exporter_class, extension = exporter_map[report_type]
-        output_path = output_dir / f"{notebook_name}{extension}"
+    exporter_class, extension = exporter_map[report_type]
+    output_path = output_dir / f"{notebook_name}{extension}"
 
-        export_notebook(notebook, output_path, exporter_class)
-        logging.debug("Generated %s report: %s", report_type, output_path)
+    export_notebook(notebook, output_path, exporter_class)
+    logging.debug("Generated %s report: %s", report_type, output_path)
+
+    return output_path
 
 
-def main() -> None:
-    """The main entrypoint."""
+def _init_logging() -> None:
     if "RULES_JUPYTER_DEBUG" in os.environ:
         logging.basicConfig(
             format="%(levelname)s: %(message)s",
             level=logging.DEBUG,
         )
 
+
+def main() -> None:
+    """The main entrypoint."""
+    _init_logging()
+
     # Set up environment FIRST before any nbconvert imports
-    original_home, original_userprofile, temp_home = _set_temp_home_env()
+    original_home, original_userprofile, temp_home = set_temp_home_env()
     try:
         runfiles = Runfiles.Create()
         if not runfiles:
@@ -228,7 +254,7 @@ def main() -> None:
             logging.error("RULES_JUPYTER_TEST_ARGS_FILE environment variable not set")
             sys.exit(1)
 
-        args_file = _rlocation(runfiles, args_file_path)
+        args_file = rlocation(runfiles, args_file_path)
         argv = args_file.read_text(encoding="utf-8").splitlines()
         args = parse_args(argv + sys.argv[1:], runfiles)
 
@@ -265,7 +291,7 @@ def main() -> None:
         postprocess_notebook_outputs(notebook)
 
         # Generate reports into the TEST_UNDECLARED_OUTPUTS_DIR if available
-        if args.report:
+        if args.reports:
             output_dir_str = os.environ.get("TEST_UNDECLARED_OUTPUTS_DIR")
             if output_dir_str:
                 output_dir = Path(output_dir_str)
@@ -276,13 +302,14 @@ def main() -> None:
                 save_notebook(notebook, executed_notebook_path)
                 logging.debug("Saved executed notebook: %s", executed_notebook_path)
 
-                generate_reports(notebook, notebook_name, args.report, output_dir)
+                for report_type in args.reports:
+                    generate_reports(notebook, notebook_name, report_type, output_dir)
             else:
                 logging.warning(
                     "TEST_UNDECLARED_OUTPUTS_DIR not set, skipping report generation"
                 )
     finally:
-        _restore_home_env(original_home, original_userprofile, temp_home)
+        restore_home_env(original_home, original_userprofile, temp_home)
 
     sys.exit(0)
 

@@ -202,7 +202,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=_workspace_root() / "jupyter/playwright/private",
+        default=_workspace_root() / "playwright/private",
         help="The directory in which to save version files.",
     )
     parser.add_argument(

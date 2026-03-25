@@ -67,7 +67,7 @@ jupyter_toolchain(
     jupyter = "@pip_deps//jupyter",
     jupytext = "@pip_deps//jupytext",
     pandoc = "@pandoc",
-    playwright_browsers_dir = "//jupyter/playwright:current_browsers_dir",
+    playwright_browsers_dir = "//playwright:current_browsers_dir",
 )
 
 toolchain(

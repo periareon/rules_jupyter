@@ -1,7 +1,7 @@
 """Unit tests for the requirements.txt parser"""
 
 load("@bazel_skylib//lib:unittest.bzl", "asserts", "unittest")
-load("//jupyter/playwright/private:requirements_parser.bzl", "parse_playwright_version_from_requirements")
+load("//playwright/private:requirements_parser.bzl", "parse_playwright_version_from_requirements")
 
 def _parse_simple_requirements_test_impl(ctx):
     env = unittest.begin(ctx)
@@ -108,7 +108,7 @@ def _parse_requirements_with_whitespace_test_impl(ctx):
 
     requirements_content = """\
 pytest==7.4.0
-  playwright==1.57.0  
+  playwright==1.57.0
 requests==2.31.0
 """
 

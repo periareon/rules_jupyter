@@ -61,7 +61,7 @@ def _parse_playwright_version_from_requirements(module_ctx, requirements_file):
 
 # Template for BUILD file that creates playwright_toolchain rule for a specific platform
 _TOOLCHAIN_BUILD_TEMPLATE = """\
-load("@rules_jupyter//jupyter/playwright/private:playwright.bzl", "playwright_toolchain")
+load("@rules_jupyter//playwright/private:playwright.bzl", "playwright_toolchain")
 
 playwright_toolchain(
     name = "playwright_toolchain",
@@ -189,7 +189,7 @@ toolchain(
     exec_compatible_with = {exec_constraints},
     target_compatible_with = {target_constraints},
     toolchain = "{toolchain_label}",
-    toolchain_type = "@rules_jupyter//jupyter/playwright:toolchain_type",
+    toolchain_type = "@rules_jupyter//playwright:toolchain_type",
     visibility = ["//visibility:public"],
 )
 """

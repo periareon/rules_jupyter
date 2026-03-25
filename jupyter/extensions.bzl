@@ -1,16 +1,17 @@
 """# Jupyter bzlmod extensions"""
 
-# buildifier: disable=bzl-visibility
-load(
-    "//jupyter/playwright/private:extensions.bzl",
-    _playwright = "playwright",
-)
 load(
     "//jupyter/private:pandoc.bzl",
     "DEFAULT_PANDOC_VERSION",
     "PANDOC_VERSIONS",
     "pandoc_alias_repository",
     "pandoc_archive",
+)
+
+# buildifier: disable=bzl-visibility
+load(
+    "//playwright/private:extensions.bzl",
+    _playwright = "playwright",
 )
 
 playwright = _playwright

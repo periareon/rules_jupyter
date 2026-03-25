@@ -168,11 +168,15 @@ _SM.create_session = _reusing_create_session
 _TEMPLATES_DIR = Path(__file__).parent
 
 
-def _write_jupyter_config(directory: Path, *, execute: bool) -> Path:
+def _write_jupyter_config(
+    directory: Path, *, execute: bool, ibazel: bool = False
+) -> Path:
     """Write a Jupyter server config file.
 
     When *execute* is True the config includes a tornado ``OutputTransform``
-    that injects auto-run JavaScript into Lab's HTML page.
+    that injects auto-run JavaScript into Lab's HTML page.  When *ibazel*
+    is also True, the ibazel reload watcher script is appended so that
+    rebuilds trigger an automatic revert-and-rerun cycle in the browser.
 
     Returns the path to the config file for ``--JupyterApp.config_file``.
     """
@@ -183,6 +187,11 @@ def _write_jupyter_config(directory: Path, *, execute: bool) -> Path:
         # config.  At runtime the transform monkey-patches the Jupyter
         # server to inject the script into every /lab/* HTML response.
         autorun_js = (_TEMPLATES_DIR / "autorun.js").read_text(encoding="utf-8")
+        if ibazel:
+            ibazel_js = (_TEMPLATES_DIR / "ibazel_reload.js").read_text(
+                encoding="utf-8"
+            )
+            autorun_js += "\n" + ibazel_js
         transform_template = (_TEMPLATES_DIR / "autorun_transform.py").read_text(
             encoding="utf-8"
         )
@@ -324,7 +333,9 @@ def _prepare_runfiles_mode(
     )
 
 
-def _build_lab_argv(layout: _WorkspaceLayout, args: argparse.Namespace) -> list[str]:
+def _build_lab_argv(
+    layout: _WorkspaceLayout, args: argparse.Namespace, *, ibazel: bool = False
+) -> list[str]:
     """Assemble the ``jupyterlab`` CLI arguments."""
     token = secrets.token_hex(24)
     port = _find_free_port()
@@ -332,7 +343,9 @@ def _build_lab_argv(layout: _WorkspaceLayout, args: argparse.Namespace) -> list[
     url = f"http://localhost:{port}/lab/tree/{name}?token={token}"
     print(f"\n  Jupyter Lab: {url}\n", flush=True)
 
-    config_path = _write_jupyter_config(layout.config_dir, execute=args.execute)
+    config_path = _write_jupyter_config(
+        layout.config_dir, execute=args.execute, ibazel=ibazel
+    )
 
     argv = [
         f"--ServerApp.token={token}",
@@ -381,6 +394,8 @@ def main() -> None:
     if args.playwright_browsers_dir:
         configure_playwright(args.playwright_browsers_dir)
 
+    ibazel_mode = os.environ.get("IBAZEL_NOTIFY_CHANGES") == "y"
+
     if args.run_mode == "source":
         layout = _prepare_source_mode(args)
         os.environ.pop("RUNFILES_DIR", None)
@@ -388,7 +403,20 @@ def main() -> None:
     else:
         layout = _prepare_runfiles_mode(args, runfiles)
 
-    lab_argv = _build_lab_argv(layout, args)
+    if ibazel_mode:
+        if not args.run_mode == "runfiles":
+            raise RuntimeError(
+                "ibazel cannot be used with `jupyter_lab.run_mode = 'source'`"
+            )
+        # pylint: disable-next=import-outside-toplevel
+        from tools.process_wrappers.ibazel_handler import setup_ibazel
+
+        setup_ibazel(
+            source_path=args.notebook,
+            dest_path=layout.notebook_dir / layout.notebook_name,
+        )
+
+    lab_argv = _build_lab_argv(layout, args, ibazel=ibazel_mode)
 
     # pylint: disable-next=import-outside-toplevel
     from jupyterlab.labapp import main as lab_main  # type: ignore[import-untyped]

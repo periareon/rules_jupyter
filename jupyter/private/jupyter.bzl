@@ -737,8 +737,12 @@ def _jupyter_lab_impl(ctx):
         args.add("--data_file", "{}={}".format(_rlocationpath(f, ctx.workspace_name), f.short_path))
 
     if ctx.attr.run_mode == "source":
+        if not notebook_info.src.is_source:
+            fail("`run_mode='source'` requires a `.ipynb` source, but `{}` provides a generated source.".format(
+                ctx.attr.notebook.label,
+            ))
         if not notebook_info.src.basename.endswith(".ipynb"):
-            fail("run_mode='source' requires a .ipynb source, but {} has src='{}'".format(
+            fail("`run_mode='source'` requires a `.ipynb` source, but `{}` has `src='{}'`".format(
                 ctx.attr.notebook.label,
                 notebook_info.src.basename,
             ))

@@ -2,11 +2,14 @@
 # with the existing `jupyter` import path.
 
 load("@rules_venv//python:py_binary.bzl", "py_binary")
+load("@rules_venv//python:py_library.bzl", "py_library")
 
 exports_files([
     "autorun.js",
     "autorun_transform.py",
     "compiler.py",
+    "ibazel_handler.py",
+    "ibazel_reload.js",
     "lab_launcher.py",
     "playwright_install.py",
     "reporter.py",
@@ -55,12 +58,21 @@ py_binary(
     data = [
         "autorun.js",
         "autorun_transform.py",
+        "ibazel_reload.js",
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":ibazel_handler",
         ":reporter",
         "@rules_venv//python/runfiles",
     ],
+)
+
+py_library(
+    name = "ibazel_handler",
+    srcs = ["ibazel_handler.py"],
+    visibility = ["//visibility:public"],
+    deps = ["//jupyter:current_jupyter_toolchain"],
 )
 
 py_binary(

@@ -217,7 +217,7 @@ playwright_toolchain = rule(
 )
 
 def _current_playwright_toolchain_browsers_dir_impl(ctx):
-    toolchain = ctx.toolchains[str(Label("//jupyter/playwright:toolchain_type"))]
+    toolchain = ctx.toolchains[str(Label("//playwright:toolchain_type"))]
 
     return [DefaultInfo(
         files = depset([toolchain.browsers_dir]),
@@ -226,5 +226,5 @@ def _current_playwright_toolchain_browsers_dir_impl(ctx):
 current_playwright_toolchain_browsers_dir = rule(
     doc = "Provides access to the browsers directory from the current Playwright toolchain. The browsers directory contains all installed browser binaries in a structure compatible with PLAYWRIGHT_BROWSERS_PATH.",
     implementation = _current_playwright_toolchain_browsers_dir_impl,
-    toolchains = [str(Label("//jupyter/playwright:toolchain_type"))],
+    toolchains = [str(Label("//playwright:toolchain_type"))],
 )

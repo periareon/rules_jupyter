@@ -1,5 +1,5 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("//jupyter/playwright/private:playwright.bzl", "current_playwright_toolchain_browsers_dir")
+load("//playwright/private:playwright.bzl", "current_playwright_toolchain_browsers_dir")
 
 toolchain_type(
     name = "toolchain_type",
@@ -21,5 +21,5 @@ bzl_library(
     name = "bzl_lib",
     srcs = [],
     visibility = ["//jupyter:__subpackages__"],
-    deps = ["//jupyter/playwright/private:bzl_lib"],
+    deps = ["//playwright/private:bzl_lib"],
 )

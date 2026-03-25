@@ -5,7 +5,7 @@ bzl_library(
     srcs = glob(["*.bzl"]),
     visibility = ["//jupyter:__pkg__"],
     deps = [
-        "//jupyter/playwright:bzl_lib",
+        "//playwright:bzl_lib",
         "@rules_venv//python:defs_bzl",
     ],
 )

@@ -9,7 +9,7 @@ jupyter_toolchain(
     jupytext = "@pip_deps//jupytext",
     pandoc = "@pandoc",
     # Requires the `playwright` module extension in `MODULE.bazel`.
-    playwright_browsers_dir = "@rules_jupyter//jupyter/playwright:current_browsers_dir",
+    playwright_browsers_dir = "@rules_jupyter//playwright:current_browsers_dir",
 )
 
 toolchain(

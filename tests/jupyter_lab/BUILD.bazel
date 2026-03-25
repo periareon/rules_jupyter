@@ -1,0 +1,33 @@
+load("//jupyter:defs.bzl", "jupyter_lab", "jupyter_notebook")
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.ipynb",
+)
+
+# Basic lab - auto-executes cells when opened in browser (runfiles mode, default)
+jupyter_lab(
+    name = "lab",
+    notebook = ":notebook",
+)
+
+# Lab with auto-execution disabled
+jupyter_lab(
+    name = "lab_no_execute",
+    execute = False,
+    notebook = ":notebook",
+)
+
+# Lab serving the notebook directly from the source tree
+jupyter_lab(
+    name = "lab_source",
+    notebook = ":notebook",
+    run_mode = "source",
+)
+
+# Lab with data dependencies (runfiles mode with symlinked data)
+jupyter_lab(
+    name = "lab_with_data",
+    data = ["data.txt"],
+    notebook = ":notebook",
+)

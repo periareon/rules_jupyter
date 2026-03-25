@@ -1,6 +1,10 @@
 """# Jupyter rules"""
 
 load(
+    ":jupyter_lab.bzl",
+    _jupyter_lab = "jupyter_lab",
+)
+load(
     ":jupyter_notebook.bzl",
     _jupyter_notebook = "jupyter_notebook",
 )
@@ -17,6 +21,7 @@ load(
     _jupyter_toolchain = "jupyter_toolchain",
 )
 
+jupyter_lab = _jupyter_lab
 jupyter_notebook = _jupyter_notebook
 jupyter_notebook_test = _jupyter_notebook_test
 jupyter_toolchain = _jupyter_toolchain

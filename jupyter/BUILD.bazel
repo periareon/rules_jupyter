@@ -8,12 +8,20 @@ load(
 exports_files([
     "defs.bzl",
     "extensions.bzl",
-    "jupyter_notebook_test.bzl",
+    "jupyter_lab.bzl",
     "jupyter_notebook.bzl",
+    "jupyter_notebook_test.bzl",
     "jupyter_report.bzl",
     "jupyter_toolchain.bzl",
+    "overrides.json",
     "requirements.in",
 ])
+
+label_flag(
+    name = "lab_app_settings",
+    build_setting_default = "//jupyter:overrides.json",
+    visibility = ["//visibility:public"],
+)
 
 toolchain_type(
     name = "toolchain_type",
@@ -35,6 +43,7 @@ bzl_library(
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "//jupyter:jupyter_lab_bzl",
         "//jupyter:jupyter_notebook_bzl",
         "//jupyter:jupyter_notebook_test_bzl",
         "//jupyter:jupyter_report_bzl",
@@ -45,6 +54,15 @@ bzl_library(
 bzl_library(
     name = "jupyter_notebook_bzl",
     srcs = ["jupyter_notebook.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//jupyter/private:bzl_lib",
+    ],
+)
+
+bzl_library(
+    name = "jupyter_lab_bzl",
+    srcs = ["jupyter_lab.bzl"],
     visibility = ["//visibility:public"],
     deps = [
         "//jupyter/private:bzl_lib",

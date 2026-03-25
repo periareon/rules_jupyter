@@ -52,6 +52,7 @@ def _jupyter_notebook_impl(ctx):
         JupyterNotebookInfo(
             kernel = ctx.attr.kernel,
             notebook = notebook,
+            src = ctx.file.src,
             data = depset(ctx.files.data),
         ),
         aspects_provider(ctx, ctx.file.src),
@@ -534,6 +535,180 @@ jupyter_notebook_test = rule(
         ),
     },
     test = True,
+    toolchains = [
+        TOOLCHAIN_TYPE,
+        py_venv_common.TOOLCHAIN_TYPE,
+    ],
+)
+
+def _jupyter_lab_impl(ctx):
+    toolchain = ctx.toolchains[TOOLCHAIN_TYPE]
+    notebook_info = ctx.attr.notebook[JupyterNotebookInfo]
+
+    kernel = notebook_info.kernel
+    if not kernel:
+        kernel = toolchain.default_kernel
+
+    cwd_mode = ctx.attr.cwd_mode
+    if not cwd_mode:
+        cwd_mode = toolchain.default_cwd_mode
+
+    notebook_rloc = _rlocationpath(notebook_info.notebook, ctx.workspace_name)
+
+    args = ctx.actions.args()
+    args.set_param_file_format("multiline")
+    args.add("--pandoc", _rlocationpath(toolchain.pandoc, ctx.workspace_name))
+    if toolchain.playwright_browsers_dir:
+        args.add("--playwright_browsers_dir", _rlocationpath(toolchain.playwright_browsers_dir, ctx.workspace_name))
+    args.add("--notebook", notebook_rloc)
+    args.add("--cwd_mode", cwd_mode)
+    if kernel:
+        args.add("--kernel", kernel)
+    if not ctx.attr.execute:
+        args.add("--no-execute")
+    args.add("--overrides", _rlocationpath(ctx.files.app_settings[0], ctx.workspace_name))
+    args.add("--run_mode", ctx.attr.run_mode)
+    args.add("--notebook_rlocationpath", notebook_rloc)
+    args.add("--notebook_src_short_path", notebook_info.src.short_path)
+
+    all_data_files = depset(ctx.files.data, transitive = [notebook_info.data]).to_list()
+    for f in all_data_files:
+        args.add("--data_file", "{}={}".format(_rlocationpath(f, ctx.workspace_name), f.short_path))
+
+    if ctx.attr.run_mode == "source":
+        if not notebook_info.src.basename.endswith(".ipynb"):
+            fail("run_mode='source' requires a .ipynb source, but {} has src='{}'".format(
+                ctx.attr.notebook.label,
+                notebook_info.src.basename,
+            ))
+        args.add("--source_notebook", notebook_info.src.short_path)
+
+    args.add("--")
+
+    known_variables = {}
+    for target in ctx.attr.toolchains:
+        if platform_common.TemplateVariableInfo in target:
+            variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
+            known_variables.update(variables)
+
+    notebook_args = _expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables)
+    args.add_all(notebook_args)
+
+    args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
+    ctx.actions.write(
+        output = args_file,
+        content = args,
+    )
+
+    executable, runfiles = _create_executable(
+        ctx = ctx,
+        cfg = "target",
+        runner = ctx.attr._launcher,
+        runner_main = ctx.file._launcher_main,
+        notebook = ctx.attr.notebook,
+    )
+
+    extra_files = [executable, args_file, notebook_info.notebook] + ctx.files.data + ctx.files.app_settings
+
+    runfiles = runfiles.merge(ctx.runfiles(
+        extra_files,
+        transitive_files = depset(transitive = [notebook_info.data, toolchain.all_files]),
+    ))
+
+    return [
+        DefaultInfo(
+            executable = executable,
+            runfiles = runfiles,
+        ),
+        _create_run_environment_info(
+            ctx = ctx,
+            env = ctx.attr.env | {
+                "RULES_JUPYTER_LAB_ARGS_FILE": _rlocationpath(args_file, ctx.workspace_name),
+            },
+            env_inherit = ctx.attr.env_inherit,
+            targets = ctx.attr.data,
+            known_variables = known_variables,
+        ),
+    ]
+
+jupyter_lab = rule(
+    doc = """\
+Launches a Jupyter Lab server for interactive notebook development.
+
+This rule creates an executable target that, when run via `bazel run`, starts a Jupyter Lab
+server with the notebook's dependencies available in the virtualenv. By default, when a user
+opens the printed URL in their browser, all notebook cells are automatically executed — exactly
+as if the user clicked "Run All Cells" in Lab's Run menu.
+
+Example:
+
+```python
+jupyter_notebook(
+    name = "my_notebook",
+    src = "notebook.py",
+    deps = ["@pip_deps//polars"],
+)
+
+jupyter_lab(
+    name = "my_lab",
+    notebook = ":my_notebook",
+)
+```
+
+Then run: `bazel run :my_lab`
+""",
+    implementation = _jupyter_lab_impl,
+    attrs = {
+        "app_settings": attr.label(
+            doc = "A JupyterLab `overrides.json` file providing default settings. Keys are `@jupyterlab/<extension>:<plugin>` and values are settings objects.",
+            default = Label("//jupyter:lab_app_settings"),
+            allow_single_file = [".json"],
+        ),
+        "cwd_mode": attr.string(
+            doc = "The working directory mode for notebook execution. If not specified, uses the toolchain's `default_cwd`. `execution_root` sets the working directory to Bazel's execution root, while `notebook_root` sets it to the notebook's parent directory.",
+            values = [
+                "execution_root",
+                "notebook_root",
+            ],
+        ),
+        "data": attr.label_list(
+            doc = "Additional data files required by the notebook (e.g., input data files, images, configuration files).",
+            allow_files = True,
+        ),
+        "env": attr.string_dict(
+            doc = "Environment variables to set when launching the server. Values support location expansion (e.g., `$(location :target)`).",
+        ),
+        "env_inherit": attr.string_list(
+            doc = "Specifies additional environment variables to inherit from the external environment.",
+        ),
+        "execute": attr.bool(
+            doc = "Whether to automatically execute all notebook cells when the user opens the notebook in their browser. When True, Lab triggers 'Run All Cells' as soon as the notebook loads. Can be overridden at runtime with `-- --no-execute`.",
+            default = True,
+        ),
+        "notebook": attr.label(
+            doc = "The notebook to serve. Must be a `jupyter_notebook` target.",
+            providers = [JupyterNotebookInfo, PyInfo],
+            mandatory = True,
+        ),
+        "run_mode": attr.string(
+            doc = "Controls where the notebook is served from. `runfiles` (default) copies the notebook to a temp directory with symlinked data dependencies. `source` serves the notebook directly from the source tree for in-place editing with unrestricted file access; requires a `.ipynb` source.",
+            values = [
+                "runfiles",
+                "source",
+            ],
+            default = "runfiles",
+        ),
+        "_launcher": attr.label(
+            cfg = "target",
+            default = Label("//tools/process_wrappers:lab_launcher"),
+        ),
+        "_launcher_main": attr.label(
+            cfg = "target",
+            allow_single_file = True,
+            default = Label("//tools/process_wrappers:lab_launcher.py"),
+        ),
+    },
+    executable = True,
     toolchains = [
         TOOLCHAIN_TYPE,
         py_venv_common.TOOLCHAIN_TYPE,

@@ -6,5 +6,6 @@ JupyterNotebookInfo = provider(
         "data": "Depset[file]: Additional data files required by the notebook (e.g., input data files, images).",
         "kernel": "str: The name of the Jupyter kernel to use for executing the notebook (e.g., 'python3', 'rust').",
         "notebook": "File: The notebook file (.ipynb format).",
+        "src": "File: The original source file (.py or .ipynb) provided to the jupyter_notebook rule.",
     },
 )

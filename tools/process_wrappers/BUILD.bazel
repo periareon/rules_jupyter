@@ -4,7 +4,10 @@
 load("@rules_venv//python:py_binary.bzl", "py_binary")
 
 exports_files([
+    "autorun.js",
+    "autorun_transform.py",
     "compiler.py",
+    "lab_launcher.py",
     "playwright_install.py",
     "reporter.py",
     "tester.py",
@@ -27,6 +30,20 @@ py_binary(
 py_binary(
     name = "tester",
     srcs = ["tester.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":reporter",
+        "@rules_venv//python/runfiles",
+    ],
+)
+
+py_binary(
+    name = "lab_launcher",
+    srcs = ["lab_launcher.py"],
+    data = [
+        "autorun.js",
+        "autorun_transform.py",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":reporter",

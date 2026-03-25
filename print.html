@@ -209,6 +209,7 @@ toolchain(
 <ul>
 <li><a href="rules.html#jupyter_lab">jupyter_lab</a></li>
 <li><a href="rules.html#jupyter_notebook">jupyter_notebook</a></li>
+<li><a href="rules.html#jupyter_notebook_binary">jupyter_notebook_binary</a></li>
 <li><a href="rules.html#jupyter_notebook_test">jupyter_notebook_test</a></li>
 <li><a href="rules.html#jupyter_report">jupyter_report</a></li>
 <li><a href="rules.html#jupyter_toolchain">jupyter_toolchain</a></li>
@@ -278,6 +279,43 @@ to <code>.ipynb</code> format. If the source is already a <code>.ipynb</code> fi
 <tr><td style="text-align: left"><a id="jupyter_notebook-src"></a>src</td><td style="text-align: left">The notebook source file. Can be either a .ipynb file or a <code>.py</code> file in <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> format (with <code># %%</code> cell markers).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook-data"></a>data</td><td style="text-align: left">Additional data files required by the notebook (e.g., input data files, images, configuration files).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook-kernel"></a>kernel</td><td style="text-align: left">The name of the Jupyter kernel to use for executing the notebook (e.g., <code>python3</code>, <code>rust</code>). If not specified, the default kernel from the toolchain is used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="jupyter_notebook_binary"></a></p>
+<h2 id="jupyter_notebook_binary"><a class="header" href="#jupyter_notebook_binary">jupyter_notebook_binary</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:defs.bzl", "jupyter_notebook_binary")
+
+jupyter_notebook_binary(<a href="rules.html#jupyter_notebook_binary-name">name</a>, <a href="rules.html#jupyter_notebook_binary-data">data</a>, <a href="rules.html#jupyter_notebook_binary-cwd_mode">cwd_mode</a>, <a href="rules.html#jupyter_notebook_binary-env">env</a>, <a href="rules.html#jupyter_notebook_binary-env_inherit">env_inherit</a>, <a href="rules.html#jupyter_notebook_binary-notebook">notebook</a>, <a href="rules.html#jupyter_notebook_binary-out_dir">out_dir</a>, <a href="rules.html#jupyter_notebook_binary-reports">reports</a>)
+</pre>
+<p>An executable rule that runs a Jupyter notebook and optionally generates reports.</p>
+<p>Unlike <code>jupyter_notebook_test</code>, this rule creates an executable target for use with <code>bazel run</code>.
+Outputs (executed notebook and reports) are written to a configurable output directory, defaulting
+to the caller's working directory (<code>BUILD_WORKING_DIRECTORY</code>).</p>
+<p>Example:</p>
+<pre><code class="language-python">jupyter_notebook(
+    name = "my_notebook",
+    src = "notebook.py",
+    deps = ["@pip_deps//polars"],
+)
+
+jupyter_notebook_binary(
+    name = "run_notebook",
+    notebook = ":my_notebook",
+    reports = ["html"],
+)
+</code></pre>
+<p>Then run: <code>bazel run :run_notebook</code> or <code>bazel run :run_notebook -- --out-dir /tmp/results</code></p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-data"></a>data</td><td style="text-align: left">Additional data files required by the notebook (e.g., input data files, images, configuration files).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-cwd_mode"></a>cwd_mode</td><td style="text-align: left">The working directory mode for notebook execution. If not specified, uses the toolchain's <code>default_cwd</code>. <code>workspace_root</code> sets the working directory to the workspace root, while <code>notebook_root</code> sets it to the notebook's parent directory. This affects how relative paths in the notebook are resolved.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-env"></a>env</td><td style="text-align: left">Environment variables to set when executing the notebook. Values support location expansion (e.g., <code>$(location :target)</code>).</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-env_inherit"></a>env_inherit</td><td style="text-align: left">Specifies additional environment variables to inherit from the external environment.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-notebook"></a>notebook</td><td style="text-align: left">The notebook to execute. Must be a <code>jupyter_notebook</code> target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-out_dir"></a>out_dir</td><td style="text-align: left">Directory to write output files to. If not specified, outputs are written to a subdirectory named after the target under the caller's working directory (e.g., <code>bazel run :run_notebook</code> writes to <code>./run_notebook/</code>). Absolute paths (e.g., <code>/tmp</code>) are used as-is; relative paths are resolved against the caller's working directory.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-reports"></a>reports</td><td style="text-align: left">List of report types to generate after successful notebook execution. Valid values: 'html', 'markdown', 'latex', 'webpdf'.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="jupyter_notebook_test"></a></p>

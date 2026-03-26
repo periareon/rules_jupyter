@@ -1,6 +1,10 @@
 """Playwright bzlmod extension"""
 
 load(
+    "//tools/debian:debian_archive.bzl",
+    "debian_archive",
+)
+load(
     ":browser_versions.bzl",
     _BROWSER_VERSIONS = "BROWSER_VERSIONS",
 )
@@ -20,6 +24,14 @@ load(
 load(
     ":requirements_parser.bzl",
     _parse_playwright_version_from_requirements_content = "parse_playwright_version_from_requirements",
+)
+load(
+    ":sysroot.bzl",
+    "chromium_headless_shell_selector",
+)
+load(
+    ":sysroot_packages.bzl",
+    _CHROMIUM_SYSROOT_PACKAGES = "CHROMIUM_SYSROOT_PACKAGES",
 )
 
 # Platform to constraint mapping
@@ -324,8 +336,35 @@ def _playwright_impl(module_ctx):
                     integrity = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]["integrity"],
                     strip_prefix = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]["strip_prefix"],
                 )
-                browser_labels["chromium_headless_shell"] = "@{}".format(repo_name)
                 browser_versions_dict["chromium_headless_shell_version"] = chromium_headless_shell_version
+
+                # On Linux, create debian_archive repos and a selector repo
+                # that chooses between raw browser and sysroot-enhanced variant.
+                sysroot_packages = _CHROMIUM_SYSROOT_PACKAGES.get(platform, [])
+                if sysroot_packages:
+                    sysroot_lib_labels = []
+                    for pkg in sysroot_packages:
+                        pkg_name = pkg["name"].replace(".", "_").replace("-", "_").replace("+", "_")
+                        deb_repo_name = "{}_{}_{}".format(name, pkg_name, platform.replace("-", "_"))
+                        debian_archive(
+                            name = deb_repo_name,
+                            urls = pkg["urls"],
+                            integrity = pkg.get("integrity", ""),
+                            sha256 = pkg.get("sha256", ""),
+                            build_file_content = 'filegroup(name = "files", srcs = glob(["**"]), visibility = ["//visibility:public"])',
+                        )
+                        sysroot_lib_labels.append("@{}//:files".format(deb_repo_name))
+
+                    selector_repo_name = "{}_{}_{}".format(name, "chromium_headless_shell_selector", platform.replace("-", "_"))
+                    chromium_headless_shell_selector(
+                        name = selector_repo_name,
+                        original_name = selector_repo_name,
+                        browser = "@{}".format(repo_name),
+                        sysroot_libs = sysroot_lib_labels,
+                    )
+                    browser_labels["chromium_headless_shell"] = "@{}".format(selector_repo_name)
+                else:
+                    browser_labels["chromium_headless_shell"] = "@{}".format(repo_name)
 
             # Firefox
             if firefox_version and firefox_version in FIREFOX_VERSIONS and platform in FIREFOX_VERSIONS[firefox_version]:

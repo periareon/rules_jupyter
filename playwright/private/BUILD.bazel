@@ -1,7 +1,23 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@rules_venv//python:py_binary.bzl", "py_binary")
 
 bzl_library(
     name = "bzl_lib",
     srcs = glob(["*.bzl"]),
     visibility = ["//playwright:__subpackages__"],
+    deps = [
+        "//tools/debian:debian_archive_bzl",
+    ],
+)
+
+py_binary(
+    name = "sysroot_overlay",
+    srcs = ["sysroot_overlay.py"],
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "playwright_install",
+    srcs = ["playwright_install.py"],
+    visibility = ["//visibility:public"],
 )

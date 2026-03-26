@@ -162,13 +162,11 @@ playwright_toolchain = rule(
         "chromium": attr.label(
             doc = "Chromium browser filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "chromium_headless_shell": attr.label(
             doc = "Chromium headless-shell browser filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "chromium_headless_shell_version": attr.string(
@@ -180,7 +178,6 @@ playwright_toolchain = rule(
         "ffmpeg": attr.label(
             doc = "FFmpeg filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "ffmpeg_version": attr.string(
@@ -189,7 +186,6 @@ playwright_toolchain = rule(
         "firefox": attr.label(
             doc = "Firefox browser filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "firefox_version": attr.string(
@@ -202,7 +198,6 @@ playwright_toolchain = rule(
         "webkit": attr.label(
             doc = "WebKit browser filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "webkit_version": attr.string(
@@ -211,7 +206,7 @@ playwright_toolchain = rule(
         "_installer": attr.label(
             cfg = "exec",
             executable = True,
-            default = Label("//tools/process_wrappers:playwright_install"),
+            default = Label("//playwright/private:playwright_install"),
         ),
     },
 )

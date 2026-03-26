@@ -389,46 +389,47 @@ def main() -> None:
     argv = args_file.read_text(encoding="utf-8").splitlines()
     args = parse_args(argv + sys.argv[1:], runfiles)
 
-    configure_jupyter_environment()
-    configure_pandoc(args.pandoc)
-    if args.playwright_browsers_dir:
-        configure_playwright(args.playwright_browsers_dir)
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp_dir:
+        configure_jupyter_environment(Path(tmp_dir))
+        configure_pandoc(args.pandoc)
+        if args.playwright_browsers_dir:
+            configure_playwright(args.playwright_browsers_dir)
 
-    ibazel_mode = os.environ.get("IBAZEL_NOTIFY_CHANGES") == "y"
+        ibazel_mode = os.environ.get("IBAZEL_NOTIFY_CHANGES") == "y"
 
-    if args.run_mode == "source":
-        layout = _prepare_source_mode(args)
-        os.environ.pop("RUNFILES_DIR", None)
-        os.environ.pop("RUNFILES_MANIFEST_FILE", None)
-    else:
-        layout = _prepare_runfiles_mode(args, runfiles)
+        if args.run_mode == "source":
+            layout = _prepare_source_mode(args)
+            os.environ.pop("RUNFILES_DIR", None)
+            os.environ.pop("RUNFILES_MANIFEST_FILE", None)
+        else:
+            layout = _prepare_runfiles_mode(args, runfiles)
 
-    if ibazel_mode:
-        if not args.run_mode == "runfiles":
-            raise RuntimeError(
-                "ibazel cannot be used with `jupyter_lab.run_mode = 'source'`"
+        if ibazel_mode:
+            if not args.run_mode == "runfiles":
+                raise RuntimeError(
+                    "ibazel cannot be used with `jupyter_lab.run_mode = 'source'`"
+                )
+            # pylint: disable-next=import-outside-toplevel
+            from tools.process_wrappers.ibazel_handler import setup_ibazel
+
+            setup_ibazel(
+                source_path=args.notebook,
+                dest_path=layout.notebook_dir / layout.notebook_name,
             )
+
+        lab_argv = _build_lab_argv(layout, args, ibazel=ibazel_mode)
+
         # pylint: disable-next=import-outside-toplevel
-        from tools.process_wrappers.ibazel_handler import setup_ibazel
+        from jupyterlab.labapp import main as lab_main  # type: ignore[import-untyped]
 
-        setup_ibazel(
-            source_path=args.notebook,
-            dest_path=layout.notebook_dir / layout.notebook_name,
-        )
-
-    lab_argv = _build_lab_argv(layout, args, ibazel=ibazel_mode)
-
-    # pylint: disable-next=import-outside-toplevel
-    from jupyterlab.labapp import main as lab_main  # type: ignore[import-untyped]
-
-    try:
-        lab_main(argv=lab_argv)
-    except SystemExit:
-        pass
-    finally:
-        if args.run_mode == "runfiles":
-            nb = layout.notebook_dir / layout.notebook_name
-            print(f"\n  Modified notebook saved at: {nb}\n")
+        try:
+            lab_main(argv=lab_argv)
+        except SystemExit:
+            pass
+        finally:
+            if args.run_mode == "runfiles":
+                nb = layout.notebook_dir / layout.notebook_name
+                print(f"\n  Modified notebook saved at: {nb}\n")
 
 
 if __name__ == "__main__":

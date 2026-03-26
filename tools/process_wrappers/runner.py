@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import sys
+import tempfile
 from pathlib import Path
 from typing import Optional, Sequence
 
@@ -64,51 +65,52 @@ def main() -> None:
 
     args = parse_args(collect_argv(runfiles, "RULES_JUPYTER_ARGS_FILE"), runfiles)
 
-    configure_jupyter_environment()
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp_dir:
+        configure_jupyter_environment(Path(tmp_dir))
 
-    configure_pandoc(args.pandoc)
+        configure_pandoc(args.pandoc)
 
-    if args.playwright_browsers_dir:
-        configure_playwright(args.playwright_browsers_dir)
+        if args.playwright_browsers_dir:
+            configure_playwright(args.playwright_browsers_dir)
 
-    if not args.notebook.exists():
-        raise FileNotFoundError(f"Notebook does not exist: {args.notebook}")
+        if not args.notebook.exists():
+            raise FileNotFoundError(f"Notebook does not exist: {args.notebook}")
 
-    if args.cwd_mode == CwdMode.NOTEBOOK_ROOT:
-        cwd = args.notebook.parent
-    elif args.cwd_mode == CwdMode.EXECUTION_ROOT:
-        cwd = Path.cwd()
-    else:
-        raise ValueError(f"Unexpected cwd mode: {args.cwd_mode}")
+        if args.cwd_mode == CwdMode.NOTEBOOK_ROOT:
+            cwd = args.notebook.parent
+        elif args.cwd_mode == CwdMode.EXECUTION_ROOT:
+            cwd = Path.cwd()
+        else:
+            raise ValueError(f"Unexpected cwd mode: {args.cwd_mode}")
 
-    logging.debug("Executing notebook: %s", args.notebook)
-    try:
-        notebook = execute_notebook(
-            args.notebook,
-            cwd,
-            kernel_name=args.kernel,
-            suppress_log=False,
-            params=args.params,
-        )
-    except CellExecutionError as e:
-        print(f"\nCellExecutionError: {e}", file=sys.stderr)
-        sys.exit(1)
-    logging.debug("Notebook execution completed successfully")
+        logging.debug("Executing notebook: %s", args.notebook)
+        try:
+            notebook = execute_notebook(
+                args.notebook,
+                cwd,
+                kernel_name=args.kernel,
+                suppress_log=False,
+                params=args.params,
+            )
+        except CellExecutionError as e:
+            print(f"\nCellExecutionError: {e}", file=sys.stderr)
+            sys.exit(1)
+        logging.debug("Notebook execution completed successfully")
 
-    postprocess_notebook_outputs(notebook)
+        postprocess_notebook_outputs(notebook)
 
-    output_dir = args.out_dir
+        output_dir = args.out_dir
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-    notebook_name = args.notebook.stem
+        output_dir.mkdir(parents=True, exist_ok=True)
+        notebook_name = args.notebook.stem
 
-    executed_notebook_path = output_dir / f"{notebook_name}_executed.ipynb"
-    save_notebook(notebook, executed_notebook_path)
-    logging.info("Saved executed notebook: %s", executed_notebook_path)
+        executed_notebook_path = output_dir / f"{notebook_name}_executed.ipynb"
+        save_notebook(notebook, executed_notebook_path)
+        logging.info("Saved executed notebook: %s", executed_notebook_path)
 
-    for report_type in args.reports:
-        output = generate_reports(notebook, notebook_name, report_type, output_dir)
-        print(f"{report_type.capitalize()} report written to: {output}")
+        for report_type in args.reports:
+            output = generate_reports(notebook, notebook_name, report_type, output_dir)
+            print(f"{report_type.capitalize()} report written to: {output}")
 
     sys.exit(0)
 

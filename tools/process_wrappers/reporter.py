@@ -164,7 +164,82 @@ sys.argv = [sys.argv[0]] + {argv_list}
 """
 
 
-def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
+@contextmanager
+def _notebook_execution_environment(
+    suppress_log: bool,
+) -> Generator[StringIO | None, None, None]:
+    """Temporarily configure the process environment for notebook execution.
+
+    Handles five concerns that would otherwise clutter ``execute_notebook``:
+
+    1. **stdout/stderr redirect** -- when *suppress_log* is true, Python-level
+       streams are captured to a :class:`~io.StringIO` that is yielded to the
+       caller (and flushed to the real stderr on error).
+    2. **Windows event-loop policy** -- switches to ``SelectorEventLoop`` so
+       ZMQ's ``add_reader``/``add_writer`` work, then restores the original
+       policy so Playwright (WebPDF) can use ``ProactorEventLoop`` afterwards.
+    3. **Tornado logger** -- mutes ``tornado.general`` at ``CRITICAL`` to hide
+       the harmless "not a socket" ``ZMQError`` logged during kernel shutdown
+       on Windows.
+    4. **fd-level stderr** -- on Windows with *suppress_log*, redirects file
+       descriptor 2 to ``os.devnull`` so libzmq's C-level assertion doesn't
+       leak into build output.
+    5. **MissingIDFieldWarning** -- suppresses the nbformat warning for
+       notebooks using format 4.0-4.4 that lack cell IDs.
+    """
+    # -- stdout / stderr --
+    old_stdout, old_stderr = sys.stdout, sys.stderr
+    stream: StringIO | None = None
+    if suppress_log:
+        stream = StringIO()
+        sys.stdout = stream
+        sys.stderr = stream
+
+    # -- Windows event-loop policy --
+    original_policy = None
+    if sys.platform == "win32":
+        original_policy = asyncio.get_event_loop_policy()
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    # -- tornado logger --
+    tornado_logger = logging.getLogger("tornado.general")
+    tornado_orig_level = tornado_logger.level
+    tornado_logger.setLevel(logging.CRITICAL)
+
+    # -- fd-level stderr on Windows --
+    saved_stderr_fd: int | None = None
+    if suppress_log and sys.platform == "win32":
+        saved_stderr_fd = os.dup(2)
+        devnull_fd = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull_fd, 2)
+        os.close(devnull_fd)
+
+    # -- MissingIDFieldWarning --
+    missing_id_warning = getattr(nbformat, "MissingIDFieldWarning", None)
+    if missing_id_warning is not None:
+        warnings.filterwarnings("ignore", category=missing_id_warning)
+    else:
+        warnings.filterwarnings("ignore", message="Cell is missing an id field")
+
+    try:
+        yield stream
+    except Exception:
+        if suppress_log and stream is not None:
+            print(stream.getvalue(), file=old_stderr)
+        raise
+    finally:
+        tornado_logger.setLevel(tornado_orig_level)
+        if saved_stderr_fd is not None:
+            os.dup2(saved_stderr_fd, 2)
+            os.close(saved_stderr_fd)
+        if original_policy is not None:
+            asyncio.set_event_loop_policy(original_policy)
+        if suppress_log:
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+
+
+def execute_notebook(  # pylint: disable=too-many-arguments
     notebook_path: Path,
     cwd: Path,
     *,
@@ -209,50 +284,14 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
         argv_cell.metadata["tags"] = ["injected-argv"]
         notebook.cells.insert(0, argv_cell)
 
-    # Suppress stdout/stderr during execution
-    old_stdout, old_stderr = sys.stdout, sys.stderr
-    if suppress_log:
-        stream = StringIO()
-        sys.stdout = stream
-        sys.stderr = stream
-    # Windows defaults to ProactorEventLoop which lacks add_reader/add_writer
-    # support required by ZMQ. Temporarily switch to SelectorEventLoop for
-    # notebook execution, then restore so Playwright (WebPDF) can use
-    # subprocess_exec which requires ProactorEventLoop.
-    _original_policy = None
-    if sys.platform == "win32":
-        _original_policy = asyncio.get_event_loop_policy()
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-    try:
+    with _notebook_execution_environment(suppress_log):
         # Import ExecutePreprocessor here so environment variables can take effect
         # pylint: disable=import-outside-toplevel
         import nbconvert.preprocessors  # isort: skip
 
         ExecutePreprocessor = nbconvert.preprocessors.ExecutePreprocessor
         ep = ExecutePreprocessor(**ep_kwargs)  # type: ignore[no-untyped-call]
-
-        # Suppress MissingIDFieldWarning from nbformat validation. Notebooks
-        # using nbformat 4.0-4.4 (and cells injected without an 'id') will
-        # trigger this warning, but adding IDs would break their schema..
-        _missing_id_warning = getattr(nbformat, "MissingIDFieldWarning", None)
-        if _missing_id_warning is not None:
-            warnings.filterwarnings("ignore", category=_missing_id_warning)
-        else:
-            warnings.filterwarnings("ignore", message="Cell is missing an id field")
-
-        # Execute the notebook
         ep.preprocess(notebook, {"metadata": {"path": str(cwd)}})
-    except Exception:
-        if suppress_log:
-            print(stream.getvalue(), file=old_stderr)
-        raise
-    finally:
-        if _original_policy is not None:
-            asyncio.set_event_loop_policy(_original_policy)
-        if suppress_log:
-            sys.stdout = old_stdout
-            sys.stderr = old_stderr
 
     return notebook  # type: ignore[no-any-return]
 

@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 import nbformat
+from nbclient.exceptions import CellExecutionError
 
 
 class CwdMode(StrEnum):
@@ -573,13 +574,17 @@ def main() -> None:
             raise ValueError(f"Unexpected cwd mode: {args.cwd_mode}")
 
         # Execute notebook
-        notebook = execute_notebook(
-            args.notebook,
-            cwd,
-            kernel_name=args.kernel,
-            suppress_log=True,
-            params=args.params,
-        )
+        try:
+            notebook = execute_notebook(
+                args.notebook,
+                cwd,
+                kernel_name=args.kernel,
+                suppress_log=True,
+                params=args.params,
+            )
+        except CellExecutionError as e:
+            print(f"\nCellExecutionError: {e}", file=sys.stderr)
+            sys.exit(1)
 
         # Convert non-standard MIME types (e.g. plotly) to renderable formats
         postprocess_notebook_outputs(notebook)

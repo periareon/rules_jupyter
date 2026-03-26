@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Sequence
 
+from nbclient.exceptions import CellExecutionError
 from python.runfiles import Runfiles
 
 from tools.process_wrappers.reporter import (
@@ -19,9 +20,9 @@ from tools.process_wrappers.reporter import (
     save_notebook,
 )
 from tools.process_wrappers.tester import (
+    collect_argv,
     create_arg_parser,
     generate_reports,
-    rlocation,
 )
 
 
@@ -61,14 +62,7 @@ def main() -> None:
         logging.error("Failed to create runfiles")
         sys.exit(1)
 
-    args_file_path = os.environ.get("RULES_JUPYTER_ARGS_FILE")
-    if not args_file_path:
-        logging.error("RULES_JUPYTER_ARGS_FILE environment variable not set")
-        sys.exit(1)
-
-    args_file = rlocation(runfiles, args_file_path)
-    argv = args_file.read_text(encoding="utf-8").splitlines()
-    args = parse_args(argv + sys.argv[1:], runfiles)
+    args = parse_args(collect_argv(runfiles, "RULES_JUPYTER_ARGS_FILE"), runfiles)
 
     configure_jupyter_environment()
 
@@ -88,13 +82,17 @@ def main() -> None:
         raise ValueError(f"Unexpected cwd mode: {args.cwd_mode}")
 
     logging.debug("Executing notebook: %s", args.notebook)
-    notebook = execute_notebook(
-        args.notebook,
-        cwd,
-        kernel_name=args.kernel,
-        suppress_log=False,
-        params=args.params,
-    )
+    try:
+        notebook = execute_notebook(
+            args.notebook,
+            cwd,
+            kernel_name=args.kernel,
+            suppress_log=False,
+            params=args.params,
+        )
+    except CellExecutionError as e:
+        print(f"\nCellExecutionError: {e}", file=sys.stderr)
+        sys.exit(1)
     logging.debug("Notebook execution completed successfully")
 
     postprocess_notebook_outputs(notebook)

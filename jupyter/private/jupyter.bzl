@@ -652,7 +652,7 @@ jupyter_notebook_binary(
 )
 ```
 
-Then run: `bazel run :run_notebook` or `bazel run :run_notebook -- --out-dir /tmp/results`
+Then run: `bazel run :run_notebook` or `bazel run :run_notebook -- --my-flag value`
 """,
     implementation = _jupyter_notebook_binary_impl,
     attrs = {

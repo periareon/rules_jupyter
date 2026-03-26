@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 import nbformat
+from nbclient.exceptions import CellExecutionError
 from python.runfiles import Runfiles
 
 from tools.process_wrappers.reporter import (
@@ -237,7 +238,23 @@ def _init_logging() -> None:
         )
 
 
-def main() -> None:
+def collect_argv(runfiles: Runfiles, args_file_var: str) -> list[str]:
+    """Parse the appropriate `sys.argv` while accounting for an args file.
+
+    Args:
+        runfiles: The runfiles object for lookups
+        args_file_var: The environment variable pointing to the args file.
+    """
+    argv = []
+    args_file_path = os.environ.get(args_file_var)
+    if args_file_path:
+        args_file = rlocation(runfiles, args_file_path)
+        argv = args_file.read_text(encoding="utf-8").splitlines()
+
+    return argv + sys.argv[1:]
+
+
+def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
     """The main entrypoint."""
     _init_logging()
 
@@ -249,14 +266,9 @@ def main() -> None:
             logging.error("Failed to create runfiles")
             sys.exit(1)
 
-        args_file_path = os.environ.get("RULES_JUPYTER_TEST_ARGS_FILE")
-        if not args_file_path:
-            logging.error("RULES_JUPYTER_TEST_ARGS_FILE environment variable not set")
-            sys.exit(1)
-
-        args_file = rlocation(runfiles, args_file_path)
-        argv = args_file.read_text(encoding="utf-8").splitlines()
-        args = parse_args(argv + sys.argv[1:], runfiles)
+        args = parse_args(
+            collect_argv(runfiles, "RULES_JUPYTER_TEST_ARGS_FILE"), runfiles
+        )
 
         configure_jupyter_environment()
 
@@ -278,13 +290,17 @@ def main() -> None:
 
         # Execute the notebook - any cell error will cause test failure
         logging.debug("Executing notebook: %s", args.notebook)
-        notebook = execute_notebook(
-            args.notebook,
-            cwd,
-            kernel_name=args.kernel,
-            suppress_log=False,
-            params=args.params,
-        )
+        try:
+            notebook = execute_notebook(
+                args.notebook,
+                cwd,
+                kernel_name=args.kernel,
+                suppress_log=False,
+                params=args.params,
+            )
+        except CellExecutionError as e:
+            print(f"\nCellExecutionError: {e}", file=sys.stderr)
+            sys.exit(1)
         logging.debug("Notebook execution completed successfully")
 
         # Convert non-standard MIME types (e.g. plotly) to renderable formats

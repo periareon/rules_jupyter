@@ -9,6 +9,7 @@ import platform
 import shutil
 import sys
 import tempfile
+import warnings
 from collections.abc import Generator
 from contextlib import contextmanager
 from enum import StrEnum
@@ -24,7 +25,10 @@ class CwdMode(StrEnum):
     """Notebook current working directory modes."""
 
     EXECUTION_ROOT = "execution_root"
+    """The location where a bazel execution would normally spawn (e.g. within the runfiles dir for tests)."""
+
     NOTEBOOK_ROOT = "notebook_root"
+    """The location of the notebook itself (within runfiles)"""
 
 
 def parse_args() -> argparse.Namespace:
@@ -197,16 +201,12 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
     # Note: ExecutePreprocessor.extra_arguments is for kernel config, not sys.argv
     # So we inject a cell that sets sys.argv directly
     if params:
-        # Create a cell that sets sys.argv with the notebook path and params
-        # Format: notebook_path as first arg (like script name), then user params
         argv_code = _ARGV_CELL_TEMPLATE.format(argv_list=json.dumps(params, indent=4))
         argv_cell = nbformat.v4.new_code_cell(argv_code)  # type: ignore[no-untyped-call]
-        # Remove 'id' field if present (not supported in nbformat 4.0-4.4)
-        # The 'id' field was added in nbformat 4.5, but we want compatibility with 4.0-4.4
-        argv_cell.pop("id", None)  # Use pop with default to safely remove if present
+        # Strip the 'id' field so notebooks using nbformat 4.0-4.4 don't fail
+        # schema validation ("id" is only valid in 4.5+).
+        argv_cell.pop("id", None)
         argv_cell.metadata["tags"] = ["injected-argv"]
-
-        # Insert at the beginning
         notebook.cells.insert(0, argv_cell)
 
     # Suppress stdout/stderr during execution
@@ -231,6 +231,15 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
 
         ExecutePreprocessor = nbconvert.preprocessors.ExecutePreprocessor
         ep = ExecutePreprocessor(**ep_kwargs)  # type: ignore[no-untyped-call]
+
+        # Suppress MissingIDFieldWarning from nbformat validation. Notebooks
+        # using nbformat 4.0-4.4 (and cells injected without an 'id') will
+        # trigger this warning, but adding IDs would break their schema..
+        _missing_id_warning = getattr(nbformat, "MissingIDFieldWarning", None)
+        if _missing_id_warning is not None:
+            warnings.filterwarnings("ignore", category=_missing_id_warning)
+        else:
+            warnings.filterwarnings("ignore", message="Cell is missing an id field")
 
         # Execute the notebook
         ep.preprocess(notebook, {"metadata": {"path": str(cwd)}})

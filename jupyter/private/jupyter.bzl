@@ -420,6 +420,8 @@ def _jupyter_notebook_test_impl(ctx):
     cwd_mode = ctx.attr.cwd_mode
     if not cwd_mode:
         cwd_mode = toolchain.default_cwd_mode
+    if not cwd_mode:
+        cwd_mode = "execution_root"
 
     args = ctx.actions.args()
     args.set_param_file_format("multiline")
@@ -499,9 +501,9 @@ jupyter_notebook_test = rule(
     implementation = _jupyter_notebook_test_impl,
     attrs = {
         "cwd_mode": attr.string(
-            doc = "The working directory mode for notebook execution. If not specified, uses the toolchain's `default_cwd`. `workspace_root` sets the working directory to the workspace root, while `notebook_root` sets it to the notebook's parent directory. This affects how relative paths in the notebook are resolved.",
+            doc = "The working directory mode for notebook execution. If not specified, uses the toolchain's `default_cwd`.",
             values = [
-                "workspace_root",
+                "execution_root",
                 "notebook_root",
             ],
         ),
@@ -657,9 +659,9 @@ Then run: `bazel run :run_notebook` or `bazel run :run_notebook -- --my-flag val
     implementation = _jupyter_notebook_binary_impl,
     attrs = {
         "cwd_mode": attr.string(
-            doc = "The working directory mode for notebook execution. If not specified, uses the toolchain's `default_cwd`. `workspace_root` sets the working directory to the workspace root, while `notebook_root` sets it to the notebook's parent directory. This affects how relative paths in the notebook are resolved.",
+            doc = "The working directory mode for notebook execution. If not specified, uses the toolchain's `default_cwd`. `execution_root` sets the working directory to the workspace root, while `notebook_root` sets it to the notebook's parent directory. This affects how relative paths in the notebook are resolved.",
             values = [
-                "workspace_root",
+                "execution_root",
                 "notebook_root",
             ],
         ),
@@ -713,6 +715,8 @@ def _jupyter_lab_impl(ctx):
     cwd_mode = ctx.attr.cwd_mode
     if not cwd_mode:
         cwd_mode = toolchain.default_cwd_mode
+    if not cwd_mode:
+        cwd_mode = "execution_root"
 
     notebook_rloc = _rlocationpath(notebook_info.notebook, ctx.workspace_name)
 

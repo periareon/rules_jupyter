@@ -270,7 +270,7 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
             collect_argv(runfiles, "RULES_JUPYTER_TEST_ARGS_FILE"), runfiles
         )
 
-        configure_jupyter_environment(Path(os.environ["TEST_TMPDIR"]))
+        configure_jupyter_environment()
 
         configure_pandoc(args.pandoc)
 

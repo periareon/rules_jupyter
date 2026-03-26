@@ -101,63 +101,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _install_hermetic_kernelspec(tmp_dir: Path) -> None:
-    """Write a hermetic ipykernel kernelspec and prepend it to ``JUPYTER_PATH``.
-
-    This is a minimal, side-effect-free replacement for
-    ``ipykernel.kernelspec.install()``.  The upstream function
-    (https://github.com/ipython/ipykernel/blob/v7.2.0/ipykernel/kernelspec.py)
-    does three things we need to avoid in Bazel's sandboxed layout:
-
-    1. **Imports & instantiates** ``jupyter_client.kernelspec.KernelSpecManager``,
-       which triggers traitlets/jupyter_core path resolution that can conflict
-       with the ``JUPYTER_PATH`` we have already configured above.
-    2. **Copies resource files** via ``shutil.copytree(RESOURCES, ...)`` from
-       the ipykernel package's ``resources/`` directory, which may not be
-       resolvable inside Bazel's runfiles tree.
-    3. **Injects** ``-Xfrozen_modules=off`` into ``argv`` on Python >= 3.11
-       (via ``make_ipkernel_cmd``), altering the kernel subprocess startup
-       relative to the native kernel spec that jupyter_client otherwise uses.
-
-    What we *do* replicate from upstream:
-
-    * ``argv`` is ``[sys.executable, "-m", "ipykernel_launcher", "-f",
-      "{connection_file}"]`` -- identical to ``make_ipkernel_cmd()`` with
-      default ``executable=None`` (which falls back to ``sys.executable``)
-      and no extra arguments.
-    * ``display_name``, ``language``, and ``metadata`` match the upstream
-      ``get_kernel_dict()`` defaults.
-    * The spec is written to ``<prefix>/share/jupyter/kernels/python3/kernel.json``
-      -- the same directory layout that ``KernelSpecManager.install_kernel_spec()``
-      produces when called with ``prefix=...``.
-
-    Args:
-        tmp_dir: A caller-managed temporary directory. The kernelspec is
-            written under ``tmp_dir/kernelspec/...``.
-    """
-    kernelspec_dir = (
-        tmp_dir / "kernelspec" / "share" / "jupyter" / "kernels" / "python3"
-    )
-    kernelspec_dir.mkdir(exist_ok=True, parents=True)
-    kernel_json = {
-        "argv": [sys.executable, "-m", "ipykernel_launcher", "-f", "{connection_file}"],
-        "display_name": "Python 3",
-        "language": "python",
-        "metadata": {"debugger": True},
-    }
-    (kernelspec_dir / "kernel.json").write_text(
-        json.dumps(kernel_json, indent=1), encoding="utf-8"
-    )
-
-    kernelspec_jupyter_dir = str(kernelspec_dir.parent.parent)
-    existing = os.environ.get("JUPYTER_PATH", "")
-    os.environ["JUPYTER_PATH"] = kernelspec_jupyter_dir + (
-        os.pathsep + existing if existing else ""
-    )
-    logging.debug("Installed hermetic kernelspec at %s", kernelspec_jupyter_dir)
-
-
-def configure_jupyter_environment(tmp_dir: Path) -> None:
+def configure_jupyter_environment() -> None:
     """Configure Jupyter/IPython environment for Bazel's sandboxed execution.
 
     This function:
@@ -165,16 +109,11 @@ def configure_jupyter_environment(tmp_dir: Path) -> None:
        where packages have their data in `*.data/data/share/jupyter` directories.
     2. Sets IPYTHONDIR to a writable temp location to avoid warnings about
        non-writable IPython directories in sandboxed environments.
-    3. Installs a hermetic ipykernel kernelspec whose ``argv`` uses
-       ``sys.executable`` (an absolute path) instead of bare ``"python"``,
-       and prepends it to ``JUPYTER_PATH`` so it takes priority.
-
-    Args:
-        tmp_dir: A caller-managed temporary directory used for IPYTHONDIR and
-            the hermetic kernelspec. The caller is responsible for cleanup.
     """
+    # Set IPYTHONDIR to a writable temp location
     if "IPYTHONDIR" not in os.environ:
-        ipython_dir = tmp_dir / "ipython"
+        temp_dir = Path(os.getenv("TEST_TMPDIR", tempfile.gettempdir()))
+        ipython_dir = temp_dir / "rules_jupyter_ipython"
         ipython_dir.mkdir(exist_ok=True, parents=True)
         os.environ["IPYTHONDIR"] = str(ipython_dir)
         logging.debug("Set IPYTHONDIR to %s", ipython_dir)
@@ -217,8 +156,6 @@ def configure_jupyter_environment(tmp_dir: Path) -> None:
         logging.debug(
             "Configured JUPYTER_PATH with %d directories", len(jupyter_data_dirs)
         )
-
-    _install_hermetic_kernelspec(tmp_dir)
 
 
 _ARGV_CELL_TEMPLATE = """\
@@ -475,26 +412,23 @@ def _set_temp_home_env() -> tuple[str | None, str | None, Path]:
     """Set HOME and USERPROFILE to a temporary directory.
 
     Returns:
-        Tuple of (original HOME, original USERPROFILE, temp_dir) where
-        ``temp_dir`` is the base temporary directory that the caller should
-        pass to :func:`configure_jupyter_environment` and eventually clean up
-        via :func:`_restore_home_env`.
+        Tuple of (original HOME, original USERPROFILE, temp_home) values.
     """
     original_home = os.environ.get("HOME")
     original_userprofile = os.environ.get("USERPROFILE")
-    temp_dir = Path(tempfile.mkdtemp())
+    temp_dir = Path(os.getenv("TEST_TMPDIR", tempfile.mkdtemp()))
     temp_home = temp_dir / "home"
     temp_home.mkdir(exist_ok=True, parents=True)
     os.environ["HOME"] = str(temp_home)
     if platform.system() == "Windows":
         os.environ["USERPROFILE"] = str(temp_home)
-    return (original_home, original_userprofile, temp_dir)
+    return (original_home, original_userprofile, temp_home)
 
 
 def _restore_home_env(
     original_home: str | None,
     original_userprofile: str | None,
-    temp_dir: Path,
+    temp_home: Path,
 ) -> None:
     """Restore original HOME and USERPROFILE environment variables and cleanup temp directory."""
     if original_home is not None:
@@ -507,10 +441,13 @@ def _restore_home_env(
     elif "USERPROFILE" in os.environ:
         del os.environ["USERPROFILE"]
 
-    try:
-        shutil.rmtree(temp_dir)
-    except OSError:
-        pass
+    # Clean up temporary directory
+    if "TEST_TMPDIR" not in os.environ:
+        try:
+            shutil.rmtree(temp_home)
+        except OSError:
+            # Ignore errors during cleanup
+            pass
 
 
 _PLOTLY_MIME = "application/vnd.plotly.v1+json"
@@ -665,10 +602,10 @@ def main() -> None:
     args = parse_args()
 
     # Set up environment FIRST before any nbconvert imports
-    original_home, original_userprofile, temp_dir = _set_temp_home_env()
+    original_home, original_userprofile, temp_home = _set_temp_home_env()
     try:
         # Configure Jupyter paths for Bazel's non-standard layout
-        configure_jupyter_environment(temp_dir)
+        configure_jupyter_environment()
 
         # Configure pandoc path for nbconvert (injects to PATH)
         configure_pandoc(args.pandoc)
@@ -706,7 +643,7 @@ def main() -> None:
         # Generate all requested outputs
         _generate_outputs(notebook, args)
     finally:
-        _restore_home_env(original_home, original_userprofile, temp_dir)
+        _restore_home_env(original_home, original_userprofile, temp_home)
 
 
 if __name__ == "__main__":

@@ -44,6 +44,15 @@ alias(
 )
 """
 
+_DEBIAN_LIB_DIRS = [
+    "usr/lib/x86_64-linux-gnu",
+    "usr/lib/aarch64-linux-gnu",
+    "lib/x86_64-linux-gnu",
+    "lib/aarch64-linux-gnu",
+    "usr/lib",
+    "lib",
+]
+
 def _is_shared_lib(basename):
     """Returns True if the filename looks like a shared library (.so or .so.N...)."""
     parts = basename.split(".so")
@@ -52,21 +61,25 @@ def _is_shared_lib(basename):
     suffix = parts[-1]
     return suffix == "" or suffix.startswith(".")
 
-def _symlink_shared_libs(repository_ctx, root, dest_dir):
-    """Recursively walk `root` and symlink .so files into `dest_dir`.
+def _symlink_shared_libs(repository_ctx, deb_root, dest_dir):
+    """Scan known Debian lib directories and symlink .so files into `dest_dir`.
 
     Returns:
         List of relative paths (from repo root) for each symlinked file.
     """
     symlinked = []
-    for entry in root.readdir():
-        if entry.is_dir:
-            symlinked.extend(_symlink_shared_libs(repository_ctx, entry, dest_dir))
-        elif _is_shared_lib(entry.basename):
-            dest = dest_dir.get_child(entry.basename)
-            if not dest.exists:
-                repository_ctx.symlink(entry, dest)
-                symlinked.append("{}/{}".format(dest_dir.basename, entry.basename))
+    for lib_dir in _DEBIAN_LIB_DIRS:
+        candidate = deb_root.get_child(lib_dir)
+        if not candidate.exists:
+            continue
+        for entry in candidate.readdir():
+            if entry.is_dir:
+                continue
+            if _is_shared_lib(entry.basename):
+                dest = dest_dir.get_child(entry.basename)
+                if not dest.exists:
+                    repository_ctx.symlink(entry, dest)
+                    symlinked.append("{}/{}".format(dest_dir.basename, entry.basename))
     return symlinked
 
 def _playwright_chromium_with_sysroot_impl(repository_ctx):
@@ -90,9 +103,9 @@ def _playwright_chromium_with_sysroot_impl(repository_ctx):
     # Symlink .so files from each sysroot repo directly next to the browser binary
     sysroot_so_files = []
     for sysroot_label in repository_ctx.attr.sysroot_repos:
-        lib_root = repository_ctx.path(sysroot_label).dirname
+        deb_root = repository_ctx.path(sysroot_label).dirname
         sysroot_so_files.extend(
-            _symlink_shared_libs(repository_ctx, lib_root, browser_bin_dir),
+            _symlink_shared_libs(repository_ctx, deb_root, browser_bin_dir),
         )
 
     repository_ctx.file("BUILD.bazel", _BUILD_TEMPLATE.format(

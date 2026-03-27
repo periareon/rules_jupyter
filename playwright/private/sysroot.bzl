@@ -12,33 +12,24 @@ CHROME_LINUX = glob(["chrome-linux*/*headless_shell"], allow_empty = True)
 BROWSER_SRCS = CHROME_HEADLESS if CHROME_HEADLESS else CHROME_LINUX
 BROWSER_DIR = "chrome-headless-shell-linux" if CHROME_HEADLESS else "chrome-linux"
 
+ALL_DATA = glob(
+    include = ["{{}}*/**".format(BROWSER_DIR)],
+    exclude = BROWSER_SRCS,
+)
+
 SYSROOT_SO_FILES = {sysroot_so_files}
 
-filegroup(
-    name = "_without_sysroot",
-    srcs = BROWSER_SRCS,
-    data = glob(
-        include = ["{{}}*/**".format(BROWSER_DIR)],
-        exclude = BROWSER_SRCS + SYSROOT_SO_FILES,
-    ),
-    visibility = ["//visibility:public"],
+DATA_WITHOUT_SYSROOT = glob(
+    include = ["{{}}*/**".format(BROWSER_DIR)],
+    exclude = BROWSER_SRCS + SYSROOT_SO_FILES,
 )
 
 filegroup(
-    name = "_with_sysroot",
-    srcs = BROWSER_SRCS,
-    data = glob(
-        include = ["{{}}*/**".format(BROWSER_DIR)],
-        exclude = BROWSER_SRCS,
-    ),
-    visibility = ["//visibility:public"],
-)
-
-alias(
     name = "{name}",
-    actual = select({{
-        "@rules_jupyter//playwright/settings:embedded_linux_chrome_sys_libs_enabled": ":_with_sysroot",
-        "//conditions:default": ":_without_sysroot",
+    srcs = BROWSER_SRCS,
+    data = select({{
+        "@rules_jupyter//playwright/settings:embedded_linux_chrome_sys_libs_enabled": ALL_DATA,
+        "//conditions:default": DATA_WITHOUT_SYSROOT,
     }}),
     visibility = ["//visibility:public"],
 )
@@ -131,9 +122,9 @@ def _playwright_chromium_with_sysroot_impl(repository_ctx):
 playwright_chromium_with_sysroot = repository_rule(
     doc = """\
 Creates a repository containing the Chromium headless-shell browser files with
-system shared libraries symlinked next to the binary. A select()-based alias
-chooses between this enhanced filegroup (flag ON) and the raw browser archive
-(flag OFF).
+system shared libraries symlinked next to the binary. A single filegroup uses
+select() on its data attribute to include sysroot .so files only when the
+experimental_embedded_linux_chrome_sys_libs flag is enabled.
 """,
     implementation = _playwright_chromium_with_sysroot_impl,
     attrs = {

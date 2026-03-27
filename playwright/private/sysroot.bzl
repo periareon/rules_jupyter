@@ -1,9 +1,14 @@
-"""Repository rule for bundling Chromium headless-shell with system library dependencies.
+"""Self-contained repository rule for Chromium headless-shell with system libraries.
 
-Creates a repository that symlinks a browser archive's files alongside .so files
-extracted from Debian packages, producing a real filegroup where RPATH=$ORIGIN
-resolves the sysroot libraries at runtime.
+Downloads the browser archive and all required Debian packages directly,
+extracts .so files next to the browser binary, and produces a filegroup
+with select() to optionally include them at runtime via RPATH=$ORIGIN.
 """
+
+load(
+    "//tools/debian:debian_archive.bzl",
+    "download_and_extract",
+)
 
 _BUILD_TEMPLATE = """\
 CHROME_HEADLESS = glob(["chrome-headless-shell-linux*/*headless-shell"], allow_empty = True)
@@ -25,11 +30,17 @@ DATA_WITHOUT_SYSROOT = glob(
 )
 
 filegroup(
-    name = "{name}",
+    name = "browser",
     srcs = BROWSER_SRCS,
-    data = select({{
-        "@rules_jupyter//playwright/settings:embedded_linux_chrome_sys_libs_enabled": ALL_DATA,
-        "//conditions:default": DATA_WITHOUT_SYSROOT,
+    data = ALL_DATA,
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "{name}",
+    actual = select({{
+        "@rules_jupyter//playwright/settings:embedded_linux_chrome_sys_libs_enabled": ":browser",
+        "//conditions:default": "{original_chromium}",
     }}),
     visibility = ["//visibility:public"],
 )
@@ -52,13 +63,17 @@ def _is_shared_lib(basename):
     suffix = parts[-1]
     return suffix == "" or suffix.startswith(".")
 
-def _symlink_shared_libs(repository_ctx, deb_root, dest_dir):
-    """Scan known Debian lib directories and symlink .so files into `dest_dir`.
+def _is_browser_dir(basename):
+    """Returns True if the directory name matches a Chromium browser directory."""
+    return basename.startswith("chrome-headless-shell-linux") or basename.startswith("chrome-linux")
+
+def _copy_shared_libs(repository_ctx, deb_root, dest_dir):
+    """Scan known Debian lib directories and copy .so files into dest_dir.
 
     Returns:
-        List of relative paths (from repo root) for each symlinked file.
+        List of relative paths (from repo root) for each copied file.
     """
-    symlinked = []
+    copied = []
     for lib_dir in _DEBIAN_LIB_DIRS:
         candidate = deb_root.get_child(lib_dir)
         if not candidate.exists:
@@ -69,51 +84,53 @@ def _symlink_shared_libs(repository_ctx, deb_root, dest_dir):
             if _is_shared_lib(entry.basename):
                 dest = dest_dir.get_child(entry.basename)
                 if not dest.exists:
-                    repository_ctx.symlink(entry, dest)
-                    symlinked.append("{}/{}".format(dest_dir.basename, entry.basename))
-    return symlinked
-
-def _is_browser_dir(basename):
-    """Returns True if the directory name matches a Chromium browser directory."""
-    return basename.startswith("chrome-headless-shell-linux") or basename.startswith("chrome-linux")
-
-def _symlink_dir_contents(repository_ctx, source_dir, dest_dir_name):
-    """Symlink the individual files inside a directory rather than the directory itself.
-
-    This creates a real directory in the repo so additional files (e.g. sysroot
-    .so files) can be added alongside the originals.
-    """
-    for entry in source_dir.readdir():
-        dest = dest_dir_name + "/" + entry.basename
-        repository_ctx.symlink(entry, dest)
+                    repository_ctx.execute(
+                        ["cp", str(entry), str(dest)],
+                        quiet = True,
+                    )
+                    copied.append("{}/{}".format(dest_dir.basename, entry.basename))
+    return copied
 
 def _playwright_chromium_with_sysroot_impl(repository_ctx):
-    browser_root = repository_ctx.path(repository_ctx.attr.browser).dirname
+    repository_ctx.download_and_extract(
+        url = repository_ctx.attr.browser_urls,
+        integrity = repository_ctx.attr.browser_integrity,
+        stripPrefix = repository_ctx.attr.browser_strip_prefix,
+    )
 
     browser_bin_dir = None
-    for entry in browser_root.readdir():
-        if entry.basename in ["BUILD.bazel", "WORKSPACE.bazel", "WORKSPACE", "MODULE.bazel"]:
-            continue
+    for entry in repository_ctx.path("").readdir():
         if _is_browser_dir(entry.basename):
-            _symlink_dir_contents(repository_ctx, entry, entry.basename)
-            browser_bin_dir = repository_ctx.path(entry.basename)
-        else:
-            repository_ctx.symlink(entry, entry.basename)
+            browser_bin_dir = entry
+            break
 
     if not browser_bin_dir:
         fail("Could not find browser binary directory in browser archive")
 
-    # Symlink .so files from each sysroot repo directly next to the browser binary
     sysroot_so_files = []
-    for sysroot_label in repository_ctx.attr.sysroot_repos:
-        deb_root = repository_ctx.path(sysroot_label).dirname
-        sysroot_so_files.extend(
-            _symlink_shared_libs(repository_ctx, deb_root, browser_bin_dir),
+    packages = json.decode(repository_ctx.attr.sysroot_packages_json)
+    for i, pkg in enumerate(packages):
+        prefix = ".sysroot_tmp_{}".format(i)
+        download_and_extract(
+            repository_ctx = repository_ctx,
+            urls = pkg["urls"],
+            sha256 = pkg.get("sha256", ""),
+            integrity = pkg.get("integrity", ""),
+            add_prefix = prefix,
         )
+        sysroot_so_files.extend(
+            _copy_shared_libs(
+                repository_ctx,
+                repository_ctx.path(prefix),
+                browser_bin_dir,
+            ),
+        )
+        repository_ctx.delete(prefix)
 
     repository_ctx.file("BUILD.bazel", _BUILD_TEMPLATE.format(
         name = repository_ctx.original_name,
         sysroot_so_files = json.encode(sysroot_so_files),
+        original_chromium = repository_ctx.attr.original_chromium
     ))
     repository_ctx.file("WORKSPACE.bazel", """workspace(name = "{}")""".format(
         repository_ctx.original_name,
@@ -121,20 +138,32 @@ def _playwright_chromium_with_sysroot_impl(repository_ctx):
 
 playwright_chromium_with_sysroot = repository_rule(
     doc = """\
-Creates a repository containing the Chromium headless-shell browser files with
-system shared libraries symlinked next to the binary. A single filegroup uses
-select() on its data attribute to include sysroot .so files only when the
-experimental_embedded_linux_chrome_sys_libs flag is enabled.
+Self-contained repository that downloads Chromium headless-shell and all required
+system library Debian packages. Extracts .so files next to the browser binary and
+produces a filegroup with select() to optionally include the sysroot libraries
+when the experimental_embedded_linux_chrome_sys_libs flag is enabled.
 """,
     implementation = _playwright_chromium_with_sysroot_impl,
     attrs = {
-        "browser": attr.label(
-            doc = "Label to a file in the raw Chromium headless-shell browser archive (used for path resolution).",
+        "browser_integrity": attr.string(
+            doc = "Integrity hash for the browser archive.",
             mandatory = True,
         ),
-        "sysroot_repos": attr.label_list(
-            doc = "Labels to files in debian_archive repos (used for path resolution).",
-            default = [],
+        "browser_strip_prefix": attr.string(
+            doc = "Strip prefix for the browser archive.",
+            default = "",
+        ),
+        "browser_urls": attr.string_list(
+            doc = "URLs to download the Chromium headless-shell browser archive.",
+            mandatory = True,
+        ),
+        "sysroot_packages_json": attr.string(
+            doc = "JSON-encoded list of sysroot package descriptors, each with 'urls' and 'integrity' fields.",
+            mandatory = True,
+        ),
+        "original_chromium": attr.string(
+            doc = "The label to the original chromium filegroup.",
+            mandatory = True,
         ),
     },
 )

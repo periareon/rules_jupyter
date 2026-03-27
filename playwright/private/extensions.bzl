@@ -1,10 +1,6 @@
 """Playwright bzlmod extension"""
 
 load(
-    "//tools/debian:debian_archive.bzl",
-    "debian_archive",
-)
-load(
     ":browser_versions.bzl",
     _BROWSER_VERSIONS = "BROWSER_VERSIONS",
 )
@@ -328,42 +324,32 @@ def _playwright_impl(module_ctx):
 
             # Chromium headless-shell
             if chromium_headless_shell_version and chromium_headless_shell_version in CHROMIUM_HEADLESS_SHELL_VERSIONS and platform in CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version]:
+                browser_versions_dict["chromium_headless_shell_version"] = chromium_headless_shell_version
+                version_data = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]
                 repo_name = "{}_{}_{}".format(name, "chromium_headless_shell", platform)
                 chromium_headless_shell_archive(
                     name = repo_name,
                     platform = platform,
-                    urls = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]["urls"],
-                    integrity = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]["integrity"],
-                    strip_prefix = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]["strip_prefix"],
+                    urls = version_data["urls"],
+                    integrity = version_data["integrity"],
+                    strip_prefix = version_data["strip_prefix"],
                 )
-                browser_versions_dict["chromium_headless_shell_version"] = chromium_headless_shell_version
 
-                # On Linux, create debian_archive repos and a sysroot repo
-                # with a select() choosing between raw browser and sysroot-enhanced variant.
                 sysroot_packages = _CHROMIUM_SYSROOT_PACKAGES.get(platform, [])
                 if sysroot_packages:
-                    sysroot_repo_labels = []
-                    for pkg in sysroot_packages:
-                        pkg_name = pkg["name"].replace(".", "_").replace("-", "_").replace("+", "_")
-                        deb_repo_name = "{}_{}_{}".format(name, pkg_name, platform.replace("-", "_"))
-                        debian_archive(
-                            name = deb_repo_name,
-                            urls = pkg["urls"],
-                            integrity = pkg.get("integrity", ""),
-                            sha256 = pkg.get("sha256", ""),
-                            build_file_content = 'filegroup(name = "files", srcs = glob(["**"]), visibility = ["//visibility:public"])',
-                        )
-                        sysroot_repo_labels.append("@{}//:BUILD.bazel".format(deb_repo_name))
-
-                    sysroot_repo_name = "{}_{}_{}".format(name, "chromium_headless_shell_sysroot", platform.replace("-", "_"))
+                    sys_repo_name = "{}_{}_{}".format(name, "chromium_headless_shell_sysroot", platform.replace("-", "_"))
                     playwright_chromium_with_sysroot(
-                        name = sysroot_repo_name,
-                        browser = "@{}//:BUILD.bazel".format(repo_name),
-                        sysroot_repos = sysroot_repo_labels,
+                        name = sys_repo_name,
+                        browser_urls = version_data["urls"],
+                        browser_integrity = version_data["integrity"],
+                        browser_strip_prefix = version_data["strip_prefix"],
+                        sysroot_packages_json = json.encode(sysroot_packages),
+                        original_chromium = str(Label("@{}".format(repo_name))),
                     )
-                    browser_labels["chromium_headless_shell"] = "@{}".format(sysroot_repo_name)
-                else:
-                    browser_labels["chromium_headless_shell"] = "@{}".format(repo_name)
+
+                    repo_name = sys_repo_name
+
+                browser_labels["chromium_headless_shell"] = "@{}".format(repo_name)
 
             # Firefox
             if firefox_version and firefox_version in FIREFOX_VERSIONS and platform in FIREFOX_VERSIONS[firefox_version]:

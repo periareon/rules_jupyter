@@ -342,7 +342,7 @@ def _playwright_impl(module_ctx):
                 # with a select() choosing between raw browser and sysroot-enhanced variant.
                 sysroot_packages = _CHROMIUM_SYSROOT_PACKAGES.get(platform, [])
                 if sysroot_packages:
-                    sysroot_repo_names = []
+                    sysroot_repo_labels = []
                     for pkg in sysroot_packages:
                         pkg_name = pkg["name"].replace(".", "_").replace("-", "_").replace("+", "_")
                         deb_repo_name = "{}_{}_{}".format(name, pkg_name, platform.replace("-", "_"))
@@ -353,13 +353,13 @@ def _playwright_impl(module_ctx):
                             sha256 = pkg.get("sha256", ""),
                             build_file_content = 'filegroup(name = "files", srcs = glob(["**"]), visibility = ["//visibility:public"])',
                         )
-                        sysroot_repo_names.append(deb_repo_name)
+                        sysroot_repo_labels.append("@{}//:BUILD.bazel".format(deb_repo_name))
 
                     sysroot_repo_name = "{}_{}_{}".format(name, "chromium_headless_shell_sysroot", platform.replace("-", "_"))
                     playwright_chromium_with_sysroot(
                         name = sysroot_repo_name,
-                        browser = repo_name,
-                        sysroot_repos = sysroot_repo_names,
+                        browser = "@{}//:BUILD.bazel".format(repo_name),
+                        sysroot_repos = sysroot_repo_labels,
                     )
                     browser_labels["chromium_headless_shell"] = "@{}".format(sysroot_repo_name)
                 else:

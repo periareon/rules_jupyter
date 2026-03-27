@@ -12,6 +12,18 @@ CHROME_LINUX = glob(["chrome-linux*/*headless_shell"], allow_empty = True)
 BROWSER_SRCS = CHROME_HEADLESS if CHROME_HEADLESS else CHROME_LINUX
 BROWSER_DIR = "chrome-headless-shell-linux" if CHROME_HEADLESS else "chrome-linux"
 
+SYSROOT_SO_FILES = {sysroot_so_files}
+
+filegroup(
+    name = "_without_sysroot",
+    srcs = BROWSER_SRCS,
+    data = glob(
+        include = ["{{}}*/**".format(BROWSER_DIR)],
+        exclude = BROWSER_SRCS + SYSROOT_SO_FILES,
+    ),
+    visibility = ["//visibility:public"],
+)
+
 filegroup(
     name = "_with_sysroot",
     srcs = BROWSER_SRCS,
@@ -26,7 +38,7 @@ alias(
     name = "{name}",
     actual = select({{
         "@rules_jupyter//playwright/settings:embedded_linux_chrome_sys_libs_enabled": ":_with_sysroot",
-        "//conditions:default": "{browser_label}",
+        "//conditions:default": ":_without_sysroot",
     }}),
     visibility = ["//visibility:public"],
 )
@@ -41,21 +53,25 @@ def _is_shared_lib(basename):
     return suffix == "" or suffix.startswith(".")
 
 def _symlink_shared_libs(repository_ctx, root, dest_dir):
-    """Recursively walk `root` and symlink .so files into `dest_dir`."""
+    """Recursively walk `root` and symlink .so files into `dest_dir`.
+
+    Returns:
+        List of relative paths (from repo root) for each symlinked file.
+    """
+    symlinked = []
     for entry in root.readdir():
         if entry.is_dir:
-            _symlink_shared_libs(repository_ctx, entry, dest_dir)
+            symlinked.extend(_symlink_shared_libs(repository_ctx, entry, dest_dir))
         elif _is_shared_lib(entry.basename):
             dest = dest_dir.get_child(entry.basename)
             if not dest.exists:
                 repository_ctx.symlink(entry, dest)
+                symlinked.append("{}/{}".format(dest_dir.basename, entry.basename))
+    return symlinked
 
 def _playwright_chromium_with_sysroot_impl(repository_ctx):
-    # Symlink browser archive contents into this repo
-    browser_build = repository_ctx.path(
-        Label("@{}//:BUILD.bazel".format(repository_ctx.attr.browser)),
-    )
-    for entry in browser_build.dirname.readdir():
+    browser_root = repository_ctx.path(repository_ctx.attr.browser).dirname
+    for entry in browser_root.readdir():
         if entry.basename in ["BUILD.bazel", "WORKSPACE.bazel", "WORKSPACE", "MODULE.bazel"]:
             continue
         repository_ctx.symlink(entry, entry.basename)
@@ -69,19 +85,19 @@ def _playwright_chromium_with_sysroot_impl(repository_ctx):
             break
 
     if not browser_bin_dir:
-        fail("Could not find browser binary directory in @{}".format(repository_ctx.attr.browser))
+        fail("Could not find browser binary directory in browser archive")
 
     # Symlink .so files from each sysroot repo directly next to the browser binary
-    for sysroot_repo in repository_ctx.attr.sysroot_repos:
-        lib_root = repository_ctx.path(
-            Label("@{}//:BUILD.bazel".format(sysroot_repo)),
-        ).dirname
-        _symlink_shared_libs(repository_ctx, lib_root, browser_bin_dir)
+    sysroot_so_files = []
+    for sysroot_label in repository_ctx.attr.sysroot_repos:
+        lib_root = repository_ctx.path(sysroot_label).dirname
+        sysroot_so_files.extend(
+            _symlink_shared_libs(repository_ctx, lib_root, browser_bin_dir),
+        )
 
-    # Generate BUILD and WORKSPACE files
     repository_ctx.file("BUILD.bazel", _BUILD_TEMPLATE.format(
         name = repository_ctx.original_name,
-        browser_label = "@{}".format(repository_ctx.attr.browser),
+        sysroot_so_files = json.encode(sysroot_so_files),
     ))
     repository_ctx.file("WORKSPACE.bazel", """workspace(name = "{}")""".format(
         repository_ctx.original_name,
@@ -96,12 +112,12 @@ chooses between this enhanced filegroup (flag ON) and the raw browser archive
 """,
     implementation = _playwright_chromium_with_sysroot_impl,
     attrs = {
-        "browser": attr.string(
-            doc = "Repository name of the raw Chromium headless-shell browser archive.",
+        "browser": attr.label(
+            doc = "Label to a file in the raw Chromium headless-shell browser archive (used for path resolution).",
             mandatory = True,
         ),
-        "sysroot_repos": attr.string_list(
-            doc = "Repository names of debian_archive repos providing system shared libraries.",
+        "sysroot_repos": attr.label_list(
+            doc = "Labels to files in debian_archive repos (used for path resolution).",
             default = [],
         ),
     },

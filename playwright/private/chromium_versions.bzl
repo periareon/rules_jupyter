@@ -739,7 +739,7 @@ CHROMIUM_VERSIONS = {
     },
     "1080": {
         "linux-aarch64": {
-            "integrity": "sha256-GTBqM8BcWlQb6DJlvJuQRAC6mErIGWWzBKC6EudsQf4=",
+            "integrity": "sha256-CidcLm1bG40oxAbYFQusRCpPWVB80erzjOxMuMEBN9o=",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1080/chromium-linux-arm64.zip",
@@ -859,7 +859,9 @@ CHROMIUM_VERSIONS = {
             "integrity": "sha256-yB1gd2X4Xlm0HZN8qHfoFcbkajgLq0m9bGurOkUoQms=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1097/chromium-linux-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1097/chromium-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1097/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
@@ -970,7 +972,9 @@ CHROMIUM_VERSIONS = {
             "integrity": "sha256-aVeC4MO34JULZiaQyN4SFikNFDKWYNtt9Cqrs+j29a4=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1117/chromium-linux-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1117/chromium-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1117/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
@@ -1086,7 +1090,7 @@ CHROMIUM_VERSIONS = {
     },
     "1134": {
         "linux-aarch64": {
-            "integrity": "sha256-Kw/nlmWMp8iSdN6EIoFtw9KdtFQC7ar2ywtHNF8bCyM=",
+            "integrity": "sha256-hFWc9+y1my2aVbCZGeopRFNwU2PQ1drOh3AxN2s5u2w=",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1134/chromium-linux-arm64.zip",
@@ -1136,6 +1140,8 @@ CHROMIUM_VERSIONS = {
             "integrity": "sha256-y38uoIZQpbucqzrEHS+E9No7Favg3/flMQ2w1TLNp/Q=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1140/chromium-linux-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1140/chromium-linux-arm64.zip",
                 "https://cdn.playwright.dev/builds/chromium/1140/chromium-linux-arm64.zip",
             ],
         },
@@ -1179,7 +1185,9 @@ CHROMIUM_VERSIONS = {
             "integrity": "sha256-98S7kf4nQ1gRIuBBXI03UFU4PLaBDCuyOtp1XeMKhWc=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1148/chromium-linux-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1148/chromium-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1148/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
@@ -1453,7 +1461,9 @@ CHROMIUM_VERSIONS = {
             "integrity": "sha256-XeymNQasx0Ka++LsVlyHIprHVafBAZHuBoEiZ2QScQY=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1181/chromium-linux-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1181/chromium-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1181/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
@@ -1490,7 +1500,9 @@ CHROMIUM_VERSIONS = {
             "integrity": "sha256-/CjNvSYn7zn+mwpS0c2SfyFyDeaYl5gxOUT/RDEamnw=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-linux-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1187/chromium-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1187/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
@@ -1527,7 +1539,9 @@ CHROMIUM_VERSIONS = {
             "integrity": "sha256-plHQ+Lj0zOSYbEE2mfuAjGBeQEALhzoO5yac0AYO9Tc=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1193/chromium-linux-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1193/chromium-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1193/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {

@@ -159,6 +159,8 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             "integrity": "sha256-8+wHI693cg/gcmJQdkzK1gQO1oYUwf6BEu4rX7XcMQw=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-linux-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-linux-arm64.zip",
                 "https://cdn.playwright.dev/builds/chromium/1178/chromium-headless-shell-linux-arm64.zip",
             ],
         },

@@ -9,8 +9,3 @@ py_binary(
     name = "update_playwright_browsers",
     srcs = ["update_playwright_browsers.py"],
 )
-
-py_binary(
-    name = "update_chromium_sysroot",
-    srcs = ["update_chromium_sysroot.py"],
-)

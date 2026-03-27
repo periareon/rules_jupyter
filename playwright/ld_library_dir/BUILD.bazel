@@ -7,6 +7,12 @@ py_binary(
     visibility = ["//visibility:public"],
 )
 
+py_binary(
+    name = "generate_chromium_sysroot",
+    srcs = ["generate_chromium_sysroot.py"],
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "bzl_lib",
     srcs = ["ld_library_dir.bzl"],

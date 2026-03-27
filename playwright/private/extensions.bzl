@@ -27,7 +27,7 @@ load(
 )
 load(
     ":sysroot.bzl",
-    "chromium_headless_shell_selector",
+    "playwright_chromium_with_sysroot",
 )
 load(
     ":sysroot_packages.bzl",
@@ -338,11 +338,11 @@ def _playwright_impl(module_ctx):
                 )
                 browser_versions_dict["chromium_headless_shell_version"] = chromium_headless_shell_version
 
-                # On Linux, create debian_archive repos and a selector repo
-                # that chooses between raw browser and sysroot-enhanced variant.
+                # On Linux, create debian_archive repos and a sysroot repo
+                # with a select() choosing between raw browser and sysroot-enhanced variant.
                 sysroot_packages = _CHROMIUM_SYSROOT_PACKAGES.get(platform, [])
                 if sysroot_packages:
-                    sysroot_lib_labels = []
+                    sysroot_repo_names = []
                     for pkg in sysroot_packages:
                         pkg_name = pkg["name"].replace(".", "_").replace("-", "_").replace("+", "_")
                         deb_repo_name = "{}_{}_{}".format(name, pkg_name, platform.replace("-", "_"))
@@ -353,16 +353,15 @@ def _playwright_impl(module_ctx):
                             sha256 = pkg.get("sha256", ""),
                             build_file_content = 'filegroup(name = "files", srcs = glob(["**"]), visibility = ["//visibility:public"])',
                         )
-                        sysroot_lib_labels.append("@{}//:files".format(deb_repo_name))
+                        sysroot_repo_names.append(deb_repo_name)
 
-                    selector_repo_name = "{}_{}_{}".format(name, "chromium_headless_shell_selector", platform.replace("-", "_"))
-                    chromium_headless_shell_selector(
-                        name = selector_repo_name,
-                        original_name = selector_repo_name,
-                        browser = "@{}".format(repo_name),
-                        sysroot_libs = sysroot_lib_labels,
+                    sysroot_repo_name = "{}_{}_{}".format(name, "chromium_headless_shell_sysroot", platform.replace("-", "_"))
+                    playwright_chromium_with_sysroot(
+                        name = sysroot_repo_name,
+                        browser = repo_name,
+                        sysroot_repos = sysroot_repo_names,
                     )
-                    browser_labels["chromium_headless_shell"] = "@{}".format(selector_repo_name)
+                    browser_labels["chromium_headless_shell"] = "@{}".format(sysroot_repo_name)
                 else:
                     browser_labels["chromium_headless_shell"] = "@{}".format(repo_name)
 

@@ -11,12 +11,6 @@ bzl_library(
 )
 
 py_binary(
-    name = "sysroot_overlay",
-    srcs = ["sysroot_overlay.py"],
-    visibility = ["//visibility:public"],
-)
-
-py_binary(
     name = "playwright_install",
     srcs = ["playwright_install.py"],
     visibility = ["//visibility:public"],

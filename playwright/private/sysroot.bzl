@@ -1,130 +1,107 @@
-"""Rules for bundling Chromium headless-shell with system library dependencies.
+"""Repository rule for bundling Chromium headless-shell with system library dependencies.
 
-Provides:
-- `playwright_chromium_with_sysroot`: a build rule that overlays .so files from
-  Debian packages into a browser directory.
-- `chromium_headless_shell_selector`: a repository rule that generates a BUILD
-  with a select()-based alias, choosing between the raw browser and the
-  sysroot-enhanced variant based on the feature flag.
+Creates a repository that symlinks a browser archive's files alongside .so files
+extracted from Debian packages, producing a real filegroup where RPATH=$ORIGIN
+resolves the sysroot libraries at runtime.
 """
 
-def _playwright_chromium_with_sysroot_impl(ctx):
-    output_dir = ctx.actions.declare_directory(ctx.attr.name + "_browser")
+_BUILD_TEMPLATE = """\
+CHROME_HEADLESS = glob(["chrome-headless-shell-linux*/*headless-shell"], allow_empty = True)
+CHROME_LINUX = glob(["chrome-linux*/*headless_shell"], allow_empty = True)
 
-    browser_files = depset(transitive = [
-        ctx.attr.browser[DefaultInfo].files,
-        ctx.attr.browser[DefaultInfo].default_runfiles.files,
-    ])
+BROWSER_SRCS = CHROME_HEADLESS if CHROME_HEADLESS else CHROME_LINUX
+BROWSER_DIR = "chrome-headless-shell-linux" if CHROME_HEADLESS else "chrome-linux"
 
-    sysroot_files = []
-    for dep in ctx.attr.sysroot_libs:
-        sysroot_files.append(dep[DefaultInfo].files)
-
-    all_sysroot = depset(transitive = sysroot_files)
-
-    browser_list = browser_files.to_list()
-    sysroot_list = all_sysroot.to_list()
-
-    manifest_content = {
-        "browser_files": [f.path for f in browser_list],
-        "output_dir": output_dir.path,
-        "sysroot_files": [f.path for f in sysroot_list],
-    }
-
-    manifest_file = ctx.actions.declare_file(ctx.attr.name + "_sysroot_manifest.json")
-    ctx.actions.write(
-        output = manifest_file,
-        content = json.encode_indent(manifest_content, indent = "  "),
-    )
-
-    ctx.actions.run(
-        mnemonic = "ChromiumSysrootOverlay",
-        progress_message = "Bundling Chromium with sysroot libraries %{label}",
-        executable = ctx.executable._overlay_tool,
-        arguments = [manifest_file.path],
-        inputs = depset([manifest_file], transitive = [browser_files, all_sysroot]),
-        outputs = [output_dir],
-        env = ctx.configuration.default_shell_env,
-    )
-
-    return [DefaultInfo(
-        files = depset([output_dir]),
-    )]
-
-playwright_chromium_with_sysroot = rule(
-    doc = """\
-Combines a Chromium headless-shell browser filegroup with system shared libraries
-extracted from Debian packages. The .so files are placed in the same directory as
-the browser binary so RPATH=$ORIGIN resolves them automatically.
-""",
-    implementation = _playwright_chromium_with_sysroot_impl,
-    attrs = {
-        "browser": attr.label(
-            doc = "Label to the raw Chromium headless-shell browser filegroup.",
-            mandatory = True,
-        ),
-        "sysroot_libs": attr.label_list(
-            doc = "Labels to debian_archive filegroups providing system shared libraries.",
-            allow_empty = True,
-            default = [],
-        ),
-        "_overlay_tool": attr.label(
-            cfg = "exec",
-            executable = True,
-            default = Label("//playwright/private:sysroot_overlay"),
-        ),
-    },
-)
-
-# -- Intermediate selector repository rule --
-
-_SELECTOR_BUILD_TEMPLATE = """\
-load("@rules_jupyter//playwright/private:sysroot.bzl", "playwright_chromium_with_sysroot")
-
-playwright_chromium_with_sysroot(
-    name = "with_sysroot",
-    browser = "{browser_label}",
-    sysroot_libs = {sysroot_libs},
+filegroup(
+    name = "_with_sysroot",
+    srcs = BROWSER_SRCS,
+    data = glob(
+        include = ["{{}}*/**".format(BROWSER_DIR)],
+        exclude = BROWSER_SRCS,
+    ),
+    visibility = ["//visibility:public"],
 )
 
 alias(
     name = "{name}",
     actual = select({{
-        "@rules_jupyter//playwright/settings:embedded_linux_chrome_sys_libs_enabled": ":with_sysroot",
+        "@rules_jupyter//playwright/settings:embedded_linux_chrome_sys_libs_enabled": ":_with_sysroot",
         "//conditions:default": "{browser_label}",
     }}),
     visibility = ["//visibility:public"],
 )
 """
 
-def _chromium_headless_shell_selector_impl(repository_ctx):
-    repository_ctx.file("BUILD.bazel", _SELECTOR_BUILD_TEMPLATE.format(
-        name = repository_ctx.attr.original_name,
-        browser_label = repository_ctx.attr.browser,
-        sysroot_libs = json.encode(repository_ctx.attr.sysroot_libs),
+def _is_shared_lib(basename):
+    """Returns True if the filename looks like a shared library (.so or .so.N...)."""
+    parts = basename.split(".so")
+    if len(parts) < 2:
+        return False
+    suffix = parts[-1]
+    return suffix == "" or suffix.startswith(".")
+
+def _symlink_shared_libs(repository_ctx, root, dest_dir):
+    """Recursively walk `root` and symlink .so files into `dest_dir`."""
+    for entry in root.readdir():
+        if entry.is_dir:
+            _symlink_shared_libs(repository_ctx, entry, dest_dir)
+        elif _is_shared_lib(entry.basename):
+            dest = dest_dir.get_child(entry.basename)
+            if not dest.exists:
+                repository_ctx.symlink(entry, dest)
+
+def _playwright_chromium_with_sysroot_impl(repository_ctx):
+    # Symlink browser archive contents into this repo
+    browser_build = repository_ctx.path(
+        Label("@{}//:BUILD.bazel".format(repository_ctx.attr.browser)),
+    )
+    for entry in browser_build.dirname.readdir():
+        if entry.basename in ["BUILD.bazel", "WORKSPACE.bazel", "WORKSPACE", "MODULE.bazel"]:
+            continue
+        repository_ctx.symlink(entry, entry.basename)
+
+    # Find the browser binary directory (e.g. chrome-headless-shell-linux64/)
+    browser_bin_dir = None
+    for entry in repository_ctx.path(".").readdir():
+        basename = entry.basename
+        if basename.startswith("chrome-headless-shell-linux") or basename.startswith("chrome-linux"):
+            browser_bin_dir = entry
+            break
+
+    if not browser_bin_dir:
+        fail("Could not find browser binary directory in @{}".format(repository_ctx.attr.browser))
+
+    # Symlink .so files from each sysroot repo directly next to the browser binary
+    for sysroot_repo in repository_ctx.attr.sysroot_repos:
+        lib_root = repository_ctx.path(
+            Label("@{}//:BUILD.bazel".format(sysroot_repo)),
+        ).dirname
+        _symlink_shared_libs(repository_ctx, lib_root, browser_bin_dir)
+
+    # Generate BUILD and WORKSPACE files
+    repository_ctx.file("BUILD.bazel", _BUILD_TEMPLATE.format(
+        name = repository_ctx.original_name,
+        browser_label = "@{}".format(repository_ctx.attr.browser),
     ))
     repository_ctx.file("WORKSPACE.bazel", """workspace(name = "{}")""".format(
-        repository_ctx.attr.original_name,
+        repository_ctx.original_name,
     ))
 
-chromium_headless_shell_selector = repository_rule(
+playwright_chromium_with_sysroot = repository_rule(
     doc = """\
-Generates a repository with a select()-based alias that resolves to either the
-raw Chromium headless-shell browser or a sysroot-enhanced variant, based on the
-experimental_embedded_linux_chrome_sys_libs flag.
+Creates a repository containing the Chromium headless-shell browser files with
+system shared libraries symlinked next to the binary. A select()-based alias
+chooses between this enhanced filegroup (flag ON) and the raw browser archive
+(flag OFF).
 """,
-    implementation = _chromium_headless_shell_selector_impl,
+    implementation = _playwright_chromium_with_sysroot_impl,
     attrs = {
         "browser": attr.string(
-            doc = "Label string for the raw Chromium headless-shell browser filegroup.",
+            doc = "Repository name of the raw Chromium headless-shell browser archive.",
             mandatory = True,
         ),
-        "original_name": attr.string(
-            doc = "The apparent repo name, used as the default target name in the BUILD file.",
-            mandatory = True,
-        ),
-        "sysroot_libs": attr.string_list(
-            doc = "Label strings for debian_archive filegroups providing system shared libraries.",
+        "sysroot_repos": attr.string_list(
+            doc = "Repository names of debian_archive repos providing system shared libraries.",
             default = [],
         ),
     },

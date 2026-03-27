@@ -1,0 +1,7 @@
+load("@rules_venv//python:py_binary.bzl", "py_binary")
+
+py_binary(
+    name = "generator",
+    srcs = ["generator.py"],
+    visibility = ["//visibility:public"],
+)

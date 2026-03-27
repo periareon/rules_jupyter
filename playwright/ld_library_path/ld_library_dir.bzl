@@ -16,7 +16,6 @@ def _playwright_ld_library_dir_impl(ctx):
 
     ctx.actions.run(
         mnemonic = "PlaywrightLdLibraryDir",
-        progress_message = "Collecting shared libraries for Playwright %{label}",
         executable = ctx.executable._generator,
         arguments = [args],
         inputs = inputs,
@@ -38,7 +37,7 @@ playwright_ld_library_dir = rule(
         "_generator": attr.label(
             cfg = "exec",
             executable = True,
-            default = Label("//playwright/ld_library_dir:generator"),
+            default = Label("//playwright/ld_library_path/private:generator"),
         ),
     },
 )

@@ -82,20 +82,32 @@ def _symlink_shared_libs(repository_ctx, deb_root, dest_dir):
                     symlinked.append("{}/{}".format(dest_dir.basename, entry.basename))
     return symlinked
 
+def _is_browser_dir(basename):
+    """Returns True if the directory name matches a Chromium browser directory."""
+    return basename.startswith("chrome-headless-shell-linux") or basename.startswith("chrome-linux")
+
+def _symlink_dir_contents(repository_ctx, source_dir, dest_dir_name):
+    """Symlink the individual files inside a directory rather than the directory itself.
+
+    This creates a real directory in the repo so additional files (e.g. sysroot
+    .so files) can be added alongside the originals.
+    """
+    for entry in source_dir.readdir():
+        dest = dest_dir_name + "/" + entry.basename
+        repository_ctx.symlink(entry, dest)
+
 def _playwright_chromium_with_sysroot_impl(repository_ctx):
     browser_root = repository_ctx.path(repository_ctx.attr.browser).dirname
+
+    browser_bin_dir = None
     for entry in browser_root.readdir():
         if entry.basename in ["BUILD.bazel", "WORKSPACE.bazel", "WORKSPACE", "MODULE.bazel"]:
             continue
-        repository_ctx.symlink(entry, entry.basename)
-
-    # Find the browser binary directory (e.g. chrome-headless-shell-linux64/)
-    browser_bin_dir = None
-    for entry in repository_ctx.path(".").readdir():
-        basename = entry.basename
-        if basename.startswith("chrome-headless-shell-linux") or basename.startswith("chrome-linux"):
-            browser_bin_dir = entry
-            break
+        if _is_browser_dir(entry.basename):
+            _symlink_dir_contents(repository_ctx, entry, entry.basename)
+            browser_bin_dir = repository_ctx.path(entry.basename)
+        else:
+            repository_ctx.symlink(entry, entry.basename)
 
     if not browser_bin_dir:
         fail("Could not find browser binary directory in browser archive")

@@ -344,7 +344,7 @@ def _playwright_impl(module_ctx):
                         browser_integrity = version_data["integrity"],
                         browser_strip_prefix = version_data["strip_prefix"],
                         sysroot_packages_json = json.encode(sysroot_packages),
-                        original_chromium = str(Label("@{}".format(repo_name))),
+                        original_chromium = "@{}".format(repo_name),
                     )
 
                     repo_name = sys_repo_name

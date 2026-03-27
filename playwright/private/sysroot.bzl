@@ -161,7 +161,7 @@ when the experimental_embedded_linux_chrome_sys_libs flag is enabled.
             doc = "JSON-encoded list of sysroot package descriptors, each with 'urls' and 'integrity' fields.",
             mandatory = True,
         ),
-        "original_chromium": attr.string(
+        "original_chromium": attr.label(
             doc = "The label to the original chromium filegroup.",
             mandatory = True,
         ),

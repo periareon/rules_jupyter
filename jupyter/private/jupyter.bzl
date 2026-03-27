@@ -186,6 +186,8 @@ def _jupyter_report_impl(ctx):
         args.add("--pandoc", toolchain.pandoc)
     if toolchain.playwright_browsers_dir:
         args.add("--playwright_browsers_dir", toolchain.playwright_browsers_dir.path)
+    if toolchain.playwright_ld_library_dir:
+        args.add("--ld_library_dir", toolchain.playwright_ld_library_dir.path)
 
     if ctx.outputs.out_html:
         out_html = ctx.outputs.out_html
@@ -428,6 +430,8 @@ def _jupyter_notebook_test_impl(ctx):
     args.add("--pandoc", _rlocationpath(toolchain.pandoc, ctx.workspace_name))
     if toolchain.playwright_browsers_dir:
         args.add("--playwright_browsers_dir", _rlocationpath(toolchain.playwright_browsers_dir, ctx.workspace_name))
+    if toolchain.playwright_ld_library_dir:
+        args.add("--ld_library_dir", _rlocationpath(toolchain.playwright_ld_library_dir, ctx.workspace_name))
     args.add("--notebook", _rlocationpath(notebook_info.notebook, ctx.workspace_name))
     args.add("--cwd_mode", cwd_mode)
     if kernel:
@@ -560,6 +564,8 @@ def _jupyter_notebook_binary_impl(ctx):
     args.add("--pandoc", _rlocationpath(toolchain.pandoc, ctx.workspace_name))
     if toolchain.playwright_browsers_dir:
         args.add("--playwright_browsers_dir", _rlocationpath(toolchain.playwright_browsers_dir, ctx.workspace_name))
+    if toolchain.playwright_ld_library_dir:
+        args.add("--ld_library_dir", _rlocationpath(toolchain.playwright_ld_library_dir, ctx.workspace_name))
     args.add("--notebook", _rlocationpath(notebook_info.notebook, ctx.workspace_name))
     args.add("--cwd_mode", cwd_mode)
     if kernel:
@@ -725,6 +731,8 @@ def _jupyter_lab_impl(ctx):
     args.add("--pandoc", _rlocationpath(toolchain.pandoc, ctx.workspace_name))
     if toolchain.playwright_browsers_dir:
         args.add("--playwright_browsers_dir", _rlocationpath(toolchain.playwright_browsers_dir, ctx.workspace_name))
+    if toolchain.playwright_ld_library_dir:
+        args.add("--ld_library_dir", _rlocationpath(toolchain.playwright_ld_library_dir, ctx.workspace_name))
     args.add("--notebook", notebook_rloc)
     args.add("--cwd_mode", cwd_mode)
     if kernel:

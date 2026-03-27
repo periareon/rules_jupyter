@@ -56,6 +56,11 @@ def parse_args() -> argparse.Namespace:
         help="The path to a playwright browsers cache.",
     )
     parser.add_argument(
+        "--ld_library_dir",
+        type=Path,
+        help="Directory of shared libraries to prepend to LD_LIBRARY_PATH.",
+    )
+    parser.add_argument(
         "--cwd_mode",
         type=CwdMode,
         required=True,
@@ -408,6 +413,20 @@ def configure_playwright(browsers_dir: Path) -> None:
     logging.debug("Set PLAYWRIGHT_BROWSERS_PATH to: %s", browsers_dir)
 
 
+def configure_ld_library_path(ld_library_dir: Path) -> None:
+    """Prepend a directory of shared libraries to LD_LIBRARY_PATH.
+
+    Args:
+        ld_library_dir: Path to a directory containing .so files.
+    """
+    current = os.environ.get("LD_LIBRARY_PATH", "")
+    if current:
+        os.environ["LD_LIBRARY_PATH"] = str(ld_library_dir) + os.pathsep + current
+    else:
+        os.environ["LD_LIBRARY_PATH"] = str(ld_library_dir)
+    logging.debug("Set LD_LIBRARY_PATH to: %s", os.environ["LD_LIBRARY_PATH"])
+
+
 def _set_temp_home_env() -> tuple[str | None, str | None, Path]:
     """Set HOME and USERPROFILE to a temporary directory.
 
@@ -613,6 +632,8 @@ def main() -> None:
         # Configure playwright browsers (sets PLAYWRIGHT_BROWSERS_PATH)
         if args.playwright_browsers_dir:
             configure_playwright(args.playwright_browsers_dir)
+        if args.ld_library_dir:
+            configure_ld_library_path(args.ld_library_dir)
 
         if args.cwd_mode == CwdMode.NOTEBOOK_ROOT:
             cwd = args.notebook.parent

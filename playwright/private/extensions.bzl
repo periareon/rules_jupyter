@@ -1,6 +1,10 @@
 """Playwright bzlmod extension"""
 
 load(
+    "//tools/debian:debian_archive.bzl",
+    "debian_archive",
+)
+load(
     ":browser_versions.bzl",
     _BROWSER_VERSIONS = "BROWSER_VERSIONS",
 )
@@ -23,7 +27,7 @@ load(
 )
 load(
     ":sysroot.bzl",
-    "playwright_chromium_with_sysroot",
+    "playwright_ld_library_dir_repo",
 )
 load(
     ":sysroot_packages.bzl",
@@ -84,6 +88,7 @@ playwright_toolchain(
     webkit_version = {webkit_version},
     ffmpeg = {ffmpeg_label},
     ffmpeg_version = {ffmpeg_version},
+    ld_library_dir = {ld_library_dir_label},
     visibility = ["//visibility:public"],
 )
 
@@ -129,6 +134,7 @@ def _playwright_toolchain_repository_impl(repository_ctx):
         webkit_version = repr(repository_ctx.attr.webkit_version) if repository_ctx.attr.webkit_version else "None",
         ffmpeg_label = repr(str(repository_ctx.attr.ffmpeg)) if repository_ctx.attr.ffmpeg else "None",
         ffmpeg_version = repr(repository_ctx.attr.ffmpeg_version) if repository_ctx.attr.ffmpeg_version else "None",
+        ld_library_dir_label = repr(str(repository_ctx.attr.ld_library_dir)) if repository_ctx.attr.ld_library_dir else "None",
         exec_constraints = json.encode(constraints),
         target_constraints = json.encode(constraints),
     ))
@@ -170,6 +176,10 @@ playwright_toolchain_repository = repository_rule(
         ),
         "firefox_version": attr.string(
             doc = "Version string for the Firefox browser (e.g., \"1497\"). Required if firefox is provided.",
+            mandatory = False,
+        ),
+        "ld_library_dir": attr.label(
+            doc = "Label to the ld_library_dir target providing shared libraries for LD_LIBRARY_PATH.",
             mandatory = False,
         ),
         "platform": attr.string(
@@ -323,6 +333,7 @@ def _playwright_impl(module_ctx):
                 browser_versions_dict["chromium_version"] = chromium_version
 
             # Chromium headless-shell
+            ld_library_dir_label = None
             if chromium_headless_shell_version and chromium_headless_shell_version in CHROMIUM_HEADLESS_SHELL_VERSIONS and platform in CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version]:
                 browser_versions_dict["chromium_headless_shell_version"] = chromium_headless_shell_version
                 version_data = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]
@@ -334,22 +345,29 @@ def _playwright_impl(module_ctx):
                     integrity = version_data["integrity"],
                     strip_prefix = version_data["strip_prefix"],
                 )
+                browser_labels["chromium_headless_shell"] = "@{}".format(repo_name)
 
                 sysroot_packages = _CHROMIUM_SYSROOT_PACKAGES.get(platform, [])
                 if sysroot_packages:
-                    sys_repo_name = "{}_{}_{}".format(name, "chromium_headless_shell_sysroot", platform.replace("-", "_"))
-                    playwright_chromium_with_sysroot(
-                        name = sys_repo_name,
-                        browser_urls = version_data["urls"],
-                        browser_integrity = version_data["integrity"],
-                        browser_strip_prefix = version_data["strip_prefix"],
-                        sysroot_packages_json = json.encode(sysroot_packages),
-                        original_chromium = "@{}".format(repo_name),
+                    deb_labels = []
+                    for pkg in sysroot_packages:
+                        pkg_name = pkg["name"].replace(".", "_").replace("-", "_").replace("+", "_")
+                        deb_repo_name = "{}_{}_{}".format(name, pkg_name, platform.replace("-", "_"))
+                        debian_archive(
+                            name = deb_repo_name,
+                            urls = pkg["urls"],
+                            integrity = pkg.get("integrity", ""),
+                            sha256 = pkg.get("sha256", ""),
+                            build_file_content = 'filegroup(name = "files", srcs = glob(["**"]), visibility = ["//visibility:public"])',
+                        )
+                        deb_labels.append("@{}//:files".format(deb_repo_name))
+
+                    ld_lib_repo_name = "{}_{}_{}".format(name, "ld_library_dir", platform.replace("-", "_"))
+                    playwright_ld_library_dir_repo(
+                        name = ld_lib_repo_name,
+                        deps = deb_labels,
                     )
-
-                    repo_name = sys_repo_name
-
-                browser_labels["chromium_headless_shell"] = "@{}".format(repo_name)
+                    ld_library_dir_label = "@{}".format(ld_lib_repo_name)
 
             # Firefox
             if firefox_version and firefox_version in FIREFOX_VERSIONS and platform in FIREFOX_VERSIONS[firefox_version]:
@@ -406,6 +424,7 @@ def _playwright_impl(module_ctx):
                 webkit_version = browser_versions_dict.get("webkit_version"),
                 ffmpeg = browser_labels.get("ffmpeg"),
                 ffmpeg_version = browser_versions_dict.get("ffmpeg_version"),
+                ld_library_dir = ld_library_dir_label,
             )
 
             toolchain_names.append(toolchain_repo_name)

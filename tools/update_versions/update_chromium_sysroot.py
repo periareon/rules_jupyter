@@ -1,7 +1,11 @@
 """Generate sysroot_packages.bzl with Debian package URLs and integrity hashes.
 
 Resolves the system library packages required by Chromium headless-shell
-from Ubuntu mirrors (Noble 24.04) for both amd64 and arm64 architectures.
+from Ubuntu mirrors for both amd64 and arm64 architectures.
+
+Supported releases:
+  - jammy (22.04): glibc 2.35, pre-time_t64 package names
+  - noble (24.04): glibc 2.39, time_t64 package names
 """
 
 import argparse
@@ -17,10 +21,45 @@ from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 
-# Packages required by Chromium headless-shell on Linux.
-# Derived from `playwright install-deps --dry-run` on Ubuntu 24.04.
-# Only library packages (.so providers) are included; font/X11 packages are omitted.
-REQUIRED_PACKAGES: list[str] = [
+# Jammy (22.04) uses pre-time_t64 package names.
+REQUIRED_PACKAGES_JAMMY: list[str] = [
+    "libasound2",
+    "libatk-bridge2.0-0",
+    "libatk1.0-0",
+    "libatspi2.0-0",
+    "libcairo2",
+    "libcups2",
+    "libdbus-1-3",
+    "libdrm2",
+    "libgbm1",
+    "libglib2.0-0",
+    "libnspr4",
+    "libnss3",
+    "libnssutil3",
+    "libpango-1.0-0",
+    "libx11-6",
+    "libxcb1",
+    "libxcomposite1",
+    "libxdamage1",
+    "libxext6",
+    "libxfixes3",
+    "libxkbcommon0",
+    "libxrandr2",
+    "libfontconfig1",
+    "libfreetype6",
+    "libexpat1",
+    "libxrender1",
+    "libpangocairo-1.0-0",
+    "libpixman-1-0",
+    "libxau6",
+    "libxdmcp6",
+    "libwayland-server0",
+    "libwayland-client0",
+]
+
+# Noble (24.04) renamed several packages with a "t64" suffix for the
+# time_t 64-bit transition.
+REQUIRED_PACKAGES_NOBLE: list[str] = [
     "libasound2t64",
     "libatk-bridge2.0-0t64",
     "libatk1.0-0t64",
@@ -55,9 +94,13 @@ REQUIRED_PACKAGES: list[str] = [
     "libwayland-client0",
 ]
 
+RELEASE_PACKAGES: dict[str, list[str]] = {
+    "jammy": REQUIRED_PACKAGES_JAMMY,
+    "noble": REQUIRED_PACKAGES_NOBLE,
+}
+
 UBUNTU_MIRROR_AMD64 = "http://archive.ubuntu.com/ubuntu"
 UBUNTU_MIRROR_ARM64 = "http://ports.ubuntu.com/ubuntu-ports"
-UBUNTU_RELEASE = "noble"
 UBUNTU_COMPONENTS: list[str] = ["main", "universe"]
 
 ARCH_MAP: dict[str, str] = {
@@ -92,6 +135,7 @@ CHROMIUM_SYSROOT_PACKAGES = {packages}
 
 
 def _workspace_root() -> Path:
+    """Locate the workspace root directory."""
     if "BUILD_WORKSPACE_DIRECTORY" in os.environ:
         return Path(os.environ["BUILD_WORKSPACE_DIRECTORY"])
     return Path(__file__).parent.parent.parent
@@ -143,13 +187,13 @@ def _parse_packages_index(content: str) -> dict[str, dict[str, str]]:
     return packages
 
 
-def _load_packages_index(arch: str) -> dict[str, dict[str, str]]:
+def _load_packages_index(release: str, arch: str) -> dict[str, dict[str, str]]:
     """Download and parse the Ubuntu Packages index for an architecture."""
     mirror = MIRROR_MAP[arch]
     all_packages: dict[str, dict[str, str]] = {}
 
     for component in UBUNTU_COMPONENTS:
-        url = f"{mirror}/dists/{UBUNTU_RELEASE}/{component}/binary-{arch}/Packages.xz"
+        url = f"{mirror}/dists/{release}/{component}/binary-{arch}/Packages.xz"
         logging.info("Downloading packages index: %s", url)
 
         data = _download_with_retry(url)
@@ -159,7 +203,7 @@ def _load_packages_index(arch: str) -> dict[str, dict[str, str]]:
         logging.info(
             "Loaded %d packages from %s/%s",
             len(packages),
-            UBUNTU_RELEASE,
+            release,
             component,
         )
 
@@ -239,19 +283,31 @@ def main() -> None:
         default=_workspace_root() / "playwright" / "private" / "sysroot_packages.bzl",
         help="Output path for sysroot_packages.bzl",
     )
+    parser.add_argument(
+        "--release",
+        choices=sorted(RELEASE_PACKAGES.keys()),
+        default="jammy",
+        help="Ubuntu release to resolve packages from (default: jammy)",
+    )
     args = parser.parse_args()
 
+    required_packages = RELEASE_PACKAGES[args.release]
     packages_by_platform: dict[str, list[dict[str, Any]]] = {}
 
     for platform, arch in sorted(ARCH_MAP.items()):
-        logging.info("=== Resolving packages for %s (%s) ===", platform, arch)
-        packages_index = _load_packages_index(arch)
-        resolved = _resolve_packages(REQUIRED_PACKAGES, packages_index, arch)
+        logging.info(
+            "=== Resolving packages for %s (%s, %s) ===",
+            platform,
+            arch,
+            args.release,
+        )
+        packages_index = _load_packages_index(args.release, arch)
+        resolved = _resolve_packages(required_packages, packages_index, arch)
         packages_by_platform[platform] = resolved
         logging.info(
             "Resolved %d/%d packages for %s",
             len(resolved),
-            len(REQUIRED_PACKAGES),
+            len(required_packages),
             platform,
         )
 

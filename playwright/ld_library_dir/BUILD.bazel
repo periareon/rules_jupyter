@@ -1,0 +1,14 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@rules_venv//python:py_binary.bzl", "py_binary")
+
+py_binary(
+    name = "generator",
+    srcs = ["generator.py"],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "bzl_lib",
+    srcs = ["ld_library_dir.bzl"],
+    visibility = ["//playwright:__subpackages__"],
+)

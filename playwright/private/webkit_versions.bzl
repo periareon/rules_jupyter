@@ -266,7 +266,9 @@ WEBKIT_VERSIONS = {
             "integrity": "sha256-hKxw1gC+G7pqBSBnfvQNIaK7gf0eI10NDHjTxeMCe1E=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/1837/webkit-ubuntu-22.04-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/1837/webkit-ubuntu-22.04-arm64.zip",
+                "https://cdn.playwright.dev/builds/webkit/1837/webkit-ubuntu-22.04-arm64.zip",
             ],
         },
         "linux-x86_64": {
@@ -575,9 +577,7 @@ WEBKIT_VERSIONS = {
             "integrity": "sha256-Y1K+IV/RcvFmfXRBzSBIuLDFH5rqHRyXg437ypzN0HQ=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2051/webkit-ubuntu-22.04-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2051/webkit-ubuntu-22.04-arm64.zip",
-                "https://cdn.playwright.dev/builds/webkit/2051/webkit-ubuntu-22.04-arm64.zip",
             ],
         },
         "linux-x86_64": {
@@ -1003,7 +1003,9 @@ WEBKIT_VERSIONS = {
             "integrity": "sha256-vdiHCpQ5uTg3FTpqfTc9zHzFTGfoXNDELFTsuhjDkQA=",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2215/webkit-ubuntu-22.04-arm64.zip",
                 "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2215/webkit-ubuntu-22.04-arm64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2215/webkit-ubuntu-22.04-arm64.zip",
             ],
         },
         "linux-x86_64": {

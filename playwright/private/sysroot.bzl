@@ -1,8 +1,9 @@
 """Self-contained repository rule for Chromium headless-shell with system libraries.
 
 Downloads the browser archive and all required Debian packages directly,
-extracts .so files next to the browser binary, and produces a filegroup
-with select() to optionally include them at runtime via RPATH=$ORIGIN.
+extracts .so files next to the browser binary. Exposes an alias that
+select()s between this sysroot-enhanced build and the original plain
+http_archive, making the feature easy to enable/disable or rip out entirely.
 """
 
 load(
@@ -17,22 +18,13 @@ CHROME_LINUX = glob(["chrome-linux*/*headless_shell"], allow_empty = True)
 BROWSER_SRCS = CHROME_HEADLESS if CHROME_HEADLESS else CHROME_LINUX
 BROWSER_DIR = "chrome-headless-shell-linux" if CHROME_HEADLESS else "chrome-linux"
 
-ALL_DATA = glob(
-    include = ["{{}}*/**".format(BROWSER_DIR)],
-    exclude = BROWSER_SRCS,
-)
-
-SYSROOT_SO_FILES = {sysroot_so_files}
-
-DATA_WITHOUT_SYSROOT = glob(
-    include = ["{{}}*/**".format(BROWSER_DIR)],
-    exclude = BROWSER_SRCS + SYSROOT_SO_FILES,
-)
-
 filegroup(
     name = "browser",
     srcs = BROWSER_SRCS,
-    data = ALL_DATA,
+    data = glob(
+        include = ["{{}}*/**".format(BROWSER_DIR)],
+        exclude = BROWSER_SRCS,
+    ),
     visibility = ["//visibility:public"],
 )
 
@@ -107,7 +99,6 @@ def _playwright_chromium_with_sysroot_impl(repository_ctx):
     if not browser_bin_dir:
         fail("Could not find browser binary directory in browser archive")
 
-    sysroot_so_files = []
     packages = json.decode(repository_ctx.attr.sysroot_packages_json)
     for i, pkg in enumerate(packages):
         prefix = ".sysroot_tmp_{}".format(i)
@@ -118,19 +109,16 @@ def _playwright_chromium_with_sysroot_impl(repository_ctx):
             integrity = pkg.get("integrity", ""),
             add_prefix = prefix,
         )
-        sysroot_so_files.extend(
-            _copy_shared_libs(
-                repository_ctx,
-                repository_ctx.path(prefix),
-                browser_bin_dir,
-            ),
+        _copy_shared_libs(
+            repository_ctx,
+            repository_ctx.path(prefix),
+            browser_bin_dir,
         )
         repository_ctx.delete(prefix)
 
     repository_ctx.file("BUILD.bazel", _BUILD_TEMPLATE.format(
         name = repository_ctx.original_name,
-        sysroot_so_files = json.encode(sysroot_so_files),
-        original_chromium = repository_ctx.attr.original_chromium
+        original_chromium = repository_ctx.attr.original_chromium,
     ))
     repository_ctx.file("WORKSPACE.bazel", """workspace(name = "{}")""".format(
         repository_ctx.original_name,
@@ -140,8 +128,8 @@ playwright_chromium_with_sysroot = repository_rule(
     doc = """\
 Self-contained repository that downloads Chromium headless-shell and all required
 system library Debian packages. Extracts .so files next to the browser binary and
-produces a filegroup with select() to optionally include the sysroot libraries
-when the experimental_embedded_linux_chrome_sys_libs flag is enabled.
+exposes an alias that select()s between this enhanced build and the original plain
+http_archive based on the experimental_embedded_linux_chrome_sys_libs flag.
 """,
     implementation = _playwright_chromium_with_sysroot_impl,
     attrs = {
@@ -157,12 +145,12 @@ when the experimental_embedded_linux_chrome_sys_libs flag is enabled.
             doc = "URLs to download the Chromium headless-shell browser archive.",
             mandatory = True,
         ),
-        "sysroot_packages_json": attr.string(
-            doc = "JSON-encoded list of sysroot package descriptors, each with 'urls' and 'integrity' fields.",
+        "original_chromium": attr.string(
+            doc = "Label string of the original chromium headless-shell filegroup (e.g. '@repo//:repo').",
             mandatory = True,
         ),
-        "original_chromium": attr.label(
-            doc = "The label to the original chromium filegroup.",
+        "sysroot_packages_json": attr.string(
+            doc = "JSON-encoded list of sysroot package descriptors, each with 'urls' and 'integrity' fields.",
             mandatory = True,
         ),
     },

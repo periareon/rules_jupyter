@@ -51,6 +51,8 @@ REQUIRED_PACKAGES: list[str] = [
     "libpixman-1-0",
     "libxau6",
     "libxdmcp6",
+    "libwayland-server0",
+    "libwayland-client0",
 ]
 
 UBUNTU_MIRROR_AMD64 = "http://archive.ubuntu.com/ubuntu"

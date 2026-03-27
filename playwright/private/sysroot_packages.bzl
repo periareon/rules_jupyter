@@ -159,6 +159,16 @@ CHROMIUM_SYSROOT_PACKAGES = {
             "name": "libxdmcp6",
             "urls": ["http://ports.ubuntu.com/ubuntu-ports/pool/main/libx/libxdmcp/libxdmcp6_1.1.3-0ubuntu6_arm64.deb"],
         },
+        {
+            "integrity": "sha256-K23sDUAHBoX0zjRtILBk/F4RijFJ8wvohGUlGYW0lu0=",
+            "name": "libwayland-server0",
+            "urls": ["http://ports.ubuntu.com/ubuntu-ports/pool/main/w/wayland/libwayland-server0_1.22.0-2.1build1_arm64.deb"],
+        },
+        {
+            "integrity": "sha256-8dJY5x/UKCDLx93QyuOuC5KOJ7RuC2OHfKpq/75lN1I=",
+            "name": "libwayland-client0",
+            "urls": ["http://ports.ubuntu.com/ubuntu-ports/pool/main/w/wayland/libwayland-client0_1.22.0-2.1build1_arm64.deb"],
+        },
     ],
     "linux-x86_64": [
         {
@@ -305,6 +315,16 @@ CHROMIUM_SYSROOT_PACKAGES = {
             "integrity": "sha256-vNM2/OEc4qRfNND5XmmAryJSnyIUfo+YwVblzujuQrs=",
             "name": "libxdmcp6",
             "urls": ["http://archive.ubuntu.com/ubuntu/pool/main/libx/libxdmcp/libxdmcp6_1.1.3-0ubuntu6_amd64.deb"],
+        },
+        {
+            "integrity": "sha256-7b+ktoV2ka6SLMdop1P6sjDu6elWqizk8uqo2a13fco=",
+            "name": "libwayland-server0",
+            "urls": ["http://archive.ubuntu.com/ubuntu/pool/main/w/wayland/libwayland-server0_1.22.0-2.1build1_amd64.deb"],
+        },
+        {
+            "integrity": "sha256-avCu1B11FJvqIvpGjwHrBY/+PjXvB/8vE/uIqQOHiB0=",
+            "name": "libwayland-client0",
+            "urls": ["http://archive.ubuntu.com/ubuntu/pool/main/w/wayland/libwayland-client0_1.22.0-2.1build1_amd64.deb"],
         },
     ],
 }

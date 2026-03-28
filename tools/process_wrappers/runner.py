@@ -40,6 +40,8 @@ def parse_args(
     parser = create_arg_parser(runfiles=runfiles, description=__doc__)
     parser.add_argument(
         "--out-dir",
+        "--output_dir",
+        dest="out_dir",
         type=Path,
         default=output_dir,
         help="Directory to write output files to. Relative paths are resolved against BUILD_WORKING_DIRECTORY.",
@@ -102,17 +104,17 @@ def main() -> None:
 
         postprocess_notebook_outputs(notebook)
 
-        output_dir = args.out_dir
-
-        output_dir.mkdir(parents=True, exist_ok=True)
+        args.out_dir.mkdir(parents=True, exist_ok=True)
         notebook_name = args.notebook.stem
 
-        executed_notebook_path = output_dir / f"{notebook_name}_executed.ipynb"
+        executed_notebook_path = args.out_dir / f"{notebook_name}_executed.ipynb"
         save_notebook(notebook, executed_notebook_path)
         logging.info("Saved executed notebook: %s", executed_notebook_path)
 
         for report_type in args.reports:
-            output = generate_reports(notebook, notebook_name, report_type, output_dir)
+            output = generate_reports(
+                notebook, notebook_name, report_type, args.out_dir
+            )
             print(f"{report_type.capitalize()} report written to: {output}")
 
     sys.exit(0)

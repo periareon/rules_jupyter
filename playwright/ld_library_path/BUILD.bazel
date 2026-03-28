@@ -2,8 +2,8 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_venv//python:py_binary.bzl", "py_binary")
 
 py_binary(
-    name = "generate_chromium_sysroot",
-    srcs = ["generate_chromium_sysroot.py"],
+    name = "generate_chromium_ld_library_path",
+    srcs = ["generate_chromium_ld_library_path.py"],
     visibility = ["//visibility:public"],
 )
 

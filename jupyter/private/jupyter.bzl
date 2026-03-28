@@ -597,8 +597,9 @@ def _jupyter_notebook_binary_impl(ctx):
             variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
             known_variables.update(variables)
 
-    notebook_args = _expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables)
-    args.add_all(notebook_args)
+    if ctx.attr.args:
+        args.add("--")
+        args.add_all(_expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables))
 
     args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
     ctx.actions.write(

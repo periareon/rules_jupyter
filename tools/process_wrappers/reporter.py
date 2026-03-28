@@ -6,12 +6,11 @@ import json
 import logging
 import os
 import platform
-import shutil
 import sys
 import tempfile
 import warnings
 from collections.abc import Generator
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from enum import StrEnum
 from io import StringIO
 from pathlib import Path
@@ -106,7 +105,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def configure_jupyter_environment() -> None:
+def configure_jupyter_environment(tmp_dir: Path) -> None:
     """Configure Jupyter/IPython environment for Bazel's sandboxed execution.
 
     This function:
@@ -114,11 +113,13 @@ def configure_jupyter_environment() -> None:
        where packages have their data in `*.data/data/share/jupyter` directories.
     2. Sets IPYTHONDIR to a writable temp location to avoid warnings about
        non-writable IPython directories in sandboxed environments.
+
+    Args:
+        tmp_dir: A caller-managed temporary directory used for IPYTHONDIR.
+            The caller is responsible for cleanup.
     """
-    # Set IPYTHONDIR to a writable temp location
     if "IPYTHONDIR" not in os.environ:
-        temp_dir = Path(os.getenv("TEST_TMPDIR", tempfile.gettempdir()))
-        ipython_dir = temp_dir / "rules_jupyter_ipython"
+        ipython_dir = tmp_dir / "ipython"
         ipython_dir.mkdir(exist_ok=True, parents=True)
         os.environ["IPYTHONDIR"] = str(ipython_dir)
         logging.debug("Set IPYTHONDIR to %s", ipython_dir)
@@ -427,46 +428,54 @@ def configure_ld_library_path(ld_library_dir: Path) -> None:
     logging.debug("Set LD_LIBRARY_PATH to: %s", os.environ["LD_LIBRARY_PATH"])
 
 
-def _set_temp_home_env() -> tuple[str | None, str | None, Path]:
-    """Set HOME and USERPROFILE to a temporary directory.
+@contextmanager
+def temporary_home(
+    tmp_dir: Optional[Path] = None,
+) -> Generator[Path, None, None]:
+    """Redirect HOME (and USERPROFILE on Windows) into a temp directory.
 
-    Returns:
-        Tuple of (original HOME, original USERPROFILE, temp_home) values.
+    Creates ``<dir>/home`` and points HOME at it.  On exit the original
+    environment variables are restored.
+
+    When *tmp_dir* is ``None`` a fresh ``TemporaryDirectory`` is created and
+    cleaned up automatically on exit (using robust Windows-safe cleanup via
+    ``ignore_cleanup_errors``).  When *tmp_dir* is provided the caller owns
+    the directory lifecycle (e.g. Bazel's ``TEST_TMPDIR``).
+
+    Args:
+        tmp_dir: Optional base directory.  If ``None``, a temporary directory
+            is created and cleaned up on exit.
+
+    Yields:
+        The base directory (caller-supplied or auto-created).
     """
-    original_home = os.environ.get("HOME")
-    original_userprofile = os.environ.get("USERPROFILE")
-    temp_dir = Path(os.getenv("TEST_TMPDIR", tempfile.mkdtemp()))
-    temp_home = temp_dir / "home"
-    temp_home.mkdir(exist_ok=True, parents=True)
-    os.environ["HOME"] = str(temp_home)
-    if platform.system() == "Windows":
-        os.environ["USERPROFILE"] = str(temp_home)
-    return (original_home, original_userprofile, temp_home)
+    with ExitStack() as stack:
+        if tmp_dir is None:
+            tmp_dir = Path(
+                stack.enter_context(
+                    tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+                )
+            )
 
-
-def _restore_home_env(
-    original_home: str | None,
-    original_userprofile: str | None,
-    temp_home: Path,
-) -> None:
-    """Restore original HOME and USERPROFILE environment variables and cleanup temp directory."""
-    if original_home is not None:
-        os.environ["HOME"] = original_home
-    elif "HOME" in os.environ:
-        del os.environ["HOME"]
-
-    if original_userprofile is not None:
-        os.environ["USERPROFILE"] = original_userprofile
-    elif "USERPROFILE" in os.environ:
-        del os.environ["USERPROFILE"]
-
-    # Clean up temporary directory
-    if "TEST_TMPDIR" not in os.environ:
+        original_home = os.environ.get("HOME")
+        original_userprofile = os.environ.get("USERPROFILE")
+        temp_home = tmp_dir / "home"
+        temp_home.mkdir(exist_ok=True, parents=True)
+        os.environ["HOME"] = str(temp_home)
+        if platform.system() == "Windows":
+            os.environ["USERPROFILE"] = str(temp_home)
         try:
-            shutil.rmtree(temp_home)
-        except OSError:
-            # Ignore errors during cleanup
-            pass
+            yield tmp_dir
+        finally:
+            if original_home is not None:
+                os.environ["HOME"] = original_home
+            elif "HOME" in os.environ:
+                del os.environ["HOME"]
+
+            if original_userprofile is not None:
+                os.environ["USERPROFILE"] = original_userprofile
+            elif "USERPROFILE" in os.environ:
+                del os.environ["USERPROFILE"]
 
 
 _PLOTLY_MIME = "application/vnd.plotly.v1+json"
@@ -621,15 +630,11 @@ def main() -> None:
     args = parse_args()
 
     # Set up environment FIRST before any nbconvert imports
-    original_home, original_userprofile, temp_home = _set_temp_home_env()
-    try:
-        # Configure Jupyter paths for Bazel's non-standard layout
-        configure_jupyter_environment()
+    with temporary_home() as temp_dir:
+        configure_jupyter_environment(temp_dir)
 
-        # Configure pandoc path for nbconvert (injects to PATH)
         configure_pandoc(args.pandoc)
 
-        # Configure playwright browsers (sets PLAYWRIGHT_BROWSERS_PATH)
         if args.playwright_browsers_dir:
             configure_playwright(args.playwright_browsers_dir)
         if args.ld_library_dir:
@@ -642,7 +647,6 @@ def main() -> None:
         else:
             raise ValueError(f"Unexpected cwd mode: {args.cwd_mode}")
 
-        # Execute notebook
         try:
             notebook = execute_notebook(
                 args.notebook,
@@ -655,16 +659,11 @@ def main() -> None:
             print(f"\nCellExecutionError: {e}", file=sys.stderr)
             sys.exit(1)
 
-        # Convert non-standard MIME types (e.g. plotly) to renderable formats
         postprocess_notebook_outputs(notebook)
 
-        # Save the executed notebook
         save_notebook(notebook, args.out_notebook)
 
-        # Generate all requested outputs
         _generate_outputs(notebook, args)
-    finally:
-        _restore_home_env(original_home, original_userprofile, temp_home)
 
 
 if __name__ == "__main__":

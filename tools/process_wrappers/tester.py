@@ -4,9 +4,7 @@ import argparse
 import logging
 import os
 import platform
-import shutil
 import sys
-import tempfile
 from enum import StrEnum
 from pathlib import Path
 from typing import Optional, Sequence
@@ -25,6 +23,7 @@ from tools.process_wrappers.reporter import (
     export_notebook,
     postprocess_notebook_outputs,
     save_notebook,
+    temporary_home,
 )
 
 
@@ -143,45 +142,6 @@ def parse_args(
     return parser.parse_args()
 
 
-def set_temp_home_env() -> tuple[str | None, str | None, str]:
-    """Set HOME and USERPROFILE to a temporary directory.
-
-    Returns:
-        Tuple of (original HOME, original USERPROFILE, temp_home) values.
-    """
-    original_home = os.environ.get("HOME")
-    original_userprofile = os.environ.get("USERPROFILE")
-    temp_home = tempfile.mkdtemp()
-    os.environ["HOME"] = temp_home
-    if platform.system() == "Windows":
-        os.environ["USERPROFILE"] = temp_home
-    return (original_home, original_userprofile, temp_home)
-
-
-def restore_home_env(
-    original_home: str | None,
-    original_userprofile: str | None,
-    temp_home: str,
-) -> None:
-    """Restore original HOME and USERPROFILE environment variables and cleanup temp directory."""
-    if original_home is not None:
-        os.environ["HOME"] = original_home
-    elif "HOME" in os.environ:
-        del os.environ["HOME"]
-
-    if original_userprofile is not None:
-        os.environ["USERPROFILE"] = original_userprofile
-    elif "USERPROFILE" in os.environ:
-        del os.environ["USERPROFILE"]
-
-    # Clean up temporary directory
-    try:
-        shutil.rmtree(temp_home)
-    except OSError:
-        # Ignore errors during cleanup
-        pass
-
-
 def _get_exporter_map() -> dict[ReportType, tuple[type, str]]:
     """Get the mapping of report types to exporter classes and extensions."""
     # `nbconvert` must be imported here so the environment has a chance to be configured.
@@ -264,9 +224,10 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
     """The main entrypoint."""
     _init_logging()
 
-    # Set up environment FIRST before any nbconvert imports
-    original_home, original_userprofile, temp_home = set_temp_home_env()
-    try:
+    # Set up environment FIRST before any nbconvert imports.
+    # Use TEST_TMPDIR so Bazel manages the lifecycle of the temp directory.
+    test_tmpdir = Path(os.environ["TEST_TMPDIR"])
+    with temporary_home(test_tmpdir):
         runfiles = Runfiles.Create()
         if not runfiles:
             logging.error("Failed to create runfiles")
@@ -276,7 +237,7 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
             collect_argv(runfiles, "RULES_JUPYTER_TEST_ARGS_FILE"), runfiles
         )
 
-        configure_jupyter_environment()
+        configure_jupyter_environment(test_tmpdir)
 
         configure_pandoc(args.pandoc)
 
@@ -285,7 +246,6 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
         if args.ld_library_dir:
             configure_ld_library_path(args.ld_library_dir)
 
-        # Validate notebook exists
         if not args.notebook.exists():
             raise FileNotFoundError(f"Notebook does not exist: {args.notebook}")
 
@@ -296,7 +256,6 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
         else:
             raise ValueError(f"Unexpected cwd mode: {args.cwd_mode}")
 
-        # Execute the notebook - any cell error will cause test failure
         logging.debug("Executing notebook: %s", args.notebook)
         try:
             notebook = execute_notebook(
@@ -311,17 +270,14 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
             sys.exit(1)
         logging.debug("Notebook execution completed successfully")
 
-        # Convert non-standard MIME types (e.g. plotly) to renderable formats
         postprocess_notebook_outputs(notebook)
 
-        # Generate reports into the TEST_UNDECLARED_OUTPUTS_DIR if available
         if args.reports:
             output_dir_str = os.environ.get("TEST_UNDECLARED_OUTPUTS_DIR")
             if output_dir_str:
                 output_dir = Path(output_dir_str)
                 notebook_name = args.notebook.stem
 
-                # Also save the executed notebook
                 executed_notebook_path = output_dir / f"{notebook_name}_executed.ipynb"
                 save_notebook(notebook, executed_notebook_path)
                 logging.debug("Saved executed notebook: %s", executed_notebook_path)
@@ -332,8 +288,6 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
                 logging.warning(
                     "TEST_UNDECLARED_OUTPUTS_DIR not set, skipping report generation"
                 )
-    finally:
-        restore_home_env(original_home, original_userprofile, temp_home)
 
     sys.exit(0)
 

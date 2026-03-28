@@ -1,5 +1,9 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("//playwright/private:playwright.bzl", "current_playwright_toolchain_browsers_dir")
+load(
+    "//playwright/private:playwright.bzl",
+    "current_playwright_toolchain_browsers_dir",
+    "current_playwright_toolchain_ld_library_dir",
+)
 
 toolchain_type(
     name = "toolchain_type",
@@ -14,6 +18,17 @@ current_playwright_toolchain_browsers_dir(
 alias(
     name = "current_browsers_dir",
     actual = ":current_playwright_toolchain_browsers_dir",
+    visibility = ["//visibility:public"],
+)
+
+current_playwright_toolchain_ld_library_dir(
+    name = "current_playwright_toolchain_ld_library_dir",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "current_ld_library_dir",
+    actual = ":current_playwright_toolchain_ld_library_dir",
     visibility = ["//visibility:public"],
 )
 

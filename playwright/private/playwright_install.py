@@ -221,6 +221,24 @@ def _copy_file(source_file: Path, dest_file: Path) -> None:
         logging.warning("Failed to copy %s - %s", source_file, exc)
 
 
+def _expand_directories(file_paths: list[str]) -> list[str]:
+    """Expand any directory entries into their contained files.
+
+    TreeArtifacts from Bazel rules appear as directory paths in the manifest.
+    Walk them to discover the actual files inside.
+    """
+    expanded: list[str] = []
+    for file_path_str in file_paths:
+        p = Path(file_path_str)
+        if p.is_dir():
+            for dirpath, _dirnames, filenames in os.walk(p):
+                for filename in filenames:
+                    expanded.append(str(Path(dirpath) / filename))
+        else:
+            expanded.append(file_path_str)
+    return expanded
+
+
 def copy_browser(
     browser_type: str,
     revision: str,
@@ -245,6 +263,8 @@ def copy_browser(
 
     if not file_paths:
         raise RuntimeError(f"No file paths provided for browser type: {browser_type}")
+
+    file_paths = _expand_directories(file_paths)
 
     logging.info(
         "Finding common root for %s from %d file paths",

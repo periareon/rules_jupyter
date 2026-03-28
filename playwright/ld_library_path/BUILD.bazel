@@ -1,14 +1,14 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_venv//python:py_binary.bzl", "py_binary")
 
-bzl_library(
-    name = "bzl_lib",
-    srcs = glob(["*.bzl"]),
-    visibility = ["//playwright:__subpackages__"],
+py_binary(
+    name = "generate_chromium_ld_library_path",
+    srcs = ["generate_chromium_ld_library_path.py"],
+    visibility = ["//visibility:public"],
 )
 
-py_binary(
-    name = "playwright_install",
-    srcs = ["playwright_install.py"],
-    visibility = ["//visibility:public"],
+bzl_library(
+    name = "bzl_lib",
+    srcs = ["ld_library_dir.bzl"],
+    visibility = ["//playwright:__subpackages__"],
 )

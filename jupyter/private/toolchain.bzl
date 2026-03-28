@@ -31,6 +31,13 @@ def _jupyter_toolchain_impl(ctx):
         playwright_browsers_dir = ctx.file.playwright_browsers_dir
         all_files.append(depset([playwright_browsers_dir]))
 
+    playwright_ld_library_dir = None
+    if ctx.attr.playwright_ld_library_dir:
+        ld_lib_files = ctx.attr.playwright_ld_library_dir[DefaultInfo].files.to_list()
+        if ld_lib_files:
+            playwright_ld_library_dir = ld_lib_files[0]
+            all_files.append(depset([playwright_ld_library_dir]))
+
     providers = [
         platform_common.ToolchainInfo(
             label = ctx.label,
@@ -40,6 +47,7 @@ def _jupyter_toolchain_impl(ctx):
             jupytext = jupytext_target,
             pandoc = pandoc,
             playwright_browsers_dir = playwright_browsers_dir,
+            playwright_ld_library_dir = playwright_ld_library_dir,
             all_files = depset(transitive = all_files),
         ),
         default_info,
@@ -87,6 +95,9 @@ jupyter_toolchain = rule(
         "playwright_browsers_dir": attr.label(
             doc = "A directory containing the results of `playwright install`.",
             allow_single_file = True,
+        ),
+        "playwright_ld_library_dir": attr.label(
+            doc = "A directory of shared libraries to prepend to LD_LIBRARY_PATH when launching browsers.",
         ),
     },
 )

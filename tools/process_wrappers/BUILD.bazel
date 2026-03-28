@@ -11,7 +11,6 @@ exports_files([
     "ibazel_handler.py",
     "ibazel_reload.js",
     "lab_launcher.py",
-    "playwright_install.py",
     "reporter.py",
     "runner.py",
     "tester.py",
@@ -73,10 +72,4 @@ py_library(
     srcs = ["ibazel_handler.py"],
     visibility = ["//visibility:public"],
     deps = ["//jupyter:current_jupyter_toolchain"],
-)
-
-py_binary(
-    name = "playwright_install",
-    srcs = ["playwright_install.py"],
-    visibility = ["//visibility:public"],
 )

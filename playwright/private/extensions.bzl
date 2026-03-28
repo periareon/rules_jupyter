@@ -76,6 +76,7 @@ playwright_toolchain(
     webkit_version = {webkit_version},
     ffmpeg = {ffmpeg_label},
     ffmpeg_version = {ffmpeg_version},
+    ld_library_dir = {ld_library_dir_label},
     visibility = ["//visibility:public"],
 )
 
@@ -121,6 +122,7 @@ def _playwright_toolchain_repository_impl(repository_ctx):
         webkit_version = repr(repository_ctx.attr.webkit_version) if repository_ctx.attr.webkit_version else "None",
         ffmpeg_label = repr(str(repository_ctx.attr.ffmpeg)) if repository_ctx.attr.ffmpeg else "None",
         ffmpeg_version = repr(repository_ctx.attr.ffmpeg_version) if repository_ctx.attr.ffmpeg_version else "None",
+        ld_library_dir_label = repr(str(repository_ctx.attr.ld_library_dir)) if repository_ctx.attr.ld_library_dir else "None",
         exec_constraints = json.encode(constraints),
         target_constraints = json.encode(constraints),
     ))
@@ -162,6 +164,10 @@ playwright_toolchain_repository = repository_rule(
         ),
         "firefox_version": attr.string(
             doc = "Version string for the Firefox browser (e.g., \"1497\"). Required if firefox is provided.",
+            mandatory = False,
+        ),
+        "ld_library_dir": attr.label(
+            doc = "Label to the ld_library_dir target providing shared libraries for LD_LIBRARY_PATH.",
             mandatory = False,
         ),
         "platform": attr.string(
@@ -316,16 +322,17 @@ def _playwright_impl(module_ctx):
 
             # Chromium headless-shell
             if chromium_headless_shell_version and chromium_headless_shell_version in CHROMIUM_HEADLESS_SHELL_VERSIONS and platform in CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version]:
+                browser_versions_dict["chromium_headless_shell_version"] = chromium_headless_shell_version
+                version_data = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]
                 repo_name = "{}_{}_{}".format(name, "chromium_headless_shell", platform)
                 chromium_headless_shell_archive(
                     name = repo_name,
                     platform = platform,
-                    urls = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]["urls"],
-                    integrity = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]["integrity"],
-                    strip_prefix = CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version][platform]["strip_prefix"],
+                    urls = version_data["urls"],
+                    integrity = version_data["integrity"],
+                    strip_prefix = version_data["strip_prefix"],
                 )
                 browser_labels["chromium_headless_shell"] = "@{}".format(repo_name)
-                browser_versions_dict["chromium_headless_shell_version"] = chromium_headless_shell_version
 
             # Firefox
             if firefox_version and firefox_version in FIREFOX_VERSIONS and platform in FIREFOX_VERSIONS[firefox_version]:
@@ -382,6 +389,7 @@ def _playwright_impl(module_ctx):
                 webkit_version = browser_versions_dict.get("webkit_version"),
                 ffmpeg = browser_labels.get("ffmpeg"),
                 ffmpeg_version = browser_versions_dict.get("ffmpeg_version"),
+                ld_library_dir = None,
             )
 
             toolchain_names.append(toolchain_repo_name)

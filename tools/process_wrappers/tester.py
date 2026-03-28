@@ -18,6 +18,7 @@ from python.runfiles import Runfiles
 from tools.process_wrappers.reporter import (
     CwdMode,
     configure_jupyter_environment,
+    configure_ld_library_path,
     configure_pandoc,
     configure_playwright,
     execute_notebook,
@@ -98,6 +99,11 @@ def create_arg_parser(
         "--playwright_browsers_dir",
         type=_path,
         help="The path to a playwright browsers cache.",
+    )
+    parser.add_argument(
+        "--ld_library_dir",
+        type=_path,
+        help="Directory of shared libraries to prepend to LD_LIBRARY_PATH.",
     )
     parser.add_argument(
         "--cwd_mode",
@@ -276,6 +282,8 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
 
         if args.playwright_browsers_dir:
             configure_playwright(args.playwright_browsers_dir)
+        if args.ld_library_dir:
+            configure_ld_library_path(args.ld_library_dir)
 
         # Validate notebook exists
         if not args.notebook.exists():

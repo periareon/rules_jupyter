@@ -137,6 +137,11 @@ def _playwright_toolchain_impl(ctx):
     # Include the browsers directory
     all_files.append(depset([browsers_dir]))
 
+    ld_library_dir = None
+    if ctx.attr.ld_library_dir:
+        ld_library_dir = ctx.file.ld_library_dir
+        all_files.append(depset([ld_library_dir]))
+
     return [
         platform_common.ToolchainInfo(
             version = ctx.attr.version,
@@ -151,6 +156,7 @@ def _playwright_toolchain_impl(ctx):
             ffmpeg = ctx.attr.ffmpeg,
             ffmpeg_version = ctx.attr.ffmpeg_version,
             browsers_dir = browsers_dir,
+            ld_library_dir = ld_library_dir,
             all_files = depset(transitive = all_files),
         ),
     ]
@@ -162,13 +168,11 @@ playwright_toolchain = rule(
         "chromium": attr.label(
             doc = "Chromium browser filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "chromium_headless_shell": attr.label(
             doc = "Chromium headless-shell browser filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "chromium_headless_shell_version": attr.string(
@@ -180,7 +184,6 @@ playwright_toolchain = rule(
         "ffmpeg": attr.label(
             doc = "FFmpeg filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "ffmpeg_version": attr.string(
@@ -189,11 +192,15 @@ playwright_toolchain = rule(
         "firefox": attr.label(
             doc = "Firefox browser filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "firefox_version": attr.string(
             doc = "Firefox browser revision",
+        ),
+        "ld_library_dir": attr.label(
+            doc = "Directory of shared libraries to add to LD_LIBRARY_PATH when launching browsers.",
+            allow_single_file = True,
+            cfg = "exec",
         ),
         "version": attr.string(
             doc = "Playwright version",
@@ -202,7 +209,6 @@ playwright_toolchain = rule(
         "webkit": attr.label(
             doc = "WebKit browser filegroup",
             allow_single_file = True,
-            executable = True,
             cfg = "exec",
         ),
         "webkit_version": attr.string(
@@ -211,7 +217,7 @@ playwright_toolchain = rule(
         "_installer": attr.label(
             cfg = "exec",
             executable = True,
-            default = Label("//tools/process_wrappers:playwright_install"),
+            default = Label("//playwright/private:playwright_install"),
         ),
     },
 )
@@ -226,5 +232,19 @@ def _current_playwright_toolchain_browsers_dir_impl(ctx):
 current_playwright_toolchain_browsers_dir = rule(
     doc = "Provides access to the browsers directory from the current Playwright toolchain. The browsers directory contains all installed browser binaries in a structure compatible with PLAYWRIGHT_BROWSERS_PATH.",
     implementation = _current_playwright_toolchain_browsers_dir_impl,
+    toolchains = [str(Label("//playwright:toolchain_type"))],
+)
+
+def _current_playwright_toolchain_ld_library_dir_impl(ctx):
+    toolchain = ctx.toolchains[str(Label("//playwright:toolchain_type"))]
+    if not toolchain.ld_library_dir:
+        return [DefaultInfo()]
+    return [DefaultInfo(
+        files = depset([toolchain.ld_library_dir]),
+    )]
+
+current_playwright_toolchain_ld_library_dir = rule(
+    doc = "Provides access to the LD_LIBRARY_PATH directory from the current Playwright toolchain, if configured.",
+    implementation = _current_playwright_toolchain_ld_library_dir_impl,
     toolchains = [str(Label("//playwright:toolchain_type"))],
 )

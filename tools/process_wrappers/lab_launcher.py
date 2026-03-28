@@ -24,6 +24,7 @@ from python.runfiles import Runfiles
 from tools.process_wrappers.reporter import (
     CwdMode,
     configure_jupyter_environment,
+    configure_ld_library_path,
     configure_pandoc,
     configure_playwright,
 )
@@ -73,6 +74,11 @@ def parse_args(
         "--playwright_browsers_dir",
         type=_path,
         help="The path to a playwright browsers cache.",
+    )
+    parser.add_argument(
+        "--ld_library_dir",
+        type=_path,
+        help="Directory of shared libraries to prepend to LD_LIBRARY_PATH.",
     )
     parser.add_argument(
         "--cwd_mode",
@@ -393,6 +399,8 @@ def main() -> None:
     configure_pandoc(args.pandoc)
     if args.playwright_browsers_dir:
         configure_playwright(args.playwright_browsers_dir)
+    if args.ld_library_dir:
+        configure_ld_library_path(args.ld_library_dir)
 
     ibazel_mode = os.environ.get("IBAZEL_NOTIFY_CHANGES") == "y"
 

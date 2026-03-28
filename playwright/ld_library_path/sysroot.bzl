@@ -5,7 +5,7 @@ the given debian archive dependencies, producing a directory of .so files.
 """
 
 _BUILD_TEMPLATE = """\
-load("@rules_jupyter//playwright/ld_library_dir:ld_library_dir.bzl", "playwright_ld_library_dir")
+load("@rules_jupyter//playwright/ld_library_path:ld_library_dir.bzl", "playwright_ld_library_dir")
 
 playwright_ld_library_dir(
     name = "{name}",

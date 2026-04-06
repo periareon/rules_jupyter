@@ -51,7 +51,7 @@ PLAYWRIGHT_BROWSER_BASE_URLS = [
     "https://cdn.playwright.dev/builds",
 ]
 
-# Chrome for Testing base URL (used for Chromium starting with Playwright 1.58.0).
+# Chrome for Testing base URL (used for Chromium starting with Playwright 1.57.0).
 # Use Google's canonical bucket only; Playwright's mirror (cdn.playwright.dev) has
 # served inconsistent content in the past, breaking integrity checks.
 CHROME_FOR_TESTING_BASE_URLS = [
@@ -356,7 +356,7 @@ def get_all_browser_revisions(
     Returns:
         A dict mapping browser_type -> {"revision": "...", "browserVersion": "..."},
         or None if not found. "browserVersion" is present when browsers.json includes it
-        (Playwright >= 1.58.0 for Chromium/Chrome for Testing).
+        (Playwright >= 1.57.0 for Chromium/Chrome for Testing).
     """
     npm_registry_url = (
         f"https://registry.npmjs.org/playwright-core/{playwright_version}"
@@ -638,7 +638,7 @@ def _normalize_cft_urls(urls: str | list[str] | Any) -> list[str]:
     return out
 
 
-def _process_platform_artifact(  # pylint: disable=too-many-arguments
+def _process_platform_artifact(  # pylint: disable=too-many-arguments,too-many-return-statements,too-many-locals
     browser_type: str,
     platform: str,
     archive_name: str,
@@ -1093,13 +1093,17 @@ def main() -> (
             name: info["revision"] for name, info in browser_info.items()
         }
 
-        # Collect unique browser revisions with associated browserVersion
+        # Collect unique browser revisions with associated browserVersion.
+        # Only pass browserVersion (which triggers CfT URL lookup) for
+        # Playwright >= 1.57.0; older versions expect legacy CDN naming.
+        use_cft = version_gte(playwright_version, "1.57.0")
         for browser_type in BROWSER_TYPES:
             info = browser_info.get(browser_type)
             if info:
                 key = (browser_type, info["revision"])
                 if key not in unique_browser_revisions:
-                    unique_browser_revisions[key] = info.get("browserVersion")
+                    browser_version = info.get("browserVersion") if use_cft else None
+                    unique_browser_revisions[key] = browser_version
 
     logging.info(
         "Phase 1 complete: Found %d unique browser revisions across %d Playwright versions",

@@ -20,20 +20,6 @@ BROWSER_DIR_MAP = {
     "ffmpeg": "ffmpeg",
 }
 
-# Chrome for Testing archives use different top-level directory names than the
-# legacy Playwright CDN archives. Playwright expects the legacy names, so we
-# normalize CfT names back to the Playwright-expected names.
-CFT_DIRECTORY_NORMALIZATIONS = {
-    "chrome-linux64": "chrome-linux",
-    "chrome-mac-arm64": "chrome-mac",
-    "chrome-mac-x64": "chrome-mac",
-    "chrome-win64": "chrome-win",
-    "chrome-headless-shell-linux64": "chrome-linux",
-    "chrome-headless-shell-mac-arm64": "chrome-headless-shell-mac",
-    "chrome-headless-shell-mac-x64": "chrome-headless-shell-mac",
-    "chrome-headless-shell-win64": "chrome-headless-shell-win",
-}
-
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
@@ -291,11 +277,10 @@ def copy_browser(
     # Find the browser root (common root, checking for .app directories above it)
     browser_root = find_browser_root(file_paths)
 
-    # Use the browser root directory name as the normalized name, mapping
-    # Chrome for Testing directory names back to Playwright-expected names.
-    normalized_name = CFT_DIRECTORY_NORMALIZATIONS.get(
-        browser_root.name, browser_root.name
-    )
+    # Use the browser root directory name as the normalized name.
+    # For Playwright >= 1.57.0 the CfT names (chrome-linux64, chrome-mac-arm64, …)
+    # are expected as-is. Older versions use CDN archives with legacy names.
+    normalized_name = browser_root.name
 
     logging.info(
         "Copying %s revision %s from common root %s (normalized: %s) to %s",

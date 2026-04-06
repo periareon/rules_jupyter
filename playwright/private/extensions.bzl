@@ -31,6 +31,29 @@ PLATFORM_TO_CONSTRAINTS = {
     "windows-x86_64": ["@platforms//os:windows", "@platforms//cpu:x86_64"],
 }
 
+# Minimum Playwright version that ships with Chrome for Testing naming
+# conventions and can use the stable Google CDN with integrity hashes.
+_MIN_REPRODUCIBLE_VERSION = "1.57.0"
+
+def _version_gte(version, min_version):
+    """Check if version >= min_version using semver-style comparison.
+
+    Args:
+        version: Version string (e.g., "1.57.0").
+        min_version: Minimum version string to compare against.
+
+    Returns:
+        True if version >= min_version.
+    """
+    v_parts = [int(x) for x in version.split(".")]
+    m_parts = [int(x) for x in min_version.split(".")]
+    for i in range(max(len(v_parts), len(m_parts))):
+        v = v_parts[i] if i < len(v_parts) else 0
+        m = m_parts[i] if i < len(m_parts) else 0
+        if v != m:
+            return v > m
+    return True
+
 def _find_modules(module_ctx):
     root = None
     rules_module = None
@@ -70,12 +93,14 @@ playwright_toolchain(
     chromium_version = {chromium_version},
     chromium_headless_shell = {chromium_headless_shell_label},
     chromium_headless_shell_version = {chromium_headless_shell_version},
-    firefox = {firefox_label},
-    firefox_version = {firefox_version},
-    webkit = {webkit_label},
-    webkit_version = {webkit_version},
-    ffmpeg = {ffmpeg_label},
-    ffmpeg_version = {ffmpeg_version},
+    # Firefox, WebKit, and FFmpeg are currently disabled due to Playwright CDN instability.
+    # See: https://github.com/periareon/rules_jupyter/issues/37
+    # firefox = {firefox_label},
+    # firefox_version = {firefox_version},
+    # webkit = {webkit_label},
+    # webkit_version = {webkit_version},
+    # ffmpeg = {ffmpeg_label},
+    # ffmpeg_version = {ffmpeg_version},
     ld_library_dir = {ld_library_dir_label},
     visibility = ["//visibility:public"],
 )
@@ -246,6 +271,7 @@ def _playwright_impl(module_ctx):
     if not toolchains:
         toolchains = rules_mod.tags.toolchain
     direct_deps = []
+    is_reproducible = True
 
     for attrs in toolchains:
         # Determine version - either from explicit version or from requirements.txt
@@ -259,6 +285,9 @@ def _playwright_impl(module_ctx):
             fail("Either 'version' or 'version_from_requirements' must be specified")
 
         name = attrs.name
+
+        if not _version_gte(version, _MIN_REPRODUCIBLE_VERSION):
+            is_reproducible = False
 
         # Get browser versions from browser_versions.bzl based on playwright version
         browser_versions = _BROWSER_VERSIONS.get(version, {})
@@ -285,6 +314,7 @@ def _playwright_impl(module_ctx):
             all_platforms.extend(CHROMIUM_VERSIONS[chromium_version].keys())
         if chromium_headless_shell_version and chromium_headless_shell_version in CHROMIUM_HEADLESS_SHELL_VERSIONS:
             all_platforms.extend(CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version].keys())
+
         if firefox_version and firefox_version in FIREFOX_VERSIONS:
             all_platforms.extend(FIREFOX_VERSIONS[firefox_version].keys())
         if webkit_version and webkit_version in WEBKIT_VERSIONS:
@@ -383,12 +413,14 @@ def _playwright_impl(module_ctx):
                 chromium_version = browser_versions_dict.get("chromium_version"),
                 chromium_headless_shell = browser_labels.get("chromium_headless_shell"),
                 chromium_headless_shell_version = browser_versions_dict.get("chromium_headless_shell_version"),
-                firefox = browser_labels.get("firefox"),
-                firefox_version = browser_versions_dict.get("firefox_version"),
-                webkit = browser_labels.get("webkit"),
-                webkit_version = browser_versions_dict.get("webkit_version"),
-                ffmpeg = browser_labels.get("ffmpeg"),
-                ffmpeg_version = browser_versions_dict.get("ffmpeg_version"),
+                # Firefox, Webkit, and FFMPEG are disabled due to volatile integrity hashes.
+                # See: https://github.com/periareon/rules_jupyter/issues/37
+                # firefox = browser_labels.get("firefox"),
+                # firefox_version = browser_versions_dict.get("firefox_version"),
+                # webkit = browser_labels.get("webkit"),
+                # webkit_version = browser_versions_dict.get("webkit_version"),
+                # ffmpeg = browser_labels.get("ffmpeg"),
+                # ffmpeg_version = browser_versions_dict.get("ffmpeg_version"),
                 ld_library_dir = None,
             )
 
@@ -408,7 +440,7 @@ def _playwright_impl(module_ctx):
         direct_deps.append(name)
 
     return module_ctx.extension_metadata(
-        reproducible = True,
+        reproducible = is_reproducible,
         root_module_direct_deps = direct_deps,
         root_module_direct_dev_deps = [],
     )

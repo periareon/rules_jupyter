@@ -2,6 +2,12 @@
 
 -r ../../jupyter/requirements.in
 
+# Test dependencies
+plotly
+polars
+matplotlib
+
+# Linter and Formatters
 black
 isort
 mypy

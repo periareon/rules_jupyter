@@ -3,8 +3,3 @@
 jupyter
 jupytext
 nbconvert[webpdf]
-
-# Test dependencies
-plotly
-polars
-matplotlib

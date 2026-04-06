@@ -41,17 +41,20 @@ PLAYWRIGHT_GITHUB_RELEASES_API_TEMPLATE = (
 # Matches versions like 1.40.0, 1.57.0 (semantic versioning)
 PLAYWRIGHT_RELEASE_NAME_REGEX = r"^v?(\d+\.\d+\.\d+(?:-\w+)?)$"
 
-# Playwright browser download base URLs (primary and fallbacks)
+# Playwright browser download base URLs (primary and fallbacks).
+# These are required for Firefox, WebKit, FFmpeg, and legacy Chromium revision-style
+# zips (linux-aarch64) that are not published on Google's Chrome for Testing bucket.
+# Replace with a self-hosted mirror if CDN stability is a concern for these browsers.
 PLAYWRIGHT_BROWSER_BASE_URLS = [
     "https://cdn.playwright.dev/dbazure/download/playwright/builds",
     "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds",
     "https://cdn.playwright.dev/builds",
 ]
 
-# Chrome for Testing CDN base URLs (used for Chromium starting with Playwright 1.58.0)
-# Playwright mirrors Google's CDN at cdn.playwright.dev/chrome-for-testing-public.
+# Chrome for Testing base URL (used for Chromium starting with Playwright 1.57.0).
+# Use Google's canonical bucket only; Playwright's mirror (cdn.playwright.dev) has
+# served inconsistent content in the past, breaking integrity checks.
 CHROME_FOR_TESTING_BASE_URLS = [
-    "https://cdn.playwright.dev/chrome-for-testing-public",
     "https://storage.googleapis.com/chrome-for-testing-public",
 ]
 
@@ -353,7 +356,7 @@ def get_all_browser_revisions(
     Returns:
         A dict mapping browser_type -> {"revision": "...", "browserVersion": "..."},
         or None if not found. "browserVersion" is present when browsers.json includes it
-        (Playwright >= 1.58.0 for Chromium/Chrome for Testing).
+        (Playwright >= 1.57.0 for Chromium/Chrome for Testing).
     """
     npm_registry_url = (
         f"https://registry.npmjs.org/playwright-core/{playwright_version}"
@@ -602,7 +605,40 @@ def _find_working_urls(
     return working_urls
 
 
-def _process_platform_artifact(  # pylint: disable=too-many-arguments
+_CFT_PATH_PREFIX = "/chrome-for-testing-public/"
+_CFT_CANONICAL_ORIGIN = "https://storage.googleapis.com"
+
+
+def _has_cft_url(urls: list[str]) -> bool:
+    """Return True if any URL in the list is a Chrome for Testing URL."""
+    return any(_CFT_PATH_PREFIX in url for url in urls)
+
+
+def _normalize_cft_urls(urls: str | list[str] | Any) -> list[str]:
+    """Rewrite Chrome for Testing URLs to the canonical GCS origin.
+
+    Any URL whose path starts with /chrome-for-testing-public/ is rewritten to
+    use storage.googleapis.com, deduped, with order preserved.
+    """
+    if isinstance(urls, str):
+        urls = [urls]
+    if not isinstance(urls, list):
+        return []
+    seen: set[str] = set()
+    out: list[str] = []
+    for url in urls:
+        if not isinstance(url, str):
+            continue
+        parsed = urlparse(url)
+        if parsed.path.startswith(_CFT_PATH_PREFIX):
+            url = f"{_CFT_CANONICAL_ORIGIN}{parsed.path}"
+        if url not in seen:
+            seen.add(url)
+            out.append(url)
+    return out
+
+
+def _process_platform_artifact(  # pylint: disable=too-many-arguments,too-many-return-statements,too-many-locals
     browser_type: str,
     platform: str,
     archive_name: str,
@@ -627,15 +663,22 @@ def _process_platform_artifact(  # pylint: disable=too-many-arguments
     """
     # Check if we already have integrity value
     if existing_data and existing_data.get("integrity"):
+        normalized_urls = _normalize_cft_urls(existing_data.get("urls", []))
+        # Drop integrity for Playwright CDN URLs (unstable content hashes).
+        # See: https://github.com/periareon/rules_jupyter/issues/37
+        existing_integrity = (
+            existing_data["integrity"] if _has_cft_url(normalized_urls) else ""
+        )
         logging.debug(
-            "Reusing existing integrity for %s %s revision %s",
+            "Reusing existing data for %s %s revision %s (integrity=%s)",
             browser_type,
             platform,
             browser_revision,
+            "kept" if existing_integrity else "dropped (CDN)",
         )
         result = {
-            "urls": existing_data.get("urls", []),
-            "integrity": existing_data["integrity"],
+            "urls": normalized_urls,
+            "integrity": existing_integrity,
             "strip_prefix": existing_data.get("strip_prefix", ""),
         }
         return result, False
@@ -671,6 +714,20 @@ def _process_platform_artifact(  # pylint: disable=too-many-arguments
     strip_prefix = STRIP_PREFIX.get(browser_type, {}).get(platform, "")
 
     logging.debug("Strip prefix for %s %s: %s", browser_type, platform, strip_prefix)
+
+    # Skip integrity computation for Playwright CDN URLs (unstable content hashes).
+    # See: https://github.com/periareon/rules_jupyter/issues/37
+    if not _has_cft_url(working_urls):
+        logging.info(
+            "Skipping integrity for %s %s (Playwright CDN only)",
+            browser_type,
+            platform,
+        )
+        return {
+            "urls": working_urls,
+            "integrity": "",
+            "strip_prefix": strip_prefix,
+        }, False
 
     try:
         sha256_hex = compute_sha256(download_url)
@@ -1036,13 +1093,17 @@ def main() -> (
             name: info["revision"] for name, info in browser_info.items()
         }
 
-        # Collect unique browser revisions with associated browserVersion
+        # Collect unique browser revisions with associated browserVersion.
+        # Only pass browserVersion (which triggers CfT URL lookup) for
+        # Playwright >= 1.57.0; older versions expect legacy CDN naming.
+        use_cft = version_gte(playwright_version, "1.57.0")
         for browser_type in BROWSER_TYPES:
             info = browser_info.get(browser_type)
             if info:
                 key = (browser_type, info["revision"])
                 if key not in unique_browser_revisions:
-                    unique_browser_revisions[key] = info.get("browserVersion")
+                    browser_version = info.get("browserVersion") if use_cft else None
+                    unique_browser_revisions[key] = browser_version
 
     logging.info(
         "Phase 1 complete: Found %d unique browser revisions across %d Playwright versions",

@@ -15,7 +15,7 @@ Each revision key maps to platform-specific download information.
 CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     "1148": {
         "linux-aarch64": {
-            "integrity": "sha256-vmVBN2S3U/tzGH3R12DMZiJzDypNojkj7vdpc8F/slw=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1148/chromium-headless-shell-linux-arm64.zip",
@@ -24,7 +24,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-Q8jx4p4InZdl7YMIPrvKp8f+WCqnYtBnj4iDi1XZL2M=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1148/chromium-headless-shell-linux.zip",
@@ -33,7 +33,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-7jf+UNEgGXBPK3EJGs6lY1GYMKAn35c+5YwD/QgQO8I=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1148/chromium-headless-shell-mac-arm64.zip",
@@ -42,7 +42,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-U6TfebmQBiWaZApXFt5ffqx9eByCz7lcSqjr75lz3cY=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1148/chromium-headless-shell-mac.zip",
@@ -51,7 +51,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-kWirlcu4wCyNmOO59VvMrYYepz2rbkVTIYMzf/v8NfM=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1148/chromium-headless-shell-win64.zip",
@@ -62,7 +62,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1161": {
         "linux-aarch64": {
-            "integrity": "sha256-CVI7C0uk7iR8oSRaMtK16h7nd2WgoSUlCbKHTjfu/tU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1161/chromium-headless-shell-linux-arm64.zip",
@@ -71,7 +71,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-tXQwe+KExEDnfUGMyMpSGsHXzgOaXsXxPypcVm2WKQw=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1161/chromium-headless-shell-linux.zip",
@@ -80,7 +80,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-bDuFwsaMSoivq+9NVhgIKcGzIajlQBtMzXu5XIaaoBQ=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1161/chromium-headless-shell-mac-arm64.zip",
@@ -89,7 +89,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-9WQ8sm4mMtapWr1dR6IRvLDA1yoeUrr1kDoyE0qr9Xc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1161/chromium-headless-shell-mac.zip",
@@ -98,7 +98,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-jZIxevij7QR9c8DQDcXGg5cjbtCfJH2aK8auFHXV+8Q=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1161/chromium-headless-shell-win64.zip",
@@ -109,7 +109,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1169": {
         "linux-aarch64": {
-            "integrity": "sha256-J9mNPOsDY971dcNH2/8YtohvgHJ34brOpgR97JO4APc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1169/chromium-headless-shell-linux-arm64.zip",
@@ -118,7 +118,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-kuxxKkmkUet0toKa5Lx+4vNkINKEnCRdu7NxCLQd6SA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1169/chromium-headless-shell-linux.zip",
@@ -127,7 +127,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-lsqhqd0ex/SqXprfeu0qOb5rmkcCsz1qJGSfe16Gv4s=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1169/chromium-headless-shell-mac-arm64.zip",
@@ -136,7 +136,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-gTakxJOj8Zp4n8RcS84CMtjsybtWRIFK2+rrTjXKGEU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1169/chromium-headless-shell-mac.zip",
@@ -145,7 +145,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-x/AwbU07vnrkKUMJGTSG08ZZJmffwy2W/WfSwuV1EOQ=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1169/chromium-headless-shell-win64.zip",
@@ -156,7 +156,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1178": {
         "linux-aarch64": {
-            "integrity": "sha256-8+wHI693cg/gcmJQdkzK1gQO1oYUwf6BEu4rX7XcMQw=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-linux-arm64.zip",
@@ -165,14 +165,16 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-/MnqBXVmpAlOh/sEAkTvEjRbsjvXXGe2+Af2UVNvBPE=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-linux.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-linux.zip",
                 "https://cdn.playwright.dev/builds/chromium/1178/chromium-headless-shell-linux.zip",
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-WivHELSoDI13AYX5tTuofxLMpZjmH9FSGU9lZuYhjek=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-mac-arm64.zip",
@@ -181,23 +183,27 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-PjccvnFt/NjCAAiGrtDFc6rSGIwA/biZDcuJXUwKJWs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-mac.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-mac.zip",
                 "https://cdn.playwright.dev/builds/chromium/1178/chromium-headless-shell-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-VIrJ6ajpza/Ilzd8HuZQ85CnC7C5AFlWAhbvz952Z14=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-win64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-win64.zip",
                 "https://cdn.playwright.dev/builds/chromium/1178/chromium-headless-shell-win64.zip",
             ],
         },
     },
     "1179": {
         "linux-aarch64": {
-            "integrity": "sha256-97/Z/jcRl/NSkZQTThd0PotQ6YbZquYhWcYJJ5KxgTE=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1179/chromium-headless-shell-linux-arm64.zip",
@@ -206,7 +212,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-HY16amvxYAMVtQJCrXeK0PLkseIz3ti5tmEi9zXlJZs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1179/chromium-headless-shell-linux.zip",
@@ -215,21 +221,25 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-xXT9cCT6pinjAVesR0RlLeHu7iAmQQ/fRi5QfsCgTa4=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1179/chromium-headless-shell-mac-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1179/chromium-headless-shell-mac-arm64.zip",
                 "https://cdn.playwright.dev/builds/chromium/1179/chromium-headless-shell-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-0JCexl6JttoF/G54JNhSaaHQ8G2sGNShY/zIsogXmHg=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1179/chromium-headless-shell-mac.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1179/chromium-headless-shell-mac.zip",
                 "https://cdn.playwright.dev/builds/chromium/1179/chromium-headless-shell-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-U4bZilnyDEjRzecuF0n52/EMoEhM+zwx+WIzQEqwi4I=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1179/chromium-headless-shell-win64.zip",
@@ -240,7 +250,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1181": {
         "linux-aarch64": {
-            "integrity": "sha256-rW8erv7IAJqOyyA5gefM9YGWqWJVe6vjGbhmp1qjdjs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1181/chromium-headless-shell-linux-arm64.zip",
@@ -249,7 +259,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-/tdTGKSNkLvylbURMXt7wUlhmlwTcSum7lDwvKWjis4=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1181/chromium-headless-shell-linux.zip",
@@ -258,7 +268,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-dpPSqPd+0X2uWuNDTRIg0NXbbAYWloiEIIAOUTOBFYY=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1181/chromium-headless-shell-mac-arm64.zip",
@@ -267,7 +277,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-anUXYWSBoYTHgASfHZ/CdTt0qefQcwIWQY8oIAMrtOs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1181/chromium-headless-shell-mac.zip",
@@ -276,7 +286,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-8dEnjqa2q/tqWkCAnMyFxVWldE6g99nft9F6v3XT8e8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1181/chromium-headless-shell-win64.zip",
@@ -287,7 +297,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1187": {
         "linux-aarch64": {
-            "integrity": "sha256-nU39xFgyB09Dz3vdC0XhW58aR3KS1ogQ2VdDHTdKYMk=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-headless-shell-linux-arm64.zip",
@@ -296,7 +306,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-l4QsQ9SWJ+iT4UmPYVVP3+AiPTXa8kfkvt7hHnlQm44=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-headless-shell-linux.zip",
@@ -305,7 +315,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-YzAuQEqw7hTkYnARe+Is3VAFr/d9VPEg6pCV9NjByKI=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-headless-shell-mac-arm64.zip",
@@ -314,7 +324,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-hrYqcjtHF8cTq1YMgQ80JUZTmME5wnnO9o8984NK/IA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-headless-shell-mac.zip",
@@ -323,7 +333,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-6oARnJ4NoCK0lr7efLSqRJnMlw2dMwEjDnT1944wtfI=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-headless-shell-win64.zip",
@@ -334,7 +344,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1193": {
         "linux-aarch64": {
-            "integrity": "sha256-W7Kofh4zKv6xhc16No8lXXXWf5Az75LgH2kclpjmukE=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1193/chromium-headless-shell-linux-arm64.zip",
@@ -343,7 +353,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-fZPDhe26OsnxDxMDfmADU/KfhGkfCdJrk1v8EXu865g=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1193/chromium-headless-shell-linux.zip",
@@ -352,7 +362,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-QS47EuRHnZOWXGOKenQVzrRMHqtyQTY+Nr/lfXBwSSY=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1193/chromium-headless-shell-mac-arm64.zip",
@@ -361,7 +371,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-fnZig7ruRQW/d6nBQnnTL15zDPQvNk9TW2WOhopim8M=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1193/chromium-headless-shell-mac.zip",
@@ -370,7 +380,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-ihM8A8zSgJ0yk6z8hEPX+qwOdYgDh5uRAMDNUkOne6Y=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1193/chromium-headless-shell-win64.zip",
@@ -381,7 +391,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1194": {
         "linux-aarch64": {
-            "integrity": "sha256-a5Y7dlERnIH6UTEsEXZCnTI1u++1bVxodzDPRKWx/dc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-headless-shell-linux-arm64.zip",
@@ -390,7 +400,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-10XHIQzIi3PHmRoiyWJIGZYNhLw953rHM20t6EGoyR8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-headless-shell-linux.zip",
@@ -399,7 +409,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-xMl8qrNMFvmiu0EdoOaFBd6ss1yG1w22PcEXOBpebWA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-headless-shell-mac-arm64.zip",
@@ -408,7 +418,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-qEz3kafH0ZXD/fztnijFkTg1ItOWoVJCYCMEWHuCV1U=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-headless-shell-mac.zip",
@@ -417,7 +427,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-x0XvhwFsabEfRhyl7O0yxpq88a5FDje0UFhd6fRG4QM=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-headless-shell-win64.zip",
@@ -428,7 +438,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1200": {
         "linux-aarch64": {
-            "integrity": "sha256-IyHj0dSXsht5qoItbJ4TxbFVJJqd988CjwCfEVmQfHU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux-arm64.zip",
@@ -440,42 +450,34 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             "integrity": "sha256-qaUlyzgy1ZqBD3j4umxe01kqakiJhGJ/XYJ8KjZcilo=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux.zip",
-                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux.zip",
-                "https://cdn.playwright.dev/builds/chromium/1200/chromium-headless-shell-linux.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/143.0.7499.4/linux64/chrome-headless-shell-linux64.zip",
             ],
         },
         "macos-aarch64": {
             "integrity": "sha256-4WIEAraXFvoX4445TDQSGsZMBUJRgDyxPd5YRYE24Dw=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-mac-arm64.zip",
-                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-mac-arm64.zip",
-                "https://cdn.playwright.dev/builds/chromium/1200/chromium-headless-shell-mac-arm64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/143.0.7499.4/mac-arm64/chrome-headless-shell-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
             "integrity": "sha256-TmBHoBS+wDQBm1iaLegDg1KMUvoYbDrsEt630fZ75ho=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-mac.zip",
-                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-mac.zip",
-                "https://cdn.playwright.dev/builds/chromium/1200/chromium-headless-shell-mac.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/143.0.7499.4/mac-x64/chrome-headless-shell-mac-x64.zip",
             ],
         },
         "windows-x86_64": {
             "integrity": "sha256-OwiyDQmUZnBNA20n0NhlB/pammFuyvvHBGMvW7OJg3k=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-win64.zip",
-                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-win64.zip",
-                "https://cdn.playwright.dev/builds/chromium/1200/chromium-headless-shell-win64.zip",
+                "https://storage.googleapis.com/chrome-for-testing-public/143.0.7499.4/win64/chrome-headless-shell-win64.zip",
             ],
         },
     },
     "1208": {
         "linux-aarch64": {
-            "integrity": "sha256-a9tDSUKewz58Amfg6qA5whMfoLOymX3sDslrDUD1ef0=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-headless-shell-linux-arm64.zip",
@@ -487,7 +489,6 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             "integrity": "sha256-JTbpfY9BDfA5Sz58QlLojOnyOfBPOvTiR6Jsr0W69J4=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/linux64/chrome-headless-shell-linux64.zip",
                 "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/linux64/chrome-headless-shell-linux64.zip",
             ],
         },
@@ -495,7 +496,6 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             "integrity": "sha256-hRC5sVdVOKpqCS7RbZgXOLLr9SxeQepMVKfOFnVs3PU=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/mac-arm64/chrome-headless-shell-mac-arm64.zip",
                 "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/mac-arm64/chrome-headless-shell-mac-arm64.zip",
             ],
         },
@@ -503,7 +503,6 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             "integrity": "sha256-Qxb3+YIToXPiNWQGIDNZzUq1srLbNsshm52Z7ex0aBk=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/mac-x64/chrome-headless-shell-mac-x64.zip",
                 "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/mac-x64/chrome-headless-shell-mac-x64.zip",
             ],
         },
@@ -511,8 +510,46 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
             "integrity": "sha256-g5UA254bCGWWHOiwUTS6PT1xuCvl3sI21sh+zZPggs0=",
             "strip_prefix": "",
             "urls": [
-                "https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/win64/chrome-headless-shell-win64.zip",
                 "https://storage.googleapis.com/chrome-for-testing-public/145.0.7632.6/win64/chrome-headless-shell-win64.zip",
+            ],
+        },
+    },
+    "1217": {
+        "linux-aarch64": {
+            "integrity": "",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1217/chromium-headless-shell-linux-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1217/chromium-headless-shell-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1217/chromium-headless-shell-linux-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-z3ec1UhvP8Whi+pKxgYCahZnrhbvruFa9RvTrTrgEJI=",
+            "strip_prefix": "",
+            "urls": [
+                "https://storage.googleapis.com/chrome-for-testing-public/147.0.7727.15/linux64/chrome-headless-shell-linux64.zip",
+            ],
+        },
+        "macos-aarch64": {
+            "integrity": "sha256-kuFvq5FIJ6Y3YH5GRotDYOvS0wu60GBE0zO7XAzrMxk=",
+            "strip_prefix": "",
+            "urls": [
+                "https://storage.googleapis.com/chrome-for-testing-public/147.0.7727.15/mac-arm64/chrome-headless-shell-mac-arm64.zip",
+            ],
+        },
+        "macos-x86_64": {
+            "integrity": "sha256-74CMW+DRWRP1jURonivRFDEcjGtBcY+raVzcG7yw4qo=",
+            "strip_prefix": "",
+            "urls": [
+                "https://storage.googleapis.com/chrome-for-testing-public/147.0.7727.15/mac-x64/chrome-headless-shell-mac-x64.zip",
+            ],
+        },
+        "windows-x86_64": {
+            "integrity": "sha256-rZm82P4pdJUFLbES9e4/ib3p9f3FzYkoEqOCTcZGG9s=",
+            "strip_prefix": "",
+            "urls": [
+                "https://storage.googleapis.com/chrome-for-testing-public/147.0.7727.15/win64/chrome-headless-shell-win64.zip",
             ],
         },
     },

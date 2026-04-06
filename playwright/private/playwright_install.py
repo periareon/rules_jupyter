@@ -277,7 +277,9 @@ def copy_browser(
     # Find the browser root (common root, checking for .app directories above it)
     browser_root = find_browser_root(file_paths)
 
-    # Use the browser root directory name as the normalized name
+    # Use the browser root directory name as the normalized name.
+    # For Playwright >= 1.57.0 the CfT names (chrome-linux64, chrome-mac-arm64, …)
+    # are expected as-is. Older versions use CDN archives with legacy names.
     normalized_name = browser_root.name
 
     logging.info(

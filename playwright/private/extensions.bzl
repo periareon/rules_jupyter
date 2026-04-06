@@ -70,12 +70,14 @@ playwright_toolchain(
     chromium_version = {chromium_version},
     chromium_headless_shell = {chromium_headless_shell_label},
     chromium_headless_shell_version = {chromium_headless_shell_version},
-    firefox = {firefox_label},
-    firefox_version = {firefox_version},
-    webkit = {webkit_label},
-    webkit_version = {webkit_version},
-    ffmpeg = {ffmpeg_label},
-    ffmpeg_version = {ffmpeg_version},
+    # Firefox, WebKit, and FFmpeg are currently disabled due to Playwright CDN instability.
+    # See: https://github.com/periareon/rules_jupyter/issues/37
+    # firefox = {firefox_label},
+    # firefox_version = {firefox_version},
+    # webkit = {webkit_label},
+    # webkit_version = {webkit_version},
+    # ffmpeg = {ffmpeg_label},
+    # ffmpeg_version = {ffmpeg_version},
     ld_library_dir = {ld_library_dir_label},
     visibility = ["//visibility:public"],
 )
@@ -285,6 +287,7 @@ def _playwright_impl(module_ctx):
             all_platforms.extend(CHROMIUM_VERSIONS[chromium_version].keys())
         if chromium_headless_shell_version and chromium_headless_shell_version in CHROMIUM_HEADLESS_SHELL_VERSIONS:
             all_platforms.extend(CHROMIUM_HEADLESS_SHELL_VERSIONS[chromium_headless_shell_version].keys())
+
         if firefox_version and firefox_version in FIREFOX_VERSIONS:
             all_platforms.extend(FIREFOX_VERSIONS[firefox_version].keys())
         if webkit_version and webkit_version in WEBKIT_VERSIONS:
@@ -383,12 +386,14 @@ def _playwright_impl(module_ctx):
                 chromium_version = browser_versions_dict.get("chromium_version"),
                 chromium_headless_shell = browser_labels.get("chromium_headless_shell"),
                 chromium_headless_shell_version = browser_versions_dict.get("chromium_headless_shell_version"),
-                firefox = browser_labels.get("firefox"),
-                firefox_version = browser_versions_dict.get("firefox_version"),
-                webkit = browser_labels.get("webkit"),
-                webkit_version = browser_versions_dict.get("webkit_version"),
-                ffmpeg = browser_labels.get("ffmpeg"),
-                ffmpeg_version = browser_versions_dict.get("ffmpeg_version"),
+                # Firefox, Webkit, and FFMPEG are disabled due to volatile integrity hashes.
+                # See: https://github.com/periareon/rules_jupyter/issues/37
+                # firefox = browser_labels.get("firefox"),
+                # firefox_version = browser_versions_dict.get("firefox_version"),
+                # webkit = browser_labels.get("webkit"),
+                # webkit_version = browser_versions_dict.get("webkit_version"),
+                # ffmpeg = browser_labels.get("ffmpeg"),
+                # ffmpeg_version = browser_versions_dict.get("ffmpeg_version"),
                 ld_library_dir = None,
             )
 

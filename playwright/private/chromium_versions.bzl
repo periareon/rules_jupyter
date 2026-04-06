@@ -15,7 +15,7 @@ Each revision key maps to platform-specific download information.
 CHROMIUM_VERSIONS = {
     "1000": {
         "linux-aarch64": {
-            "integrity": "sha256-JuXUhp15Fj32639GnCR6rm8wryU4GWvMox7gvCmE1bM=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1000/chromium-linux-arm64.zip",
@@ -24,7 +24,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-0gl0afgM+v4dTN19g/cUaRDBoVpEV3T1f+EDYvUicaA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1000/chromium-linux.zip",
@@ -33,7 +33,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-dVE6WaxY7TwClrbfyON7pWKqiKrXMWAwnv9ObEnv7c8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1000/chromium-mac-arm64.zip",
@@ -42,7 +42,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-jnlYhweVwq4BsfzBonVa3igoQcA2zcCV0IXehcB6eB8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1000/chromium-mac.zip",
@@ -51,7 +51,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-X8+Mkczpc1K2D8mJSebHceIxiF8TOEM8q8W54eAkHNU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1000/chromium-win64.zip",
@@ -62,7 +62,7 @@ CHROMIUM_VERSIONS = {
     },
     "1005": {
         "linux-aarch64": {
-            "integrity": "sha256-92488L5cF2MeC5O2pNAE/F/GJsHfR+QqGGPcgCjKBsk=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1005/chromium-linux-arm64.zip",
@@ -71,7 +71,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-xLstVHIBzQLWVP5aGPTOFHrbfOU3in4jIxxnLfG/WtI=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1005/chromium-linux.zip",
@@ -80,7 +80,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-G+2Ssj9c1J6F161/OaLgdp6yHpCFgjjW27J2KRmRTnA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1005/chromium-mac-arm64.zip",
@@ -89,7 +89,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-G88XAnBpD5k3M+I6szXcSgKFNcJV0pBzfcGRKY4fmJ4=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1005/chromium-mac.zip",
@@ -98,7 +98,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-36DBZGOvlD8AQi8xivy+jLNO8heysOTqKUTmV8vLcrQ=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1005/chromium-win64.zip",
@@ -109,14 +109,14 @@ CHROMIUM_VERSIONS = {
     },
     "1012": {
         "linux-aarch64": {
-            "integrity": "sha256-9qsIMsVocay4mVCyjHp59enGEKbcHm6ezuUYpdQq23w=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1012/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-3yxjQ1l3FiqrpPdLaCnS86IKpTcDUOPntU3LEaj00pU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1012/chromium-linux.zip",
@@ -125,21 +125,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-BunDd1UMuGJxoJqT6Z05PC4et7rKxZ7temxgMqxzD18=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1012/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-XZdpxEcJXD0MEjk1CCu8n2pOi5/jK4ps7gJf7uqVscU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1012/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-zyMqAoe12NFne9RxnjdmNKteS09Q57CKCQYHg9MQ7RI=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1012/chromium-win64.zip",
@@ -148,14 +148,14 @@ CHROMIUM_VERSIONS = {
     },
     "1015": {
         "linux-aarch64": {
-            "integrity": "sha256-AVUjItsUq7/hr1Y/2lolwv/n8fLFJvWF0zg9JkyFNyA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1015/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-yoYtt8xUqWxaxss8mxcQcisLh8iaTZPZnjDO6NDejA8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1015/chromium-linux.zip",
@@ -164,21 +164,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-i2Kzr/KmUTT4zqM/GDDgx/VDaSjEUl2RoIcBG8hO86Q=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1015/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-9vPDDYTA6f31D0erv8svqrDv8gtokWKYltBRYhyy2Ow=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1015/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-giLnxsPErZtUWa73PGdXHBRAySprgyzXA0GVgBs/K7Q=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1015/chromium-win64.zip",
@@ -187,14 +187,14 @@ CHROMIUM_VERSIONS = {
     },
     "1019": {
         "linux-aarch64": {
-            "integrity": "sha256-RwBWIwmkVk4oBg8jMg0Uys25sQtWTMXC49rGhA1fiC8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1019/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-NUH+aYgy3yoCLhbQUfBgKhFQzUq+nu5SpnwDPuWKOCw=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1019/chromium-linux.zip",
@@ -203,21 +203,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-V9RH708sRQxjHe2eE5WHLJZ2MjzU6YeF74XCRB2Ujh0=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1019/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-jebcrmgF/5Gn0hYk0GXvXxcdA4chHyb2yFwCaV0Bf68=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1019/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-uGQ7X+o3STK7KC3d3eiNoCSouzJ6dihDRSDmEltH6aI=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1019/chromium-win64.zip",
@@ -226,14 +226,14 @@ CHROMIUM_VERSIONS = {
     },
     "1024": {
         "linux-aarch64": {
-            "integrity": "sha256-HwZ8T/n3rHNGZe+++9sDdTd+QibpgwbZOYPKuGBaUr8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1024/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-NN0lOVd/HWFxa72ccKzEkrNk6OdCwAI+Njvi1VrcoyQ=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1024/chromium-linux.zip",
@@ -242,21 +242,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-8RmVgsf1zu97avLf/IGUH5YxrNUYawQ6W/SX56AIbyM=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1024/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-K7Yr3yFNzfmgbPJfT9I+43oa2Gt5rYK4/R3biHYPa70=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1024/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-jkW8ewbYB7cTVFZOUnoHhzMw2WvPxURvIZCKFXkDozs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1024/chromium-win64.zip",
@@ -265,14 +265,14 @@ CHROMIUM_VERSIONS = {
     },
     "1028": {
         "linux-aarch64": {
-            "integrity": "sha256-KAN+FmpgIbsmc2d+obzZypw1NKtYL5G/PH//rrQqpmA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1028/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-XZSteLYJNtUc5lTd6ipyrPBZc8FTsWRc7SxN+v/ozDY=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1028/chromium-linux.zip",
@@ -281,21 +281,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-vyvyelhOR5PfST8p8IaCzMFxtgRpvrjPQ2MzMxvpG24=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1028/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-5Y9WdaI4tLJtheKT0ISrJkL/GyVTInNalTv4107KzGs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1028/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-xss0UJPvGdgGVbHbCBqH6jaigSKGX0DclgwXb1Sc8pc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1028/chromium-win64.zip",
@@ -304,14 +304,14 @@ CHROMIUM_VERSIONS = {
     },
     "1033": {
         "linux-aarch64": {
-            "integrity": "sha256-Q/u+otjy5e1ozDySfqbs+w7CuSKMZRMDHyLE1QqSoOA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1033/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-yUe8I1iAkcKinvQqUwfvCtkXhc2GNFyjtiBhGf45Zps=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1033/chromium-linux.zip",
@@ -320,21 +320,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-AKcf2p5EEfDu+U9VRtRqxVz9uR7MViFDV9HO5dmCt8k=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1033/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-cT50mUCSRq5TiKGJz3+vdwyqD7atir7oux6yih1F8PA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1033/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-KgR52G24ygVPVAZNt3OYZ8ABjIUtAG4bPYubKiAeuYE=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1033/chromium-win64.zip",
@@ -343,14 +343,14 @@ CHROMIUM_VERSIONS = {
     },
     "1040": {
         "linux-aarch64": {
-            "integrity": "sha256-j3RfflMRbxPewVBjuU+p/agfmcxpIagOaJUqvVSL8Qc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1040/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-ySghXrzyqJgahasfKndFfmpipMZeD1VrT/uMsRXs8hM=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1040/chromium-linux.zip",
@@ -359,21 +359,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-FpD0uRLRXYVmL8UxCmms0k5EsfVdrUEQZA+VePyRpVQ=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1040/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-ajPuAP0QAQMFIgC+eJA6X/GELbxC3oJTWOaEIjIItfE=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1040/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-7h+Piy6n5Nd9JjBf5wMdFvjsyx5ciBysbYvqXw85KCM=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1040/chromium-win64.zip",
@@ -382,14 +382,14 @@ CHROMIUM_VERSIONS = {
     },
     "1041": {
         "linux-aarch64": {
-            "integrity": "sha256-krtsQYPt+smepZXytiMgpa+cXHD+ejL6+7c11nC/V9Q=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1041/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-HsNSjOz/Nb0gGE3H/Qfet5RiQCNgc4iw6o/aaWcwgF0=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1041/chromium-linux.zip",
@@ -398,21 +398,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-MJcVxV9tE/++75acs5aex5LyFGwtq5UUdDnGM7610AY=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1041/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-AtA/v9tVRt4bCq9OPmITLc5eIIMe65fe1tI9gKOuS8w=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1041/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-n2wXOkuhVtC4FWOCWuJ+EZl3fK0XDrgtLPTrB3edDTk=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1041/chromium-win64.zip",
@@ -421,14 +421,14 @@ CHROMIUM_VERSIONS = {
     },
     "1045": {
         "linux-aarch64": {
-            "integrity": "sha256-AWVWPuCXqQlP7SeQMyAWxhlbXCLZLYXbRtG8KOd7OWc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1045/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-yCuOkHPtcrblFdR76Yrxg/lioBDtJXQau6PnKJ4hN7U=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1045/chromium-linux.zip",
@@ -437,21 +437,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-MfEf66JS4AI2G2aOQNwgN4hsCaRHcFcJDmx7gZmdm/w=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1045/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-qACzHta8wwo4Votv7+hqp/gAS/0eTpaMRZ+6TdhWigA=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1045/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-kh454mKG76Q6M7c9zGgvS0L92PWRSiVi0QVRI5CybZ8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1045/chromium-win64.zip",
@@ -462,14 +462,14 @@ CHROMIUM_VERSIONS = {
     },
     "1048": {
         "linux-aarch64": {
-            "integrity": "sha256-9+2kDHJ4FMnr9gzCkZ1yrwQmLYJCmXTWsvEVdmxcxFM=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1048/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-b074IlxvDrqqyxgNKF8QB6UWHqqxdtgRobRKxrAjMPs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1048/chromium-linux.zip",
@@ -478,21 +478,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-Vq9/yQNWG92yvy4TZNMEGP654H7xi+HL0cTLNMkBOc0=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1048/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-oCyZva5azp9EeYRZ+8Ce1d+X6CymA/A4BRHhjgPMA24=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1048/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-QDnNdAVyA8oZ8OXrgMYVk6e0Ym21bbcuCih4xtKb50g=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1048/chromium-win64.zip",
@@ -501,14 +501,14 @@ CHROMIUM_VERSIONS = {
     },
     "1055": {
         "linux-aarch64": {
-            "integrity": "sha256-XtR8FHtYlz/fhHFrIKVOzqRKpqx11PF1A/xhy8Pa0z8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1055/chromium-linux-arm64.zip",
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-XcQ8UdPCJu/q9PBsiqnpk6xukMw2ufW7FrWg3qsTwmg=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1055/chromium-linux.zip",
@@ -517,21 +517,21 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-e/tUkwH4RgI2UdQkol+XRgh1EqwjLSIXxauuaNrE24M=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1055/chromium-mac-arm64.zip",
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-KeK60LwXmPuXPOaBJR/7OKkdh9FbRu7IReYwcr8Wklc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1055/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-hwnvG3LIM8Slmdr1AioKGlc8G2Jj5TPa0OAY+261R/4=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1055/chromium-win64.zip",
@@ -542,7 +542,7 @@ CHROMIUM_VERSIONS = {
     },
     "1060": {
         "linux-aarch64": {
-            "integrity": "sha256-XgLZrrskOzLsFQfpiPPBlMbWe1VDzYNsAQB3OHaBDSU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1060/chromium-linux-arm64.zip",
@@ -551,7 +551,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "linux-x86_64": {
-            "integrity": "sha256-5/w+UHynoFjgz6azKmoaktLpm/rtwVG4NDqisVanu8w=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1060/chromium-linux.zip",
@@ -560,7 +560,7 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-aarch64": {
-            "integrity": "sha256-FJxZkUcKA5Oem3X5gOuajAcm8InrG7F3AZ7uYNhTMiM=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1060/chromium-mac-arm64.zip",
@@ -569,14 +569,14 @@ CHROMIUM_VERSIONS = {
             ],
         },
         "macos-x86_64": {
-            "integrity": "sha256-AuoREm1DTd5ctRN8aGRRo9DMTSPZw4dHz/IHRq8+LkU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1060/chromium-mac.zip",
             ],
         },
         "windows-x86_64": {
-            "integrity": "sha256-httAgs/w12GVmNkO8tQ1qixZAXmZldG8B8ykfq5RYTs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1060/chromium-win64.zip",
@@ -585,7 +585,7 @@ CHROMIUM_VERSIONS = {
     },
     "1064": {
         "linux-aarch64": {
-            "integrity": "sha256-JF0iTpncEFg7fZnJJnXGOrZbyKl6TLidQbUCD0hLUZo=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1064/chromium-linux-arm64.zip",
@@ -622,7 +622,7 @@ CHROMIUM_VERSIONS = {
     },
     "1067": {
         "linux-aarch64": {
-            "integrity": "sha256-IcVFBYAvsTQfDatL/bxyMuh4ruEI7gSt1arLoyT6Neo=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1067/chromium-linux-arm64.zip",
@@ -659,7 +659,7 @@ CHROMIUM_VERSIONS = {
     },
     "1071": {
         "linux-aarch64": {
-            "integrity": "sha256-yipAvx5CyyYtEwGFE/EhXlGmnXVgVpg7poG1B+e/VG0=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1071/chromium-linux-arm64.zip",
@@ -696,7 +696,7 @@ CHROMIUM_VERSIONS = {
     },
     "1076": {
         "linux-aarch64": {
-            "integrity": "sha256-ptJzZSGlzLTkp/MJMt2SAfS5CE3ud/wQTynmz+dmtns=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1076/chromium-linux-arm64.zip",
@@ -733,7 +733,7 @@ CHROMIUM_VERSIONS = {
     },
     "1080": {
         "linux-aarch64": {
-            "integrity": "sha256-GTBqM8BcWlQb6DJlvJuQRAC6mErIGWWzBKC6EudsQf4=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1080/chromium-linux-arm64.zip",
@@ -770,7 +770,7 @@ CHROMIUM_VERSIONS = {
     },
     "1084": {
         "linux-aarch64": {
-            "integrity": "sha256-O/BWprpUvcCK260jRmlYVKIVHiv4kf6twGWJuhRFGt0=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1084/chromium-linux-arm64.zip",
@@ -809,7 +809,7 @@ CHROMIUM_VERSIONS = {
     },
     "1091": {
         "linux-aarch64": {
-            "integrity": "sha256-72htVD3fMtXZzDjh/q0zVl705MU31nql1qmfMn+881E=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1091/chromium-linux-arm64.zip",
@@ -846,7 +846,7 @@ CHROMIUM_VERSIONS = {
     },
     "1097": {
         "linux-aarch64": {
-            "integrity": "sha256-yB1gd2X4Xlm0HZN8qHfoFcbkajgLq0m9bGurOkUoQms=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1097/chromium-linux-arm64.zip",
@@ -885,7 +885,7 @@ CHROMIUM_VERSIONS = {
     },
     "1105": {
         "linux-aarch64": {
-            "integrity": "sha256-nyPKl5Nc7OUGmd3s8eM32GUcA+XjxMqfciXsbBAYNrk=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1105/chromium-linux-arm64.zip",
@@ -922,7 +922,7 @@ CHROMIUM_VERSIONS = {
     },
     "1112": {
         "linux-aarch64": {
-            "integrity": "sha256-gvvSRM4bfuFXUHI2fyRoDVvAh4cNWqCqjSk69K4TZUU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1112/chromium-linux-arm64.zip",
@@ -959,7 +959,7 @@ CHROMIUM_VERSIONS = {
     },
     "1117": {
         "linux-aarch64": {
-            "integrity": "sha256-aVeC4MO34JULZiaQyN4SFikNFDKWYNtt9Cqrs+j29a4=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1117/chromium-linux-arm64.zip",
@@ -998,7 +998,7 @@ CHROMIUM_VERSIONS = {
     },
     "1124": {
         "linux-aarch64": {
-            "integrity": "sha256-waWyhfJi+wCWmhaeXoooMAKx7iazorREf9kVnj3YEs0=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/builds/chromium/1124/chromium-linux-arm64.zip",
@@ -1035,7 +1035,7 @@ CHROMIUM_VERSIONS = {
     },
     "1129": {
         "linux-aarch64": {
-            "integrity": "sha256-Z6qyzsWkknZnV1RSorbFdWYIXBVPR/kk1uPvpH9713c=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1129/chromium-linux-arm64.zip",
@@ -1074,7 +1074,7 @@ CHROMIUM_VERSIONS = {
     },
     "1134": {
         "linux-aarch64": {
-            "integrity": "sha256-hFWc9+y1my2aVbCZGeopRFNwU2PQ1drOh3AxN2s5u2w=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1134/chromium-linux-arm64.zip",
@@ -1113,7 +1113,7 @@ CHROMIUM_VERSIONS = {
     },
     "1140": {
         "linux-aarch64": {
-            "integrity": "sha256-zPbhq6p7TDvw6QXANdYwgBc8ISZvo0h8C2MQj6+8D9c=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1140/chromium-linux-arm64.zip",
@@ -1152,7 +1152,7 @@ CHROMIUM_VERSIONS = {
     },
     "1148": {
         "linux-aarch64": {
-            "integrity": "sha256-98S7kf4nQ1gRIuBBXI03UFU4PLaBDCuyOtp1XeMKhWc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1148/chromium-linux-arm64.zip",
@@ -1191,7 +1191,7 @@ CHROMIUM_VERSIONS = {
     },
     "1155": {
         "linux-aarch64": {
-            "integrity": "sha256-YREKFXUbFeUCgGlj8mBGgqMVy/EP5VgnYl34ed4bV08=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1155/chromium-linux-arm64.zip",
@@ -1230,7 +1230,7 @@ CHROMIUM_VERSIONS = {
     },
     "1161": {
         "linux-aarch64": {
-            "integrity": "sha256-/eb3uHAYYmZMbNoNKQtcglmXTNQT3QocXtqRiNjHCzc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1161/chromium-linux-arm64.zip",
@@ -1269,7 +1269,7 @@ CHROMIUM_VERSIONS = {
     },
     "1169": {
         "linux-aarch64": {
-            "integrity": "sha256-LoEAmFYRf8x+p/Gs+udL1bQHnmXQYwF7u8v6pOQlREs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1169/chromium-linux-arm64.zip",
@@ -1308,7 +1308,7 @@ CHROMIUM_VERSIONS = {
     },
     "1178": {
         "linux-aarch64": {
-            "integrity": "sha256-BdaX4mrsvQDPORWS/zS6tTv66+4VZccxyCt+O+yXYIY=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1178/chromium-linux-arm64.zip",
@@ -1347,7 +1347,7 @@ CHROMIUM_VERSIONS = {
     },
     "1179": {
         "linux-aarch64": {
-            "integrity": "sha256-EF2bvCFb8JhiptGw7V3/oSWOESh6KXM3jzvM5W6mfI8=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1179/chromium-linux-arm64.zip",
@@ -1386,7 +1386,7 @@ CHROMIUM_VERSIONS = {
     },
     "1181": {
         "linux-aarch64": {
-            "integrity": "sha256-XeymNQasx0Ka++LsVlyHIprHVafBAZHuBoEiZ2QScQY=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1181/chromium-linux-arm64.zip",
@@ -1425,7 +1425,7 @@ CHROMIUM_VERSIONS = {
     },
     "1187": {
         "linux-aarch64": {
-            "integrity": "sha256-/CjNvSYn7zn+mwpS0c2SfyFyDeaYl5gxOUT/RDEamnw=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-linux-arm64.zip",
@@ -1464,7 +1464,7 @@ CHROMIUM_VERSIONS = {
     },
     "1193": {
         "linux-aarch64": {
-            "integrity": "sha256-plHQ+Lj0zOSYbEE2mfuAjGBeQEALhzoO5yac0AYO9Tc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1193/chromium-linux-arm64.zip",
@@ -1503,7 +1503,7 @@ CHROMIUM_VERSIONS = {
     },
     "1194": {
         "linux-aarch64": {
-            "integrity": "sha256-VGhffOIEXpHwe3+kyrDKM5CxJ3Pq5Hd8pK5nbT6dTvI=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-linux-arm64.zip",
@@ -1542,7 +1542,7 @@ CHROMIUM_VERSIONS = {
     },
     "1200": {
         "linux-aarch64": {
-            "integrity": "sha256-5z7raAMS6W1Pj7ylia1C4/txkXi0vdhwf5/nlhI79Is=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-linux-arm64.zip",
@@ -1581,7 +1581,7 @@ CHROMIUM_VERSIONS = {
     },
     "1208": {
         "linux-aarch64": {
-            "integrity": "sha256-cLRiBSGxraNgR14QWd/p1UmmRhp5uTQvhbfUfkQSMHc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-linux-arm64.zip",
@@ -1620,7 +1620,7 @@ CHROMIUM_VERSIONS = {
     },
     "1217": {
         "linux-aarch64": {
-            "integrity": "sha256-Vj0Jy2cnTCbuujbGcDLLwi3ERTQlnBXqRp3YGHJbETk=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1217/chromium-linux-arm64.zip",

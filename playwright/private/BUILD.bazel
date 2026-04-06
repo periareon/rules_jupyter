@@ -1,5 +1,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_venv//python:py_binary.bzl", "py_binary")
+load("@rules_venv//python/pytest:defs.bzl", "py_pytest_test")
 
 bzl_library(
     name = "bzl_lib",
@@ -11,4 +12,10 @@ py_binary(
     name = "playwright_install",
     srcs = ["playwright_install.py"],
     visibility = ["//visibility:public"],
+)
+
+py_pytest_test(
+    name = "playwright_install_test",
+    srcs = ["playwright_install_test.py"],
+    deps = [":playwright_install"],
 )

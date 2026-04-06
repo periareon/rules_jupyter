@@ -609,6 +609,11 @@ _CFT_PATH_PREFIX = "/chrome-for-testing-public/"
 _CFT_CANONICAL_ORIGIN = "https://storage.googleapis.com"
 
 
+def _has_cft_url(urls: list[str]) -> bool:
+    """Return True if any URL in the list is a Chrome for Testing URL."""
+    return any(_CFT_PATH_PREFIX in url for url in urls)
+
+
 def _normalize_cft_urls(urls: str | list[str] | Any) -> list[str]:
     """Rewrite Chrome for Testing URLs to the canonical GCS origin.
 
@@ -658,15 +663,22 @@ def _process_platform_artifact(  # pylint: disable=too-many-arguments
     """
     # Check if we already have integrity value
     if existing_data and existing_data.get("integrity"):
+        normalized_urls = _normalize_cft_urls(existing_data.get("urls", []))
+        # Drop integrity for Playwright CDN URLs (unstable content hashes).
+        # See: https://github.com/periareon/rules_jupyter/issues/37
+        existing_integrity = (
+            existing_data["integrity"] if _has_cft_url(normalized_urls) else ""
+        )
         logging.debug(
-            "Reusing existing integrity for %s %s revision %s",
+            "Reusing existing data for %s %s revision %s (integrity=%s)",
             browser_type,
             platform,
             browser_revision,
+            "kept" if existing_integrity else "dropped (CDN)",
         )
         result = {
-            "urls": _normalize_cft_urls(existing_data.get("urls", [])),
-            "integrity": existing_data["integrity"],
+            "urls": normalized_urls,
+            "integrity": existing_integrity,
             "strip_prefix": existing_data.get("strip_prefix", ""),
         }
         return result, False
@@ -702,6 +714,20 @@ def _process_platform_artifact(  # pylint: disable=too-many-arguments
     strip_prefix = STRIP_PREFIX.get(browser_type, {}).get(platform, "")
 
     logging.debug("Strip prefix for %s %s: %s", browser_type, platform, strip_prefix)
+
+    # Skip integrity computation for Playwright CDN URLs (unstable content hashes).
+    # See: https://github.com/periareon/rules_jupyter/issues/37
+    if not _has_cft_url(working_urls):
+        logging.info(
+            "Skipping integrity for %s %s (Playwright CDN only)",
+            browser_type,
+            platform,
+        )
+        return {
+            "urls": working_urls,
+            "integrity": "",
+            "strip_prefix": strip_prefix,
+        }, False
 
     try:
         sha256_hex = compute_sha256(download_url)

@@ -15,7 +15,7 @@ Each revision key maps to platform-specific download information.
 CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     "1148": {
         "linux-aarch64": {
-            "integrity": "sha256-vmVBN2S3U/tzGH3R12DMZiJzDypNojkj7vdpc8F/slw=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1148/chromium-headless-shell-linux-arm64.zip",
@@ -54,7 +54,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1161": {
         "linux-aarch64": {
-            "integrity": "sha256-CVI7C0uk7iR8oSRaMtK16h7nd2WgoSUlCbKHTjfu/tU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1161/chromium-headless-shell-linux-arm64.zip",
@@ -93,7 +93,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1169": {
         "linux-aarch64": {
-            "integrity": "sha256-J9mNPOsDY971dcNH2/8YtohvgHJ34brOpgR97JO4APc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1169/chromium-headless-shell-linux-arm64.zip",
@@ -132,7 +132,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1178": {
         "linux-aarch64": {
-            "integrity": "sha256-8+wHI693cg/gcmJQdkzK1gQO1oYUwf6BEu4rX7XcMQw=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1178/chromium-headless-shell-linux-arm64.zip",
@@ -171,7 +171,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1179": {
         "linux-aarch64": {
-            "integrity": "sha256-97/Z/jcRl/NSkZQTThd0PotQ6YbZquYhWcYJJ5KxgTE=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1179/chromium-headless-shell-linux-arm64.zip",
@@ -210,7 +210,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1181": {
         "linux-aarch64": {
-            "integrity": "sha256-rW8erv7IAJqOyyA5gefM9YGWqWJVe6vjGbhmp1qjdjs=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1181/chromium-headless-shell-linux-arm64.zip",
@@ -249,7 +249,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1187": {
         "linux-aarch64": {
-            "integrity": "sha256-nU39xFgyB09Dz3vdC0XhW58aR3KS1ogQ2VdDHTdKYMk=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-headless-shell-linux-arm64.zip",
@@ -288,7 +288,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1193": {
         "linux-aarch64": {
-            "integrity": "sha256-W7Kofh4zKv6xhc16No8lXXXWf5Az75LgH2kclpjmukE=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1193/chromium-headless-shell-linux-arm64.zip",
@@ -327,7 +327,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1194": {
         "linux-aarch64": {
-            "integrity": "sha256-a5Y7dlERnIH6UTEsEXZCnTI1u++1bVxodzDPRKWx/dc=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-headless-shell-linux-arm64.zip",
@@ -366,7 +366,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1200": {
         "linux-aarch64": {
-            "integrity": "sha256-IyHj0dSXsht5qoItbJ4TxbFVJJqd988CjwCfEVmQfHU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux-arm64.zip",
@@ -405,7 +405,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1208": {
         "linux-aarch64": {
-            "integrity": "sha256-a9tDSUKewz58Amfg6qA5whMfoLOymX3sDslrDUD1ef0=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-headless-shell-linux-arm64.zip",
@@ -444,7 +444,7 @@ CHROMIUM_HEADLESS_SHELL_VERSIONS = {
     },
     "1217": {
         "linux-aarch64": {
-            "integrity": "sha256-bbcEHYonMJO48senM4dmxtEquwbNAlP8kf7rtx7NRjU=",
+            "integrity": "",
             "strip_prefix": "",
             "urls": [
                 "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1217/chromium-headless-shell-linux-arm64.zip",

@@ -1134,4 +1134,51 @@ WEBKIT_VERSIONS = {
             ],
         },
     },
+    "2272": {
+        "linux-aarch64": {
+            "integrity": "sha256-aG47yVVm02ghviEZiI+k82oOq7wns/egmDJdVPJSGPg=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2272/webkit-ubuntu-22.04-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2272/webkit-ubuntu-22.04-arm64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2272/webkit-ubuntu-22.04-arm64.zip",
+            ],
+        },
+        "linux-x86_64": {
+            "integrity": "sha256-Gr3MjimiySdw7tSRtELBwG5yoomlMfgYSVQ+PtTFcTk=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2272/webkit-ubuntu-22.04.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2272/webkit-ubuntu-22.04.zip",
+                "https://cdn.playwright.dev/builds/webkit/2272/webkit-ubuntu-22.04.zip",
+            ],
+        },
+        "macos-aarch64": {
+            "integrity": "sha256-Ki7ScGnSyp/xZQIC5sQCS4FlsUqMnZ+ZnMkLRDbjrhU=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2272/webkit-mac-15-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2272/webkit-mac-15-arm64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2272/webkit-mac-15-arm64.zip",
+            ],
+        },
+        "macos-x86_64": {
+            "integrity": "sha256-oc5pbjpOaCkZciqTqalL34asgCoSGIZLriLAh1gZOSc=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2272/webkit-mac-15.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2272/webkit-mac-15.zip",
+                "https://cdn.playwright.dev/builds/webkit/2272/webkit-mac-15.zip",
+            ],
+        },
+        "windows-x86_64": {
+            "integrity": "sha256-x8Thu4F0NOwT7m0CaBfQdQeCE5ENt3YniztgaitpGxw=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2272/webkit-win64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2272/webkit-win64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2272/webkit-win64.zip",
+            ],
+        },
+    },
 }

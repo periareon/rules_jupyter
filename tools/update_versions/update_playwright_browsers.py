@@ -41,17 +41,20 @@ PLAYWRIGHT_GITHUB_RELEASES_API_TEMPLATE = (
 # Matches versions like 1.40.0, 1.57.0 (semantic versioning)
 PLAYWRIGHT_RELEASE_NAME_REGEX = r"^v?(\d+\.\d+\.\d+(?:-\w+)?)$"
 
-# Playwright browser download base URLs (primary and fallbacks)
+# Playwright browser download base URLs (primary and fallbacks).
+# These are required for Firefox, WebKit, FFmpeg, and legacy Chromium revision-style
+# zips (linux-aarch64) that are not published on Google's Chrome for Testing bucket.
+# Replace with a self-hosted mirror if CDN stability is a concern for these browsers.
 PLAYWRIGHT_BROWSER_BASE_URLS = [
     "https://cdn.playwright.dev/dbazure/download/playwright/builds",
     "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds",
     "https://cdn.playwright.dev/builds",
 ]
 
-# Chrome for Testing CDN base URLs (used for Chromium starting with Playwright 1.58.0)
-# Playwright mirrors Google's CDN at cdn.playwright.dev/chrome-for-testing-public.
+# Chrome for Testing base URL (used for Chromium starting with Playwright 1.58.0).
+# Use Google's canonical bucket only; Playwright's mirror (cdn.playwright.dev) has
+# served inconsistent content in the past, breaking integrity checks.
 CHROME_FOR_TESTING_BASE_URLS = [
-    "https://cdn.playwright.dev/chrome-for-testing-public",
     "https://storage.googleapis.com/chrome-for-testing-public",
 ]
 
@@ -602,6 +605,34 @@ def _find_working_urls(
     return working_urls
 
 
+_CFT_PATH_PREFIX = "/chrome-for-testing-public/"
+_CFT_CANONICAL_ORIGIN = "https://storage.googleapis.com"
+
+
+def _normalize_cft_urls(urls: str | list[str] | Any) -> list[str]:
+    """Rewrite Chrome for Testing URLs to the canonical GCS origin.
+
+    Any URL whose path starts with /chrome-for-testing-public/ is rewritten to
+    use storage.googleapis.com, deduped, with order preserved.
+    """
+    if isinstance(urls, str):
+        urls = [urls]
+    if not isinstance(urls, list):
+        return []
+    seen: set[str] = set()
+    out: list[str] = []
+    for url in urls:
+        if not isinstance(url, str):
+            continue
+        parsed = urlparse(url)
+        if parsed.path.startswith(_CFT_PATH_PREFIX):
+            url = f"{_CFT_CANONICAL_ORIGIN}{parsed.path}"
+        if url not in seen:
+            seen.add(url)
+            out.append(url)
+    return out
+
+
 def _process_platform_artifact(  # pylint: disable=too-many-arguments
     browser_type: str,
     platform: str,
@@ -634,7 +665,7 @@ def _process_platform_artifact(  # pylint: disable=too-many-arguments
             browser_revision,
         )
         result = {
-            "urls": existing_data.get("urls", []),
+            "urls": _normalize_cft_urls(existing_data.get("urls", [])),
             "integrity": existing_data["integrity"],
             "strip_prefix": existing_data.get("strip_prefix", ""),
         }

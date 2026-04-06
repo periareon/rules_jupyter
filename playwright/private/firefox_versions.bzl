@@ -1187,4 +1187,42 @@ FIREFOX_VERSIONS = {
             ],
         },
     },
+    "1511": {
+        "linux-x86_64": {
+            "integrity": "sha256-ipzAlnF6LPjYk54LGuNoJpdUsWEUliWaS/JCdurnXCU=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1511/firefox-ubuntu-20.04.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1511/firefox-ubuntu-20.04.zip",
+                "https://cdn.playwright.dev/builds/firefox/1511/firefox-ubuntu-20.04.zip",
+            ],
+        },
+        "macos-aarch64": {
+            "integrity": "sha256-ZORVLgC7U/Ih1VLdZuKsn8uY//MWIspz+OEAq5l5/gk=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1511/firefox-mac-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1511/firefox-mac-arm64.zip",
+                "https://cdn.playwright.dev/builds/firefox/1511/firefox-mac-arm64.zip",
+            ],
+        },
+        "macos-x86_64": {
+            "integrity": "sha256-jdYjuzWA/YPvaJmcU6SBClA1QyzeZV0EUUodUqV+3xs=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1511/firefox-mac.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1511/firefox-mac.zip",
+                "https://cdn.playwright.dev/builds/firefox/1511/firefox-mac.zip",
+            ],
+        },
+        "windows-x86_64": {
+            "integrity": "sha256-ZM6euAvsfqbZCDMiUZ5o802RfmXMHDNrFLQqe2PdDZY=",
+            "strip_prefix": "",
+            "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1511/firefox-win64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1511/firefox-win64.zip",
+                "https://cdn.playwright.dev/builds/firefox/1511/firefox-win64.zip",
+            ],
+        },
+    },
 }

@@ -31,6 +31,29 @@ PLATFORM_TO_CONSTRAINTS = {
     "windows-x86_64": ["@platforms//os:windows", "@platforms//cpu:x86_64"],
 }
 
+# Minimum Playwright version that ships with Chrome for Testing naming
+# conventions and can use the stable Google CDN with integrity hashes.
+_MIN_REPRODUCIBLE_VERSION = "1.57.0"
+
+def _version_gte(version, min_version):
+    """Check if version >= min_version using semver-style comparison.
+
+    Args:
+        version: Version string (e.g., "1.57.0").
+        min_version: Minimum version string to compare against.
+
+    Returns:
+        True if version >= min_version.
+    """
+    v_parts = [int(x) for x in version.split(".")]
+    m_parts = [int(x) for x in min_version.split(".")]
+    for i in range(max(len(v_parts), len(m_parts))):
+        v = v_parts[i] if i < len(v_parts) else 0
+        m = m_parts[i] if i < len(m_parts) else 0
+        if v != m:
+            return v > m
+    return True
+
 def _find_modules(module_ctx):
     root = None
     rules_module = None
@@ -248,6 +271,7 @@ def _playwright_impl(module_ctx):
     if not toolchains:
         toolchains = rules_mod.tags.toolchain
     direct_deps = []
+    is_reproducible = True
 
     for attrs in toolchains:
         # Determine version - either from explicit version or from requirements.txt
@@ -261,6 +285,9 @@ def _playwright_impl(module_ctx):
             fail("Either 'version' or 'version_from_requirements' must be specified")
 
         name = attrs.name
+
+        if not _version_gte(version, _MIN_REPRODUCIBLE_VERSION):
+            is_reproducible = False
 
         # Get browser versions from browser_versions.bzl based on playwright version
         browser_versions = _BROWSER_VERSIONS.get(version, {})
@@ -413,7 +440,7 @@ def _playwright_impl(module_ctx):
         direct_deps.append(name)
 
     return module_ctx.extension_metadata(
-        reproducible = True,
+        reproducible = is_reproducible,
         root_module_direct_deps = direct_deps,
         root_module_direct_dev_deps = [],
     )

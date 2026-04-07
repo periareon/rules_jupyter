@@ -43,6 +43,7 @@ def _jupyter_toolchain_impl(ctx):
             label = ctx.label,
             default_cwd_mode = ctx.attr.cwd_mode if ctx.attr.cwd_mode else None,
             default_kernel = ctx.attr.kernel if ctx.attr.kernel else None,
+            default_exporter_args = ctx.attr.exporter_args,
             jupyter = jupyter_target,
             jupytext = jupytext_target,
             pandoc = pandoc,
@@ -72,6 +73,9 @@ jupyter_toolchain = rule(
                 "notebook_root",
             ],
             default = "execution_root",
+        ),
+        "exporter_args": attr.string_list(
+            doc = "Default traitlets-style flags forwarded to nbconvert exporters for all rules using this toolchain (e.g. ``--WebPDFExporter.exclude_input=true``). Per-rule ``exporter_args`` are appended after these defaults, allowing overrides.",
         ),
         "jupyter": attr.label(
             doc = "The Jupyter Python package providing notebook execution capabilities.",

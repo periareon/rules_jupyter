@@ -97,6 +97,13 @@ def parse_args() -> argparse.Namespace:
         "--out_webpdf", type=Path, help="The output path to an pdf (web) report."
     )
     parser.add_argument(
+        "--exporter_arg",
+        dest="exporter_args",
+        action="append",
+        default=[],
+        help="Traitlets-style flag forwarded to nbconvert exporters.",
+    )
+    parser.add_argument(
         "params",
         nargs="*",
         help="Additional args to be passed to the jupyter script.",
@@ -330,11 +337,48 @@ def _plotly_pdf_workaround(
             data["text/html"] = html
 
 
+def parse_exporter_config(flags: list[str]) -> Any:
+    """Parse traitlets-style config flags into a :class:`~traitlets.config.Config`.
+
+    Each flag should follow the ``--ClassName.trait_name=value`` convention used
+    by ``jupyter nbconvert`` on the command line.  A bare flag without ``=``
+    (e.g. ``--WebPDFExporter.exclude_input``) is treated as boolean ``True``.
+    Values are decoded as JSON when possible, otherwise kept as strings.
+
+    Args:
+        flags: A list of traitlets config strings
+            (e.g. ``["--WebPDFExporter.exclude_input=true"]``).
+
+    Returns:
+        A :class:`~traitlets.config.Config` object.
+    """
+    from traitlets.config import Config  # pylint: disable=import-outside-toplevel
+
+    c = Config()
+    for flag in flags:
+        key, has_value, raw_value = flag.lstrip("-").partition("=")
+        class_name, _, trait_name = key.partition(".")
+        if not class_name or not trait_name:
+            raise ValueError(
+                f"Invalid config flag {flag!r}: expected --ClassName.trait_name=value"
+            )
+        if not has_value:
+            value: Any = True
+        else:
+            try:
+                value = json.loads(raw_value)
+            except (json.JSONDecodeError, ValueError):
+                value = raw_value
+        setattr(c[class_name], trait_name, value)
+    return c
+
+
 def export_notebook(
     notebook: nbformat.NotebookNode,
     output_path: Path,
     exporter_class: type,
     template_name: Optional[str] = None,
+    exporter_config: Optional[Any] = None,
 ) -> None:
     """Export a notebook to a specific format.
 
@@ -343,10 +387,14 @@ def export_notebook(
         output_path: Path to write the output.
         exporter_class: The nbconvert exporter class to use.
         template_name: Optional template name for the exporter.
+        exporter_config: Optional :class:`~traitlets.config.Config` object
+            forwarded to the exporter constructor.
     """
-    exporter_kwargs = {}
+    exporter_kwargs: dict[str, Any] = {}
     if template_name:
         exporter_kwargs["template_name"] = template_name
+    if exporter_config:
+        exporter_kwargs["config"] = exporter_config
 
     exporter = exporter_class(**exporter_kwargs)
 
@@ -596,12 +644,15 @@ def _generate_outputs(
     # isort: skip
     import nbconvert
 
+    config = parse_exporter_config(args.exporter_args) if args.exporter_args else None
+
     if args.out_html:
         export_notebook(
             notebook,
             args.out_html,
             nbconvert.HTMLExporter,
             template_name=args.out_html_template_type,
+            exporter_config=config,
         )
     if args.out_latex:
         export_notebook(
@@ -609,15 +660,36 @@ def _generate_outputs(
             args.out_latex,
             nbconvert.LatexExporter,
             template_name=args.out_latex_template_type,
+            exporter_config=config,
         )
     if args.out_markdown:
-        export_notebook(notebook, args.out_markdown, nbconvert.MarkdownExporter)
+        export_notebook(
+            notebook,
+            args.out_markdown,
+            nbconvert.MarkdownExporter,
+            exporter_config=config,
+        )
     if args.out_pdf:
-        export_notebook(notebook, args.out_pdf, nbconvert.PDFExporter)
+        export_notebook(
+            notebook,
+            args.out_pdf,
+            nbconvert.PDFExporter,
+            exporter_config=config,
+        )
     if args.out_rst:
-        export_notebook(notebook, args.out_rst, nbconvert.RSTExporter)
+        export_notebook(
+            notebook,
+            args.out_rst,
+            nbconvert.RSTExporter,
+            exporter_config=config,
+        )
     if args.out_webpdf:
-        export_notebook(notebook, args.out_webpdf, nbconvert.WebPDFExporter)
+        export_notebook(
+            notebook,
+            args.out_webpdf,
+            nbconvert.WebPDFExporter,
+            exporter_config=config,
+        )
 
 
 def main() -> None:

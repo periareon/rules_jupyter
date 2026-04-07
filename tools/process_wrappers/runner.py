@@ -113,7 +113,11 @@ def main() -> None:
 
         for report_type in args.reports:
             output = generate_reports(
-                notebook, notebook_name, report_type, args.out_dir
+                notebook,
+                notebook_name,
+                report_type,
+                args.out_dir,
+                exporter_args=args.exporter_args or None,
             )
             print(f"{report_type.capitalize()} report written to: {output}")
 

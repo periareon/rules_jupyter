@@ -21,6 +21,7 @@ from tools.process_wrappers.reporter import (
     configure_playwright,
     execute_notebook,
     export_notebook,
+    parse_exporter_config,
     postprocess_notebook_outputs,
     save_notebook,
     temporary_home,
@@ -122,6 +123,13 @@ def create_arg_parser(
         help="Report types to generate.",
     )
     parser.add_argument(
+        "--exporter-arg",
+        dest="exporter_args",
+        action="append",
+        default=[],
+        help="Traitlets-style flag forwarded to nbconvert exporters.",
+    )
+    parser.add_argument(
         "params",
         nargs="*",
         help="Additional args to be passed to the jupyter script.",
@@ -171,14 +179,17 @@ def generate_reports(
     notebook_name: str,
     report_type: ReportType,
     output_dir: Path,
+    exporter_args: list[str] | None = None,
 ) -> Path:
     """Generate requested reports for the executed notebook.
 
     Args:
         notebook: The executed notebook.
         notebook_name: Base name for output files.
-        reports: List of report types to generate.
+        report_type: The report type to generate.
         output_dir: Directory to write reports to.
+        exporter_args: Optional list of traitlets-style config flags
+            (e.g. ``["--WebPDFExporter.exclude_input=true"]``).
     Returns:
         The path to the generated file.
     """
@@ -190,7 +201,8 @@ def generate_reports(
     exporter_class, extension = exporter_map[report_type]
     output_path = output_dir / f"{notebook_name}{extension}"
 
-    export_notebook(notebook, output_path, exporter_class)
+    config = parse_exporter_config(exporter_args) if exporter_args else None
+    export_notebook(notebook, output_path, exporter_class, exporter_config=config)
     logging.debug("Generated %s report: %s", report_type, output_path)
 
     return output_path
@@ -283,7 +295,13 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
                 logging.debug("Saved executed notebook: %s", executed_notebook_path)
 
                 for report_type in args.reports:
-                    generate_reports(notebook, notebook_name, report_type, output_dir)
+                    generate_reports(
+                        notebook,
+                        notebook_name,
+                        report_type,
+                        output_dir,
+                        exporter_args=args.exporter_args or None,
+                    )
             else:
                 logging.warning(
                     "TEST_UNDECLARED_OUTPUTS_DIR not set, skipping report generation"

@@ -3,6 +3,7 @@
 
 load("@rules_venv//python:py_binary.bzl", "py_binary")
 load("@rules_venv//python:py_library.bzl", "py_library")
+load("@rules_venv//python/pytest:defs.bzl", "py_pytest_test")
 
 exports_files([
     "autorun.js",
@@ -65,6 +66,12 @@ py_binary(
         ":reporter",
         "@rules_venv//python/runfiles",
     ],
+)
+
+py_pytest_test(
+    name = "reporter_test",
+    srcs = ["reporter_test.py"],
+    deps = [":reporter"],
 )
 
 py_library(

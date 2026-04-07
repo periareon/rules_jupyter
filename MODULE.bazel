@@ -2,7 +2,7 @@
 
 module(
     name = "rules_jupyter",
-    version = "0.5.0",
+    version = "0.6.0",
 )
 
 bazel_dep(name = "rules_venv", version = "0.15.0")

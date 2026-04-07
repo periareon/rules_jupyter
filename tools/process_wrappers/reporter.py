@@ -252,7 +252,7 @@ def _notebook_execution_environment(
             sys.stderr = old_stderr
 
 
-def execute_notebook(  # pylint: disable=too-many-arguments
+def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
     notebook_path: Path,
     cwd: Path,
     *,
@@ -280,8 +280,17 @@ def execute_notebook(  # pylint: disable=too-many-arguments
     with open(notebook_path, "r", encoding="utf-8") as f:
         notebook = nbformat.read(f, as_version=4)  # type: ignore[no-untyped-call]
 
-    # Configure the execute preprocessor
-    ep_kwargs: dict[str, int | str] = {"timeout": timeout}
+    # Configure the execute preprocessor.
+    # Use IPC transport on Unix to avoid ZMQ port collisions when Bazel
+    # runs multiple notebook actions in parallel on the same host.
+    ep_kwargs: dict[str, Any] = {"timeout": timeout}
+    if sys.platform != "win32":
+        from traitlets.config import Config  # pylint: disable=import-outside-toplevel
+
+        config = Config()
+        config.KernelManager.transport = "ipc"
+        ep_kwargs["config"] = config
+
     if kernel_name:
         ep_kwargs["kernel_name"] = kernel_name
 

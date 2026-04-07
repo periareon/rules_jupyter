@@ -232,6 +232,9 @@ def _jupyter_report_impl(ctx):
         outputs.update({"jupiter_report_webpdf": out_webpdf})
         args.add("--out_webpdf", out_webpdf)
 
+    exporter_args = toolchain.default_exporter_args + ctx.attr.exporter_args
+    args.add_all(exporter_args, format_each = "--exporter_arg=%s")
+
     args.add("--")
 
     known_variables = {}
@@ -295,6 +298,9 @@ jupyter_report = rule(
         ),
         "env": attr.string_dict(
             doc = "Environment variables to set when executing the notebook. Values support location expansion (e.g., `$(location :target)`).",
+        ),
+        "exporter_args": attr.string_list(
+            doc = "Traitlets-style flags forwarded to nbconvert exporters (e.g. ``--WebPDFExporter.exclude_input=true``).",
         ),
         "notebook": attr.label(
             doc = "The notebook to execute and convert. Must be a `jupyter_notebook` target.",
@@ -453,6 +459,8 @@ def _jupyter_notebook_test_impl(ctx):
                 toolchain.label,
             ))
         args.add("--report", report)
+    exporter_args = toolchain.default_exporter_args + ctx.attr.exporter_args
+    args.add_all(exporter_args, format_each = "--exporter-arg=%s")
     args.add("--")
 
     known_variables = {}
@@ -521,6 +529,9 @@ jupyter_notebook_test = rule(
         "env_inherit": attr.string_list(
             doc = "Specifies additional environment variables to inherit from the external environment when the test is executed by `bazel test`.",
         ),
+        "exporter_args": attr.string_list(
+            doc = "Traitlets-style flags forwarded to nbconvert exporters (e.g. ``--WebPDFExporter.exclude_input=true``).",
+        ),
         "notebook": attr.label(
             doc = "The notebook to execute and test. Must be a jupyter_notebook target.",
             providers = [JupyterNotebookInfo, PyInfo],
@@ -587,6 +598,8 @@ def _jupyter_notebook_binary_impl(ctx):
                 toolchain.label,
             ))
         args.add("--report", report)
+    exporter_args = toolchain.default_exporter_args + ctx.attr.exporter_args
+    args.add_all(exporter_args, format_each = "--exporter-arg=%s")
     if ctx.attr.out_dir:
         args.add("--out-dir", ctx.attr.out_dir)
     args.add("--")
@@ -681,6 +694,9 @@ Then run: `bazel run :run_notebook` or `bazel run :run_notebook -- --my-flag val
         ),
         "env_inherit": attr.string_list(
             doc = "Specifies additional environment variables to inherit from the external environment.",
+        ),
+        "exporter_args": attr.string_list(
+            doc = "Traitlets-style flags forwarded to nbconvert exporters (e.g. ``--WebPDFExporter.exclude_input=true``).",
         ),
         "notebook": attr.label(
             doc = "The notebook to execute. Must be a `jupyter_notebook` target.",

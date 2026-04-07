@@ -1,0 +1,36 @@
+load("@rules_venv//python/pytest:defs.bzl", "py_pytest_test")
+load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_report")
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.py",
+    tags = ["no-pylint"],
+)
+
+# Report generated WITH exporter_args excluding code input cells.
+jupyter_report(
+    name = "report",
+    exporter_args = ["--HTMLExporter.exclude_input=true"],
+    notebook = ":notebook",
+    out_html = "report.html",
+)
+
+# Baseline report WITHOUT exporter_args (code input cells are present).
+jupyter_report(
+    name = "baseline_report",
+    notebook = ":notebook",
+    out_html = "baseline_report.html",
+)
+
+py_pytest_test(
+    name = "validate_exporter_args_test",
+    srcs = ["validate_exporter_args_test.py"],
+    data = [
+        ":baseline_report.html",
+        ":report.html",
+    ],
+    tags = ["no-pylint"],
+    deps = [
+        "@rules_venv//python/runfiles",
+    ],
+)

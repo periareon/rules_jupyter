@@ -460,7 +460,7 @@ def _jupyter_notebook_test_impl(ctx):
             ))
         args.add("--report", report)
     exporter_args = toolchain.default_exporter_args + ctx.attr.exporter_args
-    args.add_all(exporter_args, format_each = "--exporter-arg=%s")
+    args.add_all(exporter_args, format_each = "--exporter_arg=%s")
     args.add("--")
 
     known_variables = {}
@@ -599,7 +599,7 @@ def _jupyter_notebook_binary_impl(ctx):
             ))
         args.add("--report", report)
     exporter_args = toolchain.default_exporter_args + ctx.attr.exporter_args
-    args.add_all(exporter_args, format_each = "--exporter-arg=%s")
+    args.add_all(exporter_args, format_each = "--exporter_arg=%s")
     if ctx.attr.out_dir:
         args.add("--out-dir", ctx.attr.out_dir)
     args.add("--")

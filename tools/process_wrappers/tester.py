@@ -124,6 +124,7 @@ def create_arg_parser(
     )
     parser.add_argument(
         "--exporter-arg",
+        "--exporter_arg",
         dest="exporter_args",
         action="append",
         default=[],

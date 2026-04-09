@@ -602,7 +602,6 @@ def _jupyter_notebook_binary_impl(ctx):
     args.add_all(exporter_args, format_each = "--exporter_arg=%s")
     if ctx.attr.out_dir:
         args.add("--out-dir", ctx.attr.out_dir)
-    args.add("--")
 
     known_variables = {}
     for target in ctx.attr.toolchains:
@@ -610,6 +609,12 @@ def _jupyter_notebook_binary_impl(ctx):
             variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
             known_variables.update(variables)
 
+    # Note that passing args as an attribute removes the ability to pass args to the runner.
+    # For example, `args = ["--foo"]` would block the command line form of:
+    # ```
+    # bazel run //:jupyter_notebook_binary -- --out_dir=/tmp/notebook -- --foo
+    # ```
+    # The runner would interpret all args as args to the notebook and not the runner.
     if ctx.attr.args:
         args.add("--")
         args.add_all(_expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables))

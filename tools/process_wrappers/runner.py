@@ -40,6 +40,7 @@ def parse_args(
     parser = create_arg_parser(runfiles=runfiles, description=__doc__)
     parser.add_argument(
         "--out-dir",
+        "--out_dir",
         "--output_dir",
         dest="out_dir",
         type=Path,

@@ -461,6 +461,10 @@ def _jupyter_notebook_test_impl(ctx):
         args.add("--report", report)
     exporter_args = toolchain.default_exporter_args + ctx.attr.exporter_args
     args.add_all(exporter_args, format_each = "--exporter_arg=%s")
+
+    # In comparison to `jupyter_notebook_binary`, test args are always forward to the notebook
+    # and not the runner. Note that in test rules `args` are automatically added to the command
+    # line so to avoid duplication they are not added to the args file.
     args.add("--")
 
     known_variables = {}
@@ -469,16 +473,12 @@ def _jupyter_notebook_test_impl(ctx):
             variables = getattr(target[platform_common.TemplateVariableInfo], "variables", {})
             known_variables.update(variables)
 
-    notebook_args = _expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables)
-    args.add_all(notebook_args)
-
     args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
     ctx.actions.write(
         output = args_file,
         content = args,
     )
 
-    # TODO: Make runner with notebook deps
     executable, runfiles = _create_executable(
         ctx = ctx,
         cfg = "target",
@@ -617,7 +617,6 @@ def _jupyter_notebook_binary_impl(ctx):
     # The runner would interpret all args as args to the notebook and not the runner.
     if ctx.attr.args:
         args.add("--")
-        args.add_all(_expand_args(ctx, ctx.attr.args, ctx.attr.data, known_variables))
 
     args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
     ctx.actions.write(

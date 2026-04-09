@@ -49,6 +49,18 @@ jobs:
         run: bazel $env:BAZEL_STARTUP_FLAGS test //...
         if: startswith(runner.os, 'Windows')
 
+      # Run jupyter_notebook_binary targets that assert args are forwarded correctly.
+      - name: Run binary_with_args (Unix)
+        run: |
+          bazel ${BAZEL_STARTUP_FLAGS[@]} run //tests/with_args:binary_with_args_py
+          bazel ${BAZEL_STARTUP_FLAGS[@]} run //tests/with_args:binary_with_args_ipynb
+        if: startswith(runner.os, 'Windows') != true
+      - name: Run binary_with_args (Windows)
+        run: |
+          bazel $env:BAZEL_STARTUP_FLAGS run //tests/with_args:binary_with_args_py
+          bazel $env:BAZEL_STARTUP_FLAGS run //tests/with_args:binary_with_args_ipynb
+        if: startswith(runner.os, 'Windows')
+
   ci-examples-simple:
     runs-on: ${{ matrix.os }}
     strategy:

@@ -133,6 +133,7 @@ def create_arg_parser(
     parser.add_argument(
         "params",
         nargs="*",
+        default=[],
         help="Additional args to be passed to the jupyter script.",
     )
 

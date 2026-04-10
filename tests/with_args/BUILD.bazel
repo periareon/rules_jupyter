@@ -1,5 +1,17 @@
 load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_binary", "jupyter_notebook_test", "jupyter_report")
 
+# Test notebook without command-line arguments
+jupyter_notebook(
+    name = "notebook_without_args",
+    src = "notebook_without_args.py",
+    tags = ["no-pylint"],
+)
+
+jupyter_notebook_test(
+    name = "test_without_args",
+    notebook = ":notebook_without_args",
+)
+
 # Test notebook with command-line arguments (.py format)
 jupyter_notebook(
     name = "notebook_with_args_py",

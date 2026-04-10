@@ -297,7 +297,7 @@ def execute_notebook(  # pylint: disable=too-many-arguments,too-many-locals
     # If params are provided, inject a cell at the beginning to set sys.argv
     # Note: ExecutePreprocessor.extra_arguments is for kernel config, not sys.argv
     # So we inject a cell that sets sys.argv directly
-    if params:
+    if params is not None:
         argv_code = _ARGV_CELL_TEMPLATE.format(argv_list=json.dumps(params, indent=4))
         argv_cell = nbformat.v4.new_code_cell(argv_code)  # type: ignore[no-untyped-call]
         # Strip the 'id' field so notebooks using nbformat 4.0-4.4 don't fail

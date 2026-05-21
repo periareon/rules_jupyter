@@ -3,18 +3,88 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@stardoc//stardoc:stardoc.bzl", "stardoc")
 
 stardoc(
-    name = "rules",
-    out = "src/rules.md",
+    name = "defs",
+    out = "src/defs.md",
     input = "//jupyter:defs.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
     deps = ["//jupyter:defs_bzl"],
 )
 
+stardoc(
+    name = "extensions",
+    out = "src/extensions.md",
+    input = "//jupyter:extensions.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//jupyter:extensions_bzl"],
+)
+
+stardoc(
+    name = "jupyter_lab",
+    out = "src/jupyter_lab.md",
+    input = "//jupyter:jupyter_lab.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//jupyter:jupyter_lab_bzl"],
+)
+
+stardoc(
+    name = "jupyter_notebook",
+    out = "src/jupyter_notebook.md",
+    input = "//jupyter:jupyter_notebook.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//jupyter:jupyter_notebook_bzl"],
+)
+
+stardoc(
+    name = "jupyter_notebook_binary",
+    out = "src/jupyter_notebook_binary.md",
+    input = "//jupyter:jupyter_notebook_binary.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//jupyter:jupyter_notebook_binary_bzl"],
+)
+
+stardoc(
+    name = "jupyter_notebook_test",
+    out = "src/jupyter_notebook_test.md",
+    input = "//jupyter:jupyter_notebook_test.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//jupyter:jupyter_notebook_test_bzl"],
+)
+
+stardoc(
+    name = "jupyter_report",
+    out = "src/jupyter_report.md",
+    input = "//jupyter:jupyter_report.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//jupyter:jupyter_report_bzl"],
+)
+
+stardoc(
+    name = "jupyter_toolchain",
+    out = "src/jupyter_toolchain.md",
+    input = "//jupyter:jupyter_toolchain.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//jupyter:jupyter_toolchain_bzl"],
+)
+
 mdbook(
     name = "book",
     srcs = glob(["src/**/*.md"]) + [
-        ":rules",
+        ":defs",
+        ":extensions",
+        ":jupyter_lab",
+        ":jupyter_notebook",
+        ":jupyter_notebook_binary",
+        ":jupyter_notebook_test",
+        ":jupyter_report",
+        ":jupyter_toolchain",
     ],
     book = "book.toml",
     # Windows builds are typically super slow in CI so they're avoided.

@@ -203,23 +203,27 @@ toolchain(
     "//:jupyter_toolchain",
 )
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="jupyter-rules"><a class="header" href="#jupyter-rules">Jupyter Rules</a></h1>
+<ul>
+<li><a href="./jupyter_lab.html#jupyter_lab">jupyter_lab</a></li>
+<li><a href="./jupyter_notebook.html#jupyter_notebook">jupyter_notebook</a></li>
+<li><a href="./jupyter_notebook_binary.html#jupyter_notebook_binary">jupyter_notebook_binary</a></li>
+<li><a href="./jupyter_notebook_test.html#jupyter_notebook_test">jupyter_notebook_test</a></li>
+<li><a href="./jupyter_report.html#jupyter_report">jupyter_report</a></li>
+<li><a href="./jupyter_toolchain.html#jupyter_toolchain">jupyter_toolchain</a></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
-<h1 id="jupyter-rules"><a class="header" href="#jupyter-rules">Jupyter rules</a></h1>
+<h1 id="jupyter_lab"><a class="header" href="#jupyter_lab">jupyter_lab</a></h1>
 <h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <ul>
-<li><a href="rules.html#jupyter_lab">jupyter_lab</a></li>
-<li><a href="rules.html#jupyter_notebook">jupyter_notebook</a></li>
-<li><a href="rules.html#jupyter_notebook_binary">jupyter_notebook_binary</a></li>
-<li><a href="rules.html#jupyter_notebook_test">jupyter_notebook_test</a></li>
-<li><a href="rules.html#jupyter_report">jupyter_report</a></li>
-<li><a href="rules.html#jupyter_toolchain">jupyter_toolchain</a></li>
+<li><a href="jupyter_lab.html#jupyter_lab">jupyter_lab</a></li>
 </ul>
 <p><a id="jupyter_lab"></a></p>
-<h2 id="jupyter_lab"><a class="header" href="#jupyter_lab">jupyter_lab</a></h2>
+<h2 id="jupyter_lab-1"><a class="header" href="#jupyter_lab-1">jupyter_lab</a></h2>
 <pre>
-load("@rules_jupyter//jupyter:defs.bzl", "jupyter_lab")
+load("@rules_jupyter//jupyter:jupyter_lab.bzl", "jupyter_lab")
 
-jupyter_lab(<a href="rules.html#jupyter_lab-name">name</a>, <a href="rules.html#jupyter_lab-data">data</a>, <a href="rules.html#jupyter_lab-app_settings">app_settings</a>, <a href="rules.html#jupyter_lab-cwd_mode">cwd_mode</a>, <a href="rules.html#jupyter_lab-env">env</a>, <a href="rules.html#jupyter_lab-env_inherit">env_inherit</a>, <a href="rules.html#jupyter_lab-execute">execute</a>, <a href="rules.html#jupyter_lab-notebook">notebook</a>, <a href="rules.html#jupyter_lab-run_mode">run_mode</a>)
+jupyter_lab(<a href="jupyter_lab.html#jupyter_lab-name">name</a>, <a href="jupyter_lab.html#jupyter_lab-data">data</a>, <a href="jupyter_lab.html#jupyter_lab-app_settings">app_settings</a>, <a href="jupyter_lab.html#jupyter_lab-cwd_mode">cwd_mode</a>, <a href="jupyter_lab.html#jupyter_lab-env">env</a>, <a href="jupyter_lab.html#jupyter_lab-env_inherit">env_inherit</a>, <a href="jupyter_lab.html#jupyter_lab-execute">execute</a>, <a href="jupyter_lab.html#jupyter_lab-notebook">notebook</a>, <a href="jupyter_lab.html#jupyter_lab-run_mode">run_mode</a>)
 </pre>
 <p>Launches a Jupyter Lab server for interactive notebook development.</p>
 <p>This rule creates an executable target that, when run via <code>bazel run</code>, starts a Jupyter Lab
@@ -251,13 +255,18 @@ jupyter_lab(
 <tr><td style="text-align: left"><a id="jupyter_lab-notebook"></a>notebook</td><td style="text-align: left">The notebook to serve. Must be a <code>jupyter_notebook</code> target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_lab-run_mode"></a>run_mode</td><td style="text-align: left">Controls where the notebook is served from. <code>runfiles</code> (default) copies the notebook to a temp directory with symlinked data dependencies. <code>source</code> serves the notebook directly from the source tree for in-place editing with unrestricted file access; requires a <code>.ipynb</code> source.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"runfiles"</code></td></tr>
 </tbody></table>
-</div>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter_notebook"><a class="header" href="#jupyter_notebook">jupyter_notebook</a></h1>
+<h2 id="rules-1"><a class="header" href="#rules-1">Rules</a></h2>
+<ul>
+<li><a href="jupyter_notebook.html#jupyter_notebook">jupyter_notebook</a></li>
+</ul>
 <p><a id="jupyter_notebook"></a></p>
-<h2 id="jupyter_notebook"><a class="header" href="#jupyter_notebook">jupyter_notebook</a></h2>
+<h2 id="jupyter_notebook-1"><a class="header" href="#jupyter_notebook-1">jupyter_notebook</a></h2>
 <pre>
-load("@rules_jupyter//jupyter:defs.bzl", "jupyter_notebook")
+load("@rules_jupyter//jupyter:jupyter_notebook.bzl", "jupyter_notebook")
 
-jupyter_notebook(<a href="rules.html#jupyter_notebook-name">name</a>, <a href="rules.html#jupyter_notebook-deps">deps</a>, <a href="rules.html#jupyter_notebook-src">src</a>, <a href="rules.html#jupyter_notebook-data">data</a>, <a href="rules.html#jupyter_notebook-kernel">kernel</a>)
+jupyter_notebook(<a href="jupyter_notebook.html#jupyter_notebook-name">name</a>, <a href="jupyter_notebook.html#jupyter_notebook-deps">deps</a>, <a href="jupyter_notebook.html#jupyter_notebook-src">src</a>, <a href="jupyter_notebook.html#jupyter_notebook-data">data</a>, <a href="jupyter_notebook.html#jupyter_notebook-kernel">kernel</a>)
 </pre>
 <p>Compiles a Jupyter notebook from source and prepares it for execution.</p>
 <p>This rule processes notebook source files and converts them to the standard <code>.ipynb</code> format.
@@ -280,14 +289,19 @@ to <code>.ipynb</code> format. If the source is already a <code>.ipynb</code> fi
 <tr><td style="text-align: left"><a id="jupyter_notebook-data"></a>data</td><td style="text-align: left">Additional data files required by the notebook (e.g., input data files, images, configuration files).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook-kernel"></a>kernel</td><td style="text-align: left">The name of the Jupyter kernel to use for executing the notebook (e.g., <code>python3</code>, <code>rust</code>). If not specified, the default kernel from the toolchain is used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 </tbody></table>
-</div>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter_notebook_binary"><a class="header" href="#jupyter_notebook_binary">jupyter_notebook_binary</a></h1>
+<h2 id="rules-2"><a class="header" href="#rules-2">Rules</a></h2>
+<ul>
+<li><a href="jupyter_notebook_binary.html#jupyter_notebook_binary">jupyter_notebook_binary</a></li>
+</ul>
 <p><a id="jupyter_notebook_binary"></a></p>
-<h2 id="jupyter_notebook_binary"><a class="header" href="#jupyter_notebook_binary">jupyter_notebook_binary</a></h2>
+<h2 id="jupyter_notebook_binary-1"><a class="header" href="#jupyter_notebook_binary-1">jupyter_notebook_binary</a></h2>
 <pre>
-load("@rules_jupyter//jupyter:defs.bzl", "jupyter_notebook_binary")
+load("@rules_jupyter//jupyter:jupyter_notebook_binary.bzl", "jupyter_notebook_binary")
 
-jupyter_notebook_binary(<a href="rules.html#jupyter_notebook_binary-name">name</a>, <a href="rules.html#jupyter_notebook_binary-data">data</a>, <a href="rules.html#jupyter_notebook_binary-cwd_mode">cwd_mode</a>, <a href="rules.html#jupyter_notebook_binary-env">env</a>, <a href="rules.html#jupyter_notebook_binary-env_inherit">env_inherit</a>, <a href="rules.html#jupyter_notebook_binary-exporter_args">exporter_args</a>, <a href="rules.html#jupyter_notebook_binary-notebook">notebook</a>, <a href="rules.html#jupyter_notebook_binary-out_dir">out_dir</a>,
-                        <a href="rules.html#jupyter_notebook_binary-reports">reports</a>)
+jupyter_notebook_binary(<a href="jupyter_notebook_binary.html#jupyter_notebook_binary-name">name</a>, <a href="jupyter_notebook_binary.html#jupyter_notebook_binary-data">data</a>, <a href="jupyter_notebook_binary.html#jupyter_notebook_binary-cwd_mode">cwd_mode</a>, <a href="jupyter_notebook_binary.html#jupyter_notebook_binary-env">env</a>, <a href="jupyter_notebook_binary.html#jupyter_notebook_binary-env_inherit">env_inherit</a>, <a href="jupyter_notebook_binary.html#jupyter_notebook_binary-exporter_args">exporter_args</a>, <a href="jupyter_notebook_binary.html#jupyter_notebook_binary-notebook">notebook</a>, <a href="jupyter_notebook_binary.html#jupyter_notebook_binary-out_dir">out_dir</a>,
+                        <a href="jupyter_notebook_binary.html#jupyter_notebook_binary-reports">reports</a>)
 </pre>
 <p>An executable rule that runs a Jupyter notebook and optionally generates reports.</p>
 <p>Unlike <code>jupyter_notebook_test</code>, this rule creates an executable target for use with <code>bazel run</code>.
@@ -319,13 +333,18 @@ jupyter_notebook_binary(
 <tr><td style="text-align: left"><a id="jupyter_notebook_binary-out_dir"></a>out_dir</td><td style="text-align: left">Directory to write output files to. If not specified, outputs are written to a subdirectory named after the target under the caller's working directory (e.g., <code>bazel run :run_notebook</code> writes to <code>./run_notebook/</code>). Absolute paths (e.g., <code>/tmp</code>) are used as-is; relative paths are resolved against the caller's working directory.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook_binary-reports"></a>reports</td><td style="text-align: left">List of report types to generate after successful notebook execution. Valid values: 'html', 'markdown', 'latex', 'webpdf'.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
-</div>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter_notebook_test"><a class="header" href="#jupyter_notebook_test">jupyter_notebook_test</a></h1>
+<h2 id="rules-3"><a class="header" href="#rules-3">Rules</a></h2>
+<ul>
+<li><a href="jupyter_notebook_test.html#jupyter_notebook_test">jupyter_notebook_test</a></li>
+</ul>
 <p><a id="jupyter_notebook_test"></a></p>
-<h2 id="jupyter_notebook_test"><a class="header" href="#jupyter_notebook_test">jupyter_notebook_test</a></h2>
+<h2 id="jupyter_notebook_test-1"><a class="header" href="#jupyter_notebook_test-1">jupyter_notebook_test</a></h2>
 <pre>
-load("@rules_jupyter//jupyter:defs.bzl", "jupyter_notebook_test")
+load("@rules_jupyter//jupyter:jupyter_notebook_test.bzl", "jupyter_notebook_test")
 
-jupyter_notebook_test(<a href="rules.html#jupyter_notebook_test-name">name</a>, <a href="rules.html#jupyter_notebook_test-data">data</a>, <a href="rules.html#jupyter_notebook_test-cwd_mode">cwd_mode</a>, <a href="rules.html#jupyter_notebook_test-env">env</a>, <a href="rules.html#jupyter_notebook_test-env_inherit">env_inherit</a>, <a href="rules.html#jupyter_notebook_test-exporter_args">exporter_args</a>, <a href="rules.html#jupyter_notebook_test-notebook">notebook</a>, <a href="rules.html#jupyter_notebook_test-reports">reports</a>)
+jupyter_notebook_test(<a href="jupyter_notebook_test.html#jupyter_notebook_test-name">name</a>, <a href="jupyter_notebook_test.html#jupyter_notebook_test-data">data</a>, <a href="jupyter_notebook_test.html#jupyter_notebook_test-cwd_mode">cwd_mode</a>, <a href="jupyter_notebook_test.html#jupyter_notebook_test-env">env</a>, <a href="jupyter_notebook_test.html#jupyter_notebook_test-env_inherit">env_inherit</a>, <a href="jupyter_notebook_test.html#jupyter_notebook_test-exporter_args">exporter_args</a>, <a href="jupyter_notebook_test.html#jupyter_notebook_test-notebook">notebook</a>, <a href="jupyter_notebook_test.html#jupyter_notebook_test-reports">reports</a>)
 </pre>
 <p>A test rule that executes a Jupyter notebook and optionally generates reports. The test fails if any notebook cell raises an error.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -339,15 +358,20 @@ jupyter_notebook_test(<a href="rules.html#jupyter_notebook_test-name">name</a>, 
 <tr><td style="text-align: left"><a id="jupyter_notebook_test-notebook"></a>notebook</td><td style="text-align: left">The notebook to execute and test. Must be a jupyter_notebook target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook_test-reports"></a>reports</td><td style="text-align: left">List of report types to generate after successful notebook execution. Valid values: 'html', 'markdown', 'latex'.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>["webpdf"]</code></td></tr>
 </tbody></table>
-</div>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter_report"><a class="header" href="#jupyter_report">jupyter_report</a></h1>
+<h2 id="rules-4"><a class="header" href="#rules-4">Rules</a></h2>
+<ul>
+<li><a href="jupyter_report.html#jupyter_report">jupyter_report</a></li>
+</ul>
 <p><a id="jupyter_report"></a></p>
-<h2 id="jupyter_report"><a class="header" href="#jupyter_report">jupyter_report</a></h2>
+<h2 id="jupyter_report-1"><a class="header" href="#jupyter_report-1">jupyter_report</a></h2>
 <pre>
-load("@rules_jupyter//jupyter:defs.bzl", "jupyter_report")
+load("@rules_jupyter//jupyter:jupyter_report.bzl", "jupyter_report")
 
-jupyter_report(<a href="rules.html#jupyter_report-name">name</a>, <a href="rules.html#jupyter_report-data">data</a>, <a href="rules.html#jupyter_report-args">args</a>, <a href="rules.html#jupyter_report-cwd_mode">cwd_mode</a>, <a href="rules.html#jupyter_report-env">env</a>, <a href="rules.html#jupyter_report-exporter_args">exporter_args</a>, <a href="rules.html#jupyter_report-notebook">notebook</a>, <a href="rules.html#jupyter_report-out_html">out_html</a>,
-               <a href="rules.html#jupyter_report-out_html_template_type">out_html_template_type</a>, <a href="rules.html#jupyter_report-out_latex">out_latex</a>, <a href="rules.html#jupyter_report-out_latex_template_type">out_latex_template_type</a>, <a href="rules.html#jupyter_report-out_markdown">out_markdown</a>, <a href="rules.html#jupyter_report-out_notebook">out_notebook</a>,
-               <a href="rules.html#jupyter_report-out_rst">out_rst</a>, <a href="rules.html#jupyter_report-out_webpdf">out_webpdf</a>)
+jupyter_report(<a href="jupyter_report.html#jupyter_report-name">name</a>, <a href="jupyter_report.html#jupyter_report-data">data</a>, <a href="jupyter_report.html#jupyter_report-args">args</a>, <a href="jupyter_report.html#jupyter_report-cwd_mode">cwd_mode</a>, <a href="jupyter_report.html#jupyter_report-env">env</a>, <a href="jupyter_report.html#jupyter_report-exporter_args">exporter_args</a>, <a href="jupyter_report.html#jupyter_report-notebook">notebook</a>, <a href="jupyter_report.html#jupyter_report-out_html">out_html</a>,
+               <a href="jupyter_report.html#jupyter_report-out_html_template_type">out_html_template_type</a>, <a href="jupyter_report.html#jupyter_report-out_latex">out_latex</a>, <a href="jupyter_report.html#jupyter_report-out_latex_template_type">out_latex_template_type</a>, <a href="jupyter_report.html#jupyter_report-out_markdown">out_markdown</a>, <a href="jupyter_report.html#jupyter_report-out_notebook">out_notebook</a>,
+               <a href="jupyter_report.html#jupyter_report-out_rst">out_rst</a>, <a href="jupyter_report.html#jupyter_report-out_webpdf">out_webpdf</a>)
 </pre>
 <p>Executes a Jupyter notebook and generates reports in various formats (HTML, Markdown, LaTeX, PDF, RST, WebPDF).</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -368,14 +392,19 @@ jupyter_report(<a href="rules.html#jupyter_report-name">name</a>, <a href="rules
 <tr><td style="text-align: left"><a id="jupyter_report-out_rst"></a>out_rst</td><td style="text-align: left">Output path for a reStructuredText report. If specified, the notebook will be converted to RST format.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_report-out_webpdf"></a>out_webpdf</td><td style="text-align: left">Output path for a WebPDF report (generated via Playwright/Chromium). If specified, the notebook will be converted to PDF format using headless browser rendering.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
-</div>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter_toolchain"><a class="header" href="#jupyter_toolchain">jupyter_toolchain</a></h1>
+<h2 id="rules-5"><a class="header" href="#rules-5">Rules</a></h2>
+<ul>
+<li><a href="jupyter_toolchain.html#jupyter_toolchain">jupyter_toolchain</a></li>
+</ul>
 <p><a id="jupyter_toolchain"></a></p>
-<h2 id="jupyter_toolchain"><a class="header" href="#jupyter_toolchain">jupyter_toolchain</a></h2>
+<h2 id="jupyter_toolchain-1"><a class="header" href="#jupyter_toolchain-1">jupyter_toolchain</a></h2>
 <pre>
-load("@rules_jupyter//jupyter:defs.bzl", "jupyter_toolchain")
+load("@rules_jupyter//jupyter:jupyter_toolchain.bzl", "jupyter_toolchain")
 
-jupyter_toolchain(<a href="rules.html#jupyter_toolchain-name">name</a>, <a href="rules.html#jupyter_toolchain-cwd_mode">cwd_mode</a>, <a href="rules.html#jupyter_toolchain-exporter_args">exporter_args</a>, <a href="rules.html#jupyter_toolchain-jupyter">jupyter</a>, <a href="rules.html#jupyter_toolchain-jupytext">jupytext</a>, <a href="rules.html#jupyter_toolchain-kernel">kernel</a>, <a href="rules.html#jupyter_toolchain-pandoc">pandoc</a>,
-                  <a href="rules.html#jupyter_toolchain-playwright_browsers_dir">playwright_browsers_dir</a>, <a href="rules.html#jupyter_toolchain-playwright_ld_library_dir">playwright_ld_library_dir</a>)
+jupyter_toolchain(<a href="jupyter_toolchain.html#jupyter_toolchain-name">name</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-cwd_mode">cwd_mode</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-exporter_args">exporter_args</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-jupyter">jupyter</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-jupytext">jupytext</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-kernel">kernel</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-pandoc">pandoc</a>,
+                  <a href="jupyter_toolchain.html#jupyter_toolchain-playwright_browsers_dir">playwright_browsers_dir</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-playwright_ld_library_dir">playwright_ld_library_dir</a>)
 </pre>
 <p>Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, and Playwright browser support.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -389,6 +418,47 @@ jupyter_toolchain(<a href="rules.html#jupyter_toolchain-name">name</a>, <a href=
 <tr><td style="text-align: left"><a id="jupyter_toolchain-pandoc"></a>pandoc</td><td style="text-align: left">The Pandoc executable for converting notebooks to various output formats (HTML, LaTeX, PDF, etc.).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-playwright_browsers_dir"></a>playwright_browsers_dir</td><td style="text-align: left">A directory containing the results of <code>playwright install</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-playwright_ld_library_dir"></a>playwright_ld_library_dir</td><td style="text-align: left">A directory of shared libraries to prepend to LD_LIBRARY_PATH when launching browsers.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter-bzlmod-extensions"><a class="header" href="#jupyter-bzlmod-extensions">Jupyter bzlmod extensions</a></h1>
+<h2 id="module-extensions"><a class="header" href="#module-extensions">Module Extensions</a></h2>
+<ul>
+<li><a href="extensions.html#jupyter">jupyter</a></li>
+<li><a href="extensions.html#playwright">playwright</a></li>
+</ul>
+<p><a id="jupyter"></a></p>
+<h2 id="jupyter"><a class="header" href="#jupyter">jupyter</a></h2>
+<pre>
+jupyter = use_extension("@rules_jupyter//jupyter:extensions.bzl", "jupyter")
+jupyter.pandoc(<a href="extensions.html#jupyter.pandoc-name">name</a>, <a href="extensions.html#jupyter.pandoc-version">version</a>)
+</pre>
+<p>Jupyter dependencies.</p>
+<p><strong>TAG CLASSES</strong></p>
+<p><a id="jupyter.pandoc"></a></p>
+<h3 id="pandoc"><a class="header" href="#pandoc">pandoc</a></h3>
+<p>Tag class for configuring Pandoc in the Jupyter module extension. Use this to specify which Pandoc version to use.</p>
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter.pandoc-name"></a>name</td><td style="text-align: left">Name of the Pandoc repository to create. This name can be referenced in use_repo() to access the Pandoc binary.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter.pandoc-version"></a>version</td><td style="text-align: left">Pandoc version to use. Must be one of the versions available in PANDOC_VERSIONS. Defaults to the latest version.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"3.8.2"</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="playwright"></a></p>
+<h2 id="playwright"><a class="header" href="#playwright">playwright</a></h2>
+<pre>
+playwright = use_extension("@rules_jupyter//jupyter:extensions.bzl", "playwright")
+playwright.toolchain(<a href="extensions.html#playwright.toolchain-name">name</a>, <a href="extensions.html#playwright.toolchain-version">version</a>, <a href="extensions.html#playwright.toolchain-version_from_requirements">version_from_requirements</a>)
+</pre>
+<p>Playwright browser dependencies.</p>
+<p><strong>TAG CLASSES</strong></p>
+<p><a id="playwright.toolchain"></a></p>
+<h3 id="toolchain"><a class="header" href="#toolchain">toolchain</a></h3>
+<p>Playwright toolchain configuration</p>
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="playwright.toolchain-name"></a>name</td><td style="text-align: left">Name of the toolchain repository</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>"playwright_toolchains"</code></td></tr>
+<tr><td style="text-align: left"><a id="playwright.toolchain-version"></a>version</td><td style="text-align: left">Playwright version (e.g., '1.57.0'). Browser versions will be auto-selected based on this. Mutually exclusive with <code>version_from_requirements</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="playwright.toolchain-version_from_requirements"></a>version_from_requirements</td><td style="text-align: left">A python <code>requirements.txt</code> file used for parsing the desired <code>playwright</code> version. Mutually exclusive with version.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
 </div>
                     </main>

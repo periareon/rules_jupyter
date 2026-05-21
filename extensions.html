@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rules - rules_jupyter</title>
+        <title>Extensions - rules_jupyter</title>
 
 
         <!-- Custom HTML head -->
@@ -155,27 +155,56 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="jupyter-rules"><a class="header" href="#jupyter-rules">Jupyter Rules</a></h1>
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter-bzlmod-extensions"><a class="header" href="#jupyter-bzlmod-extensions">Jupyter bzlmod extensions</a></h1>
+<h2 id="module-extensions"><a class="header" href="#module-extensions">Module Extensions</a></h2>
 <ul>
-<li><a href="./jupyter_lab.html#jupyter_lab">jupyter_lab</a></li>
-<li><a href="./jupyter_notebook.html#jupyter_notebook">jupyter_notebook</a></li>
-<li><a href="./jupyter_notebook_binary.html#jupyter_notebook_binary">jupyter_notebook_binary</a></li>
-<li><a href="./jupyter_notebook_test.html#jupyter_notebook_test">jupyter_notebook_test</a></li>
-<li><a href="./jupyter_report.html#jupyter_report">jupyter_report</a></li>
-<li><a href="./jupyter_toolchain.html#jupyter_toolchain">jupyter_toolchain</a></li>
+<li><a href="#jupyter">jupyter</a></li>
+<li><a href="#playwright">playwright</a></li>
 </ul>
-
+<p><a id="jupyter"></a></p>
+<h2 id="jupyter"><a class="header" href="#jupyter">jupyter</a></h2>
+<pre>
+jupyter = use_extension("@rules_jupyter//jupyter:extensions.bzl", "jupyter")
+jupyter.pandoc(<a href="#jupyter.pandoc-name">name</a>, <a href="#jupyter.pandoc-version">version</a>)
+</pre>
+<p>Jupyter dependencies.</p>
+<p><strong>TAG CLASSES</strong></p>
+<p><a id="jupyter.pandoc"></a></p>
+<h3 id="pandoc"><a class="header" href="#pandoc">pandoc</a></h3>
+<p>Tag class for configuring Pandoc in the Jupyter module extension. Use this to specify which Pandoc version to use.</p>
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter.pandoc-name"></a>name</td><td style="text-align: left">Name of the Pandoc repository to create. This name can be referenced in use_repo() to access the Pandoc binary.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter.pandoc-version"></a>version</td><td style="text-align: left">Pandoc version to use. Must be one of the versions available in PANDOC_VERSIONS. Defaults to the latest version.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"3.8.2"</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="playwright"></a></p>
+<h2 id="playwright"><a class="header" href="#playwright">playwright</a></h2>
+<pre>
+playwright = use_extension("@rules_jupyter//jupyter:extensions.bzl", "playwright")
+playwright.toolchain(<a href="#playwright.toolchain-name">name</a>, <a href="#playwright.toolchain-version">version</a>, <a href="#playwright.toolchain-version_from_requirements">version_from_requirements</a>)
+</pre>
+<p>Playwright browser dependencies.</p>
+<p><strong>TAG CLASSES</strong></p>
+<p><a id="playwright.toolchain"></a></p>
+<h3 id="toolchain"><a class="header" href="#toolchain">toolchain</a></h3>
+<p>Playwright toolchain configuration</p>
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="playwright.toolchain-name"></a>name</td><td style="text-align: left">Name of the toolchain repository</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>"playwright_toolchains"</code></td></tr>
+<tr><td style="text-align: left"><a id="playwright.toolchain-version"></a>version</td><td style="text-align: left">Playwright version (e.g., '1.57.0'). Browser versions will be auto-selected based on this. Mutually exclusive with <code>version_from_requirements</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="playwright.toolchain-version_from_requirements"></a>version_from_requirements</td><td style="text-align: left">A python <code>requirements.txt</code> file used for parsing the desired <code>playwright</code> version. Mutually exclusive with version.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="jupyter_toolchain.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="jupyter_lab.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -183,13 +212,10 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="jupyter_toolchain.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="jupyter_lab.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

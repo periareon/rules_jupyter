@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rules - rules_jupyter</title>
+        <title>jupyter_toolchain - rules_jupyter</title>
 
 
         <!-- Custom HTML head -->
@@ -155,25 +155,43 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="jupyter-rules"><a class="header" href="#jupyter-rules">Jupyter Rules</a></h1>
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter_toolchain"><a class="header" href="#jupyter_toolchain">jupyter_toolchain</a></h1>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <ul>
-<li><a href="./jupyter_lab.html#jupyter_lab">jupyter_lab</a></li>
-<li><a href="./jupyter_notebook.html#jupyter_notebook">jupyter_notebook</a></li>
-<li><a href="./jupyter_notebook_binary.html#jupyter_notebook_binary">jupyter_notebook_binary</a></li>
-<li><a href="./jupyter_notebook_test.html#jupyter_notebook_test">jupyter_notebook_test</a></li>
-<li><a href="./jupyter_report.html#jupyter_report">jupyter_report</a></li>
-<li><a href="./jupyter_toolchain.html#jupyter_toolchain">jupyter_toolchain</a></li>
+<li><a href="#jupyter_toolchain">jupyter_toolchain</a></li>
 </ul>
+<p><a id="jupyter_toolchain"></a></p>
+<h2 id="jupyter_toolchain-1"><a class="header" href="#jupyter_toolchain-1">jupyter_toolchain</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:jupyter_toolchain.bzl", "jupyter_toolchain")
 
+jupyter_toolchain(<a href="#jupyter_toolchain-name">name</a>, <a href="#jupyter_toolchain-cwd_mode">cwd_mode</a>, <a href="#jupyter_toolchain-exporter_args">exporter_args</a>, <a href="#jupyter_toolchain-jupyter">jupyter</a>, <a href="#jupyter_toolchain-jupytext">jupytext</a>, <a href="#jupyter_toolchain-kernel">kernel</a>, <a href="#jupyter_toolchain-pandoc">pandoc</a>,
+                  <a href="#jupyter_toolchain-playwright_browsers_dir">playwright_browsers_dir</a>, <a href="#jupyter_toolchain-playwright_ld_library_dir">playwright_ld_library_dir</a>)
+</pre>
+<p>Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, and Playwright browser support.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-cwd_mode"></a>cwd_mode</td><td style="text-align: left">The default working directory mode for notebook execution. This value is used when <code>cwd_mode</code> is not specified in <code>jupyter_report</code> or <code>jupyter_notebook_test</code> rules. <code>workspace_root</code> sets the working directory to the workspace root, while <code>notebook_root</code> sets it to the notebook's parent directory. This affects how relative paths in notebooks are resolved.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"execution_root"</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-exporter_args"></a>exporter_args</td><td style="text-align: left">Default traitlets-style flags forwarded to nbconvert exporters for all rules using this toolchain (e.g. <code>--WebPDFExporter.exclude_input=true</code>). Per-rule <code>exporter_args</code> are appended after these defaults, allowing overrides.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-jupyter"></a>jupyter</td><td style="text-align: left">The Jupyter Python package providing notebook execution capabilities.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-jupytext"></a>jupytext</td><td style="text-align: left">The <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> Python package for converting between notebook formats (e.g., .py to .ipynb).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-kernel"></a>kernel</td><td style="text-align: left">Default kernel name to use for notebook execution if not specified in the notebook (e.g., 'python3', 'rust').</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-pandoc"></a>pandoc</td><td style="text-align: left">The Pandoc executable for converting notebooks to various output formats (HTML, LaTeX, PDF, etc.).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-playwright_browsers_dir"></a>playwright_browsers_dir</td><td style="text-align: left">A directory containing the results of <code>playwright install</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-playwright_ld_library_dir"></a>playwright_ld_library_dir</td><td style="text-align: left">A directory of shared libraries to prepend to LD_LIBRARY_PATH when launching browsers.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="jupyter_report.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="jupyter_lab.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="extensions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -183,11 +201,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="jupyter_report.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="jupyter_lab.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="extensions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

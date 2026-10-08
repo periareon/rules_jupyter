@@ -140,9 +140,7 @@ CHROMIUM_LD_LIBRARY_PATH_PACKAGES = {packages}
 
 def _chromium_ld_library_path_impl(module_ctx):
     """Create debian_archive repos and ld_library_dir repos for each platform."""
-
-    # buildifier: disable=unused-variable
-    _unused = module_ctx
+    direct_deps = []
 
     for platform, packages in CHROMIUM_LD_LIBRARY_PATH_PACKAGES.items():
         suffix = platform.replace("-", "_")
@@ -160,10 +158,20 @@ def _chromium_ld_library_path_impl(module_ctx):
                 build_file_content = """filegroup(name = "files", srcs = glob(["**"]), visibility = ["//visibility:public"])""",
             )
             deb_labels.append("@%s//:files" % repo_name)
+        name = "chromium_ld_library_path_%s" % suffix
         playwright_ld_library_dir_repository(
-            name = "chromium_ld_library_path_%s" % suffix,
+            name = name,
             deps = deb_labels,
         )
+        direct_deps.append(name)
+
+    # Every repository is pinned by integrity and the extension has no tags,
+    # so the result is fully determined by this file.
+    return module_ctx.extension_metadata(
+        reproducible = True,
+        root_module_direct_deps = direct_deps,
+        root_module_direct_dev_deps = [],
+    )
 
 chromium_ld_library_path = module_extension(
     implementation = _chromium_ld_library_path_impl,

@@ -1,4 +1,4 @@
-"""Rules for downloading and extracing `.deb` archives for use in Bazel"""
+"""Rules for downloading and extracting `.deb` archives for use in Bazel"""
 
 load(
     "@bazel_tools//tools/build_defs/repo:utils.bzl",
@@ -104,16 +104,15 @@ def _debian_archive_impl(repository_ctx):
     workspace_and_buildfile(repository_ctx)
     patch(repository_ctx)
 
-    override = {}
-    if download_info.integrity:
-        override = {"integrity": download_info.integrity}
-    else:
-        override = {"sha256": download_info.sha256}
-
-    return update_attrs(
-        orig = repository_ctx.attr,
-        keys = _DEBIAN_ARCHIVE_ATTRS.keys(),
-        override = override,
+    # As http_archive: a pinned checksum is already the reproducible form.
+    if repository_ctx.attr.sha256 or repository_ctx.attr.integrity:
+        return repository_ctx.repo_metadata(reproducible = True)
+    return repository_ctx.repo_metadata(
+        attrs_for_reproducibility = update_attrs(
+            orig = repository_ctx.attr,
+            keys = _DEBIAN_ARCHIVE_ATTRS.keys(),
+            override = {"integrity": download_info.integrity},
+        ),
     )
 
 _DEBIAN_ARCHIVE_ATTRS = {
@@ -207,7 +206,7 @@ easier but either this attribute or `sha256` should be set before shipping.""",
     ),
     "patch_tool": attr.string(
         default = "",
-        doc = "The patch(1) utility to use. If this is specified, Bazel will use the specifed " +
+        doc = "The patch(1) utility to use. If this is specified, Bazel will use the specified " +
               "patch tool instead of the Bazel-native patch implementation.",
     ),
     "patches": attr.label_list(
@@ -264,6 +263,8 @@ debian_archive = repository_rule(
     doc = """\
 Downloads a Bazel repository as a debian archive file, decompresses it,
 and makes its targets available for binding.
+
+Unpacking runs unprivileged, so setuid bits and ownership are not kept.
 """,
     attrs = _DEBIAN_ARCHIVE_ATTRS,
 )

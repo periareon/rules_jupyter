@@ -34,12 +34,11 @@ jupyter_report(
     out_notebook = "report_notebook.ipynb",
 )
 
-# TODO: Requires a latex toolchain
-# jupyter_report(
-#     name = "report_pdf",
-#     notebook = ":notebook",
-#     out_pdf = "report_pdf.pdf",
-# )
+jupyter_report(
+    name = "report_pdf",
+    notebook = ":notebook",
+    out_pdf = "report_pdf.pdf",
+)
 
 jupyter_report(
     name = "report_rst",
@@ -59,7 +58,6 @@ jupyter_report(
     out_html = "report_full.rst",
     out_latex = "report_full.tex",
     out_notebook = "report_full.ipynb",
-    # TODO: Requires a latex toolchain
-    # out_pdf = "report_full.tex.pdf",
+    out_pdf = "report_full.tex.pdf",
     out_webpdf = "report_full.html.pdf",
 )

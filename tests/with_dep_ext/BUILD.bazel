@@ -4,7 +4,7 @@ load("//jupyter:defs.bzl", "jupyter_notebook", "jupyter_notebook_test", "jupyter
 jupyter_notebook(
     name = "notebook_ipynb",
     src = "notebook.ipynb",
-    deps = ["@pip_deps//pytest"],
+    deps = ["@pip_jupyter//pytest"],
 )
 
 # Test notebook from .py file (Jupytext format) with pytest dependency
@@ -12,7 +12,7 @@ jupyter_notebook(
     name = "notebook_py",
     src = "notebook.py",
     tags = ["no-pylint"],
-    deps = ["@pip_deps//pytest"],
+    deps = ["@pip_jupyter//pytest"],
 )
 
 # Reports for .ipynb notebook

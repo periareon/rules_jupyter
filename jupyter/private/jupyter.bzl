@@ -157,6 +157,27 @@ def _expand_env(ctx, env, targets, known_variables):
         )
     return expanded_env
 
+def _add_latex_args(args, toolchain, workspace_name = None):
+    """Add the LaTeX toolchain flags understood by the process wrappers.
+
+    Args:
+        args (Args): The args object to extend.
+        toolchain (ToolchainInfo): The current `jupyter_toolchain`.
+        workspace_name (str, optional): When set, paths are rendered as
+            rlocationpaths (for runfiles lookups) instead of execroot paths.
+    """
+
+    def _path(file):
+        if workspace_name == None:
+            return file.path
+        return _rlocationpath(file, workspace_name)
+
+    args.add("--latex_engine", _path(toolchain.latex_engine))
+    args.add("--latex_format", _path(toolchain.latex_format))
+    args.add("--latex_texmf_cnf", _path(toolchain.latex_texmf_cnf))
+    if toolchain.bibtex:
+        args.add("--bibtex", _path(toolchain.bibtex))
+
 def _jupyter_report_impl(ctx):
     toolchain = ctx.toolchains[TOOLCHAIN_TYPE]
     notebook_info = ctx.attr.notebook[JupyterNotebookInfo]
@@ -212,11 +233,18 @@ def _jupyter_report_impl(ctx):
         outputs.update({"jupiter_report_markdown": out_markdown})
         args.add("--out_markdown", out_markdown)
 
-    # TODO(periareon/rules_jupyter#8): Requires a latex toolchain
-    # if ctx.outputs.out_pdf:
-    #     out_pdf = ctx.outputs.out_pdf
-    #     outputs.update({"jupiter_report_pdf": out_pdf})
-    #     args.add("--out_pdf", out_pdf)
+    toolchain_files = [toolchain.all_files]
+
+    if ctx.outputs.out_pdf:
+        if not toolchain.latex_engine:
+            fail("`jupyter_toolchain.latex_engine` is not set on the current toolchain yet pdf outputs were requested. Please update `{}`".format(
+                toolchain.label,
+            ))
+        out_pdf = ctx.outputs.out_pdf
+        outputs.update({"jupiter_report_pdf": out_pdf})
+        args.add("--out_pdf", out_pdf)
+        _add_latex_args(args, toolchain)
+        toolchain_files.append(toolchain.latex_files)
 
     if ctx.outputs.out_rst:
         out_rst = ctx.outputs.out_rst
@@ -262,9 +290,9 @@ def _jupyter_report_impl(ctx):
         progress_message = "JupyterReport %{label}",
         executable = reporter,
         arguments = [args],
-        inputs = depset([notebook_info.notebook] + ctx.files.data, transitive = [notebook_info.data, toolchain.all_files]),
+        inputs = depset([notebook_info.notebook] + ctx.files.data, transitive = [notebook_info.data] + toolchain_files),
         outputs = outputs.values(),
-        tools = depset(transitive = [runfiles.files, toolchain.all_files]),
+        tools = depset(transitive = [runfiles.files] + toolchain_files),
         env = env | ctx.configuration.default_shell_env,
     )
 
@@ -321,11 +349,10 @@ jupyter_report = rule(
             doc = "Output path for a LaTeX report. If specified, the notebook will be converted to LaTeX format.",
         ),
         "out_latex_template_type": attr.string(
-            doc = "Template type for LaTeX output.",
+            doc = "Document layout for LaTeX output. `article` (the nbconvert default) or `report`.",
             values = [
                 "article",
                 "report",
-                "basic",
             ],
         ),
         "out_markdown": attr.output(
@@ -334,10 +361,9 @@ jupyter_report = rule(
         "out_notebook": attr.output(
             doc = "Output path for the executed notebook (`.ipynb` file with cell outputs). If not specified, a default name is generated.",
         ),
-        # TODO(periareon/rules_jupyter#8): Requires a latex toolchain
-        # "out_pdf": attr.output(
-        #     doc = "Output path for a PDF report (generated via LaTeX). If specified, the notebook will be converted to PDF format using LaTeX.",
-        # ),
+        "out_pdf": attr.output(
+            doc = "Output path for a PDF report generated via LaTeX. Requires `jupyter_toolchain.latex_engine`. For a browser rendered PDF that does not need LaTeX see `out_webpdf`.",
+        ),
         "out_rst": attr.output(
             doc = "Output path for a reStructuredText report. If specified, the notebook will be converted to RST format.",
         ),
@@ -411,10 +437,8 @@ _REPORT_VALUES = [
     "html",
     "markdown",
     "latex",
-    "html",
+    "pdf",
     "webpdf",
-    # TODO(periareon/rules_jupyter#8): Requires a latex toolchain
-    # "pdf",
 ]
 
 def _jupyter_notebook_test_impl(ctx):
@@ -455,10 +479,18 @@ def _jupyter_notebook_test_impl(ctx):
                 toolchain.label,
             ))
         if report == "webpdf" and not toolchain.playwright_browsers_dir:
-            fail("`jupyter_toolchain.playwright_browsers_dir` is not set on the current toolchain yet markdown reports were requested. Please update `{}`".format(
+            fail("`jupyter_toolchain.playwright_browsers_dir` is not set on the current toolchain yet webpdf reports were requested. Please update `{}`".format(
+                toolchain.label,
+            ))
+        if report == "pdf" and not toolchain.latex_engine:
+            fail("`jupyter_toolchain.latex_engine` is not set on the current toolchain yet pdf reports were requested. Please update `{}`".format(
                 toolchain.label,
             ))
         args.add("--report", report)
+    toolchain_files = [toolchain.all_files]
+    if "pdf" in ctx.attr.reports:
+        _add_latex_args(args, toolchain, ctx.workspace_name)
+        toolchain_files.append(toolchain.latex_files)
     exporter_args = toolchain.default_exporter_args + ctx.attr.exporter_args
     args.add_all(exporter_args, format_each = "--exporter_arg=%s")
 
@@ -489,7 +521,7 @@ def _jupyter_notebook_test_impl(ctx):
 
     runfiles = runfiles.merge(ctx.runfiles(
         [executable, args_file, notebook_info.notebook] + ctx.files.data,
-        transitive_files = depset(transitive = [notebook_info.data, toolchain.all_files]),
+        transitive_files = depset(transitive = [notebook_info.data] + toolchain_files),
     ))
 
     return [
@@ -538,7 +570,7 @@ jupyter_notebook_test = rule(
             mandatory = True,
         ),
         "reports": attr.string_list(
-            doc = "List of report types to generate after successful notebook execution. Valid values: 'html', 'markdown', 'latex'.",
+            doc = "List of report types to generate after successful notebook execution. Valid values: `html`, `markdown`, `latex`, `pdf` (requires `jupyter_toolchain.latex_engine`), `webpdf` (requires `jupyter_toolchain.playwright_browsers_dir`).",
             default = ["webpdf"],
         ),
         "_tester": attr.label(
@@ -597,7 +629,15 @@ def _jupyter_notebook_binary_impl(ctx):
             fail("`jupyter_toolchain.playwright_browsers_dir` is not set on the current toolchain yet webpdf reports were requested. Please update `{}`".format(
                 toolchain.label,
             ))
+        if report == "pdf" and not toolchain.latex_engine:
+            fail("`jupyter_toolchain.latex_engine` is not set on the current toolchain yet pdf reports were requested. Please update `{}`".format(
+                toolchain.label,
+            ))
         args.add("--report", report)
+    toolchain_files = [toolchain.all_files]
+    if "pdf" in ctx.attr.reports:
+        _add_latex_args(args, toolchain, ctx.workspace_name)
+        toolchain_files.append(toolchain.latex_files)
     exporter_args = toolchain.default_exporter_args + ctx.attr.exporter_args
     args.add_all(exporter_args, format_each = "--exporter_arg=%s")
     if ctx.attr.out_dir:
@@ -634,7 +674,7 @@ def _jupyter_notebook_binary_impl(ctx):
 
     runfiles = runfiles.merge(ctx.runfiles(
         [executable, args_file, notebook_info.notebook] + ctx.files.data,
-        transitive_files = depset(transitive = [notebook_info.data, toolchain.all_files]),
+        transitive_files = depset(transitive = [notebook_info.data] + toolchain_files),
     ))
 
     return [
@@ -711,7 +751,7 @@ Then run: `bazel run :run_notebook` or `bazel run :run_notebook -- --my-flag val
             doc = "Directory to write output files to. If not specified, outputs are written to a subdirectory named after the target under the caller's working directory (e.g., `bazel run :run_notebook` writes to `./run_notebook/`). Absolute paths (e.g., `/tmp`) are used as-is; relative paths are resolved against the caller's working directory.",
         ),
         "reports": attr.string_list(
-            doc = "List of report types to generate after successful notebook execution. Valid values: 'html', 'markdown', 'latex', 'webpdf'.",
+            doc = "List of report types to generate after successful notebook execution. Valid values: `html`, `markdown`, `latex`, `pdf` (requires `jupyter_toolchain.latex_engine`), `webpdf` (requires `jupyter_toolchain.playwright_browsers_dir`).",
             default = [],
         ),
         "_runner": attr.label(

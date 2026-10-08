@@ -14,6 +14,7 @@ from python.runfiles import Runfiles
 from tools.process_wrappers.reporter import (
     CwdMode,
     configure_jupyter_environment,
+    configure_latex,
     configure_ld_library_path,
     configure_pandoc,
     configure_playwright,
@@ -78,6 +79,14 @@ def main() -> None:
             configure_playwright(args.playwright_browsers_dir)
         if args.ld_library_dir:
             configure_ld_library_path(args.ld_library_dir)
+        if args.latex_engine:
+            configure_latex(
+                args.latex_engine,
+                args.latex_format,
+                args.latex_texmf_cnf,
+                args.bibtex,
+                Path(tmp_dir),
+            )
 
         if not args.notebook.exists():
             raise FileNotFoundError(f"Notebook does not exist: {args.notebook}")

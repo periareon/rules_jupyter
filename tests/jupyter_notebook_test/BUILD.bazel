@@ -36,9 +36,16 @@ jupyter_notebook_test(
 )
 
 jupyter_notebook_test(
-    name = "passing_test_with_pdf_report",
+    name = "passing_test_with_webpdf_report",
     notebook = ":passing_notebook",
     reports = ["webpdf"],
+)
+
+# Test with LaTeX PDF report generation
+jupyter_notebook_test(
+    name = "passing_test_with_pdf_report",
+    notebook = ":passing_notebook",
+    reports = ["pdf"],
 )
 
 # Test with explicit kernel

@@ -11,6 +11,7 @@ import tempfile
 import warnings
 from collections.abc import Generator
 from contextlib import ExitStack, contextmanager
+from dataclasses import dataclass
 from enum import StrEnum
 from io import StringIO
 from pathlib import Path
@@ -103,6 +104,7 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help="Traitlets-style flag forwarded to nbconvert exporters.",
     )
+    add_latex_arguments(parser)
     parser.add_argument(
         "params",
         nargs="*",
@@ -110,6 +112,35 @@ def parse_args() -> argparse.Namespace:
     )
 
     return parser.parse_args()
+
+
+def add_latex_arguments(parser: argparse.ArgumentParser, path_type: Any = Path) -> None:
+    """Register the LaTeX toolchain flags shared by all process wrappers.
+
+    Args:
+        parser: The parser to extend.
+        path_type: The argparse ``type`` used for path arguments.
+    """
+    parser.add_argument(
+        "--latex_engine",
+        type=path_type,
+        help="A TeX engine executable (e.g. pdftex) used for pdf reports.",
+    )
+    parser.add_argument(
+        "--latex_format",
+        type=path_type,
+        help="A precompiled `.fmt` file loaded by the engine via `-fmt`.",
+    )
+    parser.add_argument(
+        "--latex_texmf_cnf",
+        type=path_type,
+        help="The `web2c/texmf.cnf` anchor of the texmf tree.",
+    )
+    parser.add_argument(
+        "--bibtex",
+        type=path_type,
+        help="An optional bibtex executable.",
+    )
 
 
 def configure_jupyter_environment(tmp_dir: Path) -> None:
@@ -327,7 +358,8 @@ def _plotly_pdf_workaround(
     WebPDFExporter captures the page before plotly.js finishes rendering,
     producing empty chart containers. The static PNG screenshot is reliable.
     """
-    if exporter_class.__name__ not in ("WebPDFExporter", "PDFExporter"):
+    pdf_exporters = ("WebPDFExporter", "PDFExporter")
+    if not any(base.__name__ in pdf_exporters for base in exporter_class.__mro__):
         yield
         return
 
@@ -382,12 +414,14 @@ def parse_exporter_config(flags: list[str]) -> Any:
     return c
 
 
-def export_notebook(
+def export_notebook(  # pylint: disable=too-many-arguments
     notebook: nbformat.NotebookNode,
     output_path: Path,
     exporter_class: type,
     template_name: Optional[str] = None,
     exporter_config: Optional[Any] = None,
+    *,
+    template_file: Optional[str] = None,
 ) -> None:
     """Export a notebook to a specific format.
 
@@ -395,13 +429,17 @@ def export_notebook(
         notebook: The executed notebook.
         output_path: Path to write the output.
         exporter_class: The nbconvert exporter class to use.
-        template_name: Optional template name for the exporter.
+        template_name: Optional template name (directory) for the exporter.
         exporter_config: Optional :class:`~traitlets.config.Config` object
             forwarded to the exporter constructor.
+        template_file: Optional template file within ``template_name``
+            (e.g. ``report.tex.j2``).
     """
     exporter_kwargs: dict[str, Any] = {}
     if template_name:
         exporter_kwargs["template_name"] = template_name
+    if template_file:
+        exporter_kwargs["template_file"] = template_file
     if exporter_config:
         exporter_kwargs["config"] = exporter_config
 
@@ -432,6 +470,154 @@ def save_notebook(notebook: nbformat.NotebookNode, output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         nbformat.write(notebook, f)  # type: ignore[no-untyped-call]
+
+
+@dataclass(frozen=True)
+class LatexSettings:
+    """Resolved locations of the LaTeX toolchain."""
+
+    engine: Path
+    format: Path
+    texmf_cnf: Path
+    bibtex: Optional[Path] = None
+
+
+_LATEX_SETTINGS: Optional[LatexSettings] = None
+
+
+def configure_latex(  # pylint: disable=too-many-arguments
+    engine: Path,
+    fmt: Optional[Path],
+    texmf_cnf: Optional[Path],
+    bibtex: Optional[Path],
+    tmp_dir: Path,
+) -> LatexSettings:
+    """Configure the environment so a Bazel provided TeX engine can run.
+
+    This mirrors the ``fmtutil`` style invocation used by the ``texlive``
+    module: ``TEXMFCNF`` points at the directory holding ``texmf.cnf`` and
+    ``TEXMF`` at its parent so ``$TEXMF/tex/...`` and ``$TEXMF/fonts/...``
+    lookups resolve inside the hermetic texmf tree. Writable kpathsea
+    directories are redirected into *tmp_dir* so the engine never touches
+    the user's home directory.
+
+    Args:
+        engine: The TeX engine executable.
+        fmt: The precompiled format file to load with ``-fmt``.
+        texmf_cnf: The ``web2c/texmf.cnf`` anchor file.
+        bibtex: An optional bibtex executable.
+        tmp_dir: A caller-managed temporary directory.
+
+    Returns:
+        The resolved settings, also stored for :func:`latex_exporter_config`.
+    """
+    global _LATEX_SETTINGS  # pylint: disable=global-statement
+
+    if fmt is None or texmf_cnf is None:
+        raise ValueError(
+            "--latex_format and --latex_texmf_cnf are required with --latex_engine"
+        )
+    for path, what in (
+        (engine, "LaTeX engine"),
+        (fmt, "LaTeX format"),
+        (texmf_cnf, "texmf.cnf"),
+    ):
+        if not path.exists():
+            raise FileNotFoundError(f"{what} not found: {path}")
+    if bibtex is not None and not bibtex.exists():
+        raise FileNotFoundError(f"bibtex not found: {bibtex}")
+
+    # Use absolute (not resolved) paths so symlink farms such as runfiles
+    # trees and sandboxes keep providing exactly the declared files.
+    texmf_cnf_dir = texmf_cnf.absolute().parent
+    texmf_root = texmf_cnf_dir.parent
+
+    os.environ["TEXMFCNF"] = str(texmf_cnf_dir)
+    os.environ["TEXMF"] = str(texmf_root)
+    os.environ["TEXMFROOT"] = str(texmf_root)
+    os.environ["TEXMFDIST"] = str(texmf_root)
+    os.environ["TEXFORMATS"] = str(fmt.absolute().parent)
+
+    for var in (
+        "TEXMFVAR",
+        "TEXMFSYSVAR",
+        "TEXMFCONFIG",
+        "TEXMFSYSCONFIG",
+        "TEXMFHOME",
+    ):
+        path = tmp_dir / var.lower()
+        path.mkdir(parents=True, exist_ok=True)
+        os.environ[var] = str(path)
+
+    settings = LatexSettings(
+        engine=engine.absolute(),
+        format=fmt.absolute(),
+        texmf_cnf=texmf_cnf.absolute(),
+        bibtex=bibtex.absolute() if bibtex else None,
+    )
+    _LATEX_SETTINGS = settings
+    logging.debug("Configured LaTeX: %s", settings)
+    return settings
+
+
+def latex_exporter_config(user_config: Optional[Any] = None) -> Any:
+    """Build the nbconvert config that drives the hermetic TeX engine.
+
+    User supplied exporter args are merged on top so they can still
+    override anything set here.
+
+    Args:
+        user_config: An optional :class:`~traitlets.config.Config` from
+            ``--exporter_arg`` flags.
+
+    Returns:
+        A :class:`~traitlets.config.Config` for ``PDFExporter``.
+    """
+    from traitlets.config import Config  # pylint: disable=import-outside-toplevel
+
+    config = Config()
+    settings = _LATEX_SETTINGS
+    if settings is not None:
+        stem = settings.format.stem
+        config.PDFExporter.latex_command = [
+            str(settings.engine),
+            f"-fmt={stem}",
+            f"-progname={stem}",
+            "-interaction=nonstopmode",
+            "-halt-on-error",
+            "{filename}",
+        ]
+        if settings.bibtex is not None:
+            config.PDFExporter.bib_command = [str(settings.bibtex), "{filename}"]
+    if user_config:
+        config.merge(user_config)
+    return config
+
+
+def pdf_exporter_class() -> type:
+    """Return a ``PDFExporter`` that skips bibtex when none is configured.
+
+    nbconvert unconditionally runs ``bibtex`` after the first LaTeX pass and
+    raises if the executable cannot be found, so the hermetic toolchain needs
+    the pass to be optional.
+    """
+    # pylint: disable=import-outside-toplevel
+    from nbconvert import PDFExporter
+
+    settings = _LATEX_SETTINGS
+
+    class HermeticPDFExporter(PDFExporter):  # pylint: disable=too-many-ancestors
+        """``PDFExporter`` bound to the Bazel provided TeX toolchain."""
+
+        def run_bib(self, filename: str, raise_on_failure: Any = False) -> bool:
+            if settings is not None and settings.bibtex is None:
+                return False
+            result = super().run_bib(  # type: ignore[no-untyped-call]
+                filename, raise_on_failure
+            )
+            return bool(result)
+
+    return HermeticPDFExporter
 
 
 def configure_pandoc(pandoc_path: Path) -> None:
@@ -644,6 +830,36 @@ def postprocess_notebook_outputs(notebook: nbformat.NotebookNode) -> None:
     _postprocess_plotly_outputs(notebook)
 
 
+# nbconvert >= 6 selects LaTeX layouts by template *file* inside the
+# ``latex`` template directory, not by a per-layout template name as
+# nbconvert 5 did. Map the rule's layout names onto the modern files.
+_LATEX_TEMPLATE_TYPES: dict[str, dict[str, str]] = {
+    "article": {"template_name": "latex", "template_file": "index.tex.j2"},
+    "report": {"template_name": "latex", "template_file": "report.tex.j2"},
+}
+
+
+def _latex_template_kwargs(template_type: Optional[str]) -> dict[str, str]:
+    """Translate a LaTeX template type into ``export_notebook`` keyword args.
+
+    Args:
+        template_type: One of ``_LATEX_TEMPLATE_TYPES`` or ``None`` for the
+            nbconvert default.
+
+    Returns:
+        Keyword arguments for :func:`export_notebook`.
+    """
+    if not template_type:
+        return {}
+    try:
+        return _LATEX_TEMPLATE_TYPES[template_type]
+    except KeyError:
+        raise ValueError(
+            f"Unknown latex template type {template_type!r}; "
+            f"expected one of {sorted(_LATEX_TEMPLATE_TYPES)}"
+        ) from None
+
+
 def _generate_outputs(
     notebook: nbformat.NotebookNode, args: argparse.Namespace
 ) -> None:
@@ -668,8 +884,8 @@ def _generate_outputs(
             notebook,
             args.out_latex,
             nbconvert.LatexExporter,
-            template_name=args.out_latex_template_type,
             exporter_config=config,
+            **_latex_template_kwargs(args.out_latex_template_type),
         )
     if args.out_markdown:
         export_notebook(
@@ -682,8 +898,8 @@ def _generate_outputs(
         export_notebook(
             notebook,
             args.out_pdf,
-            nbconvert.PDFExporter,
-            exporter_config=config,
+            pdf_exporter_class(),
+            exporter_config=latex_exporter_config(config),
         )
     if args.out_rst:
         export_notebook(
@@ -720,6 +936,14 @@ def main() -> None:
             configure_playwright(args.playwright_browsers_dir)
         if args.ld_library_dir:
             configure_ld_library_path(args.ld_library_dir)
+        if args.latex_engine:
+            configure_latex(
+                args.latex_engine,
+                args.latex_format,
+                args.latex_texmf_cnf,
+                args.bibtex,
+                temp_dir,
+            )
 
         if args.cwd_mode == CwdMode.NOTEBOOK_ROOT:
             cwd = args.notebook.parent

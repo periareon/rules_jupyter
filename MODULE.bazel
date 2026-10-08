@@ -13,6 +13,8 @@ bazel_dep(name = "rules_req_compile", version = "1.1.0", dev_dependency = True)
 bazel_dep(name = "rules_rust_mdbook", version = "0.69.0", dev_dependency = True)
 bazel_dep(name = "rules_shell", version = "0.7.1", dev_dependency = True)
 bazel_dep(name = "stardoc", version = "0.8.0", dev_dependency = True)
+bazel_dep(name = "texlive", version = "2026.1", dev_dependency = True)
+bazel_dep(name = "texlive-texmf", version = "2026.1", dev_dependency = True)
 
 jupyter = use_extension("//jupyter:extensions.bzl", "jupyter")
 jupyter.pandoc(

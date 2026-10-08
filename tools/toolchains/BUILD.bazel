@@ -64,8 +64,18 @@ toolchain(
 
 jupyter_toolchain(
     name = "py_jupyter_toolchain",
+    bibtex = "@texlive//texk/bibtex-x:bibtex8",
     jupyter = "@pip_deps//jupyter",
     jupytext = "@pip_deps//jupytext",
+    latex_data = [
+        "@texlive//:texmf/bibtex",
+        "@texlive//:texmf/fonts",
+        "@texlive//:texmf/tex_inputs",
+        "@texlive//:texmf/web2c_data",
+    ],
+    latex_engine = "@texlive//texk/web2c:pdftex",
+    latex_format = "@texlive//:pdflatex_fmt",
+    latex_texmf_cnf = "@texlive-texmf//:web2c/texmf.cnf",
     pandoc = "@pandoc",
     playwright_browsers_dir = "//playwright:current_browsers_dir",
     playwright_ld_library_dir = "//playwright:current_ld_library_dir",

@@ -15,13 +15,17 @@ from python.runfiles import Runfiles
 
 from tools.process_wrappers.reporter import (
     CwdMode,
+    add_latex_arguments,
     configure_jupyter_environment,
+    configure_latex,
     configure_ld_library_path,
     configure_pandoc,
     configure_playwright,
     execute_notebook,
     export_notebook,
+    latex_exporter_config,
     parse_exporter_config,
+    pdf_exporter_class,
     postprocess_notebook_outputs,
     save_notebook,
     temporary_home,
@@ -130,6 +134,7 @@ def create_arg_parser(
         default=[],
         help="Traitlets-style flag forwarded to nbconvert exporters.",
     )
+    add_latex_arguments(parser, path_type=_path)
     parser.add_argument(
         "params",
         nargs="*",
@@ -161,7 +166,6 @@ def _get_exporter_map() -> dict[ReportType, tuple[type, str]]:
         HTMLExporter,
         LatexExporter,
         MarkdownExporter,
-        PDFExporter,
         WebPDFExporter,
     )
 
@@ -171,7 +175,7 @@ def _get_exporter_map() -> dict[ReportType, tuple[type, str]]:
         ReportType.HTML: (HTMLExporter, ".html"),
         ReportType.MARKDOWN: (MarkdownExporter, ".md"),
         ReportType.LATEX: (LatexExporter, ".tex"),
-        ReportType.PDF: (PDFExporter, ".tex.pdf"),
+        ReportType.PDF: (pdf_exporter_class(), ".tex.pdf"),
         ReportType.WEB_PDF: (WebPDFExporter, ".html.pdf"),
     }
 
@@ -204,6 +208,8 @@ def generate_reports(
     output_path = output_dir / f"{notebook_name}{extension}"
 
     config = parse_exporter_config(exporter_args) if exporter_args else None
+    if report_type == ReportType.PDF:
+        config = latex_exporter_config(config)
     export_notebook(notebook, output_path, exporter_class, exporter_config=config)
     logging.debug("Generated %s report: %s", report_type, output_path)
 
@@ -259,6 +265,14 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-branches
             configure_playwright(args.playwright_browsers_dir)
         if args.ld_library_dir:
             configure_ld_library_path(args.ld_library_dir)
+        if args.latex_engine:
+            configure_latex(
+                args.latex_engine,
+                args.latex_format,
+                args.latex_texmf_cnf,
+                args.bibtex,
+                test_tmpdir,
+            )
 
         if not args.notebook.exists():
             raise FileNotFoundError(f"Notebook does not exist: {args.notebook}")

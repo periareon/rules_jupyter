@@ -28,6 +28,26 @@ from tools.process_wrappers.tester import (
 )
 
 
+def _working_directory() -> Path:
+    """Return the directory `bazel run` was invoked from.
+
+    Falls back to the process working directory when not running under Bazel.
+    """
+    return Path(os.environ.get("BUILD_WORKING_DIRECTORY", os.getcwd()))
+
+
+def _resolve_out_dir(value: str) -> Path:
+    """Resolve an `--out-dir` value, anchoring relative paths to `BUILD_WORKING_DIRECTORY`.
+
+    Under `bazel run` the process cwd is the runfiles tree, so a bare
+    `Path(value)` would silently write outputs there instead of next to the user.
+    """
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return _working_directory() / path
+
+
 def parse_args(
     argv: Optional[Sequence[str]] = None, runfiles: Optional[Runfiles] = None
 ) -> argparse.Namespace:
@@ -35,7 +55,7 @@ def parse_args(
 
     basename, _, _ = Path(__file__).name.rpartition(".")
     basename = os.environ.get("RULES_JUPYTER_BINARY_NAME", basename)
-    output_dir = Path(os.environ.get("BUILD_WORKING_DIRECTORY", os.getcwd())) / basename
+    output_dir = _working_directory() / basename
 
     parser = create_arg_parser(runfiles=runfiles, description=__doc__)
     parser.add_argument(
@@ -43,7 +63,7 @@ def parse_args(
         "--out_dir",
         "--output_dir",
         dest="out_dir",
-        type=Path,
+        type=_resolve_out_dir,
         default=output_dir,
         help="Directory to write output files to. Relative paths are resolved against BUILD_WORKING_DIRECTORY.",
     )

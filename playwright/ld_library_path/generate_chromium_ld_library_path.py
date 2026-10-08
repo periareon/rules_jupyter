@@ -4,6 +4,11 @@ Resolves the system library packages required by Chromium headless-shell
 from Ubuntu mirrors for both amd64 and arm64 architectures, then writes
 a self-contained .bzl file that consumers can commit in their repo.
 
+Each package is emitted with multiple URLs so that Bazel can fall back to
+a mirror if the primary Ubuntu host is unavailable. The Launchpad librarian
+is used as the fallback because it keeps every published binary permanently,
+for all architectures, even after a release reaches end of life.
+
 Supported releases:
   - jammy (22.04): glibc 2.35, pre-time_t64 package names
   - noble (24.04): glibc 2.39, time_t64 package names
@@ -117,6 +122,10 @@ MIRROR_MAP: dict[str, str] = {
     "arm64": UBUNTU_MIRROR_ARM64,
 }
 
+# Permanent, architecture-independent fallback for any binary ever published
+# to the Ubuntu primary archive. Only the .deb basename is needed.
+LAUNCHPAD_LIBRARIAN_URL = "https://launchpad.net/ubuntu/+archive/primary/+files"
+
 REQUEST_HEADERS: dict[str, str] = {"User-Agent": "curl/8.7.1"}
 
 _BZL_TEMPLATE = '''\
@@ -202,6 +211,23 @@ def _download_with_retry(url: str, max_retries: int = 3, delay: int = 2) -> byte
     raise last_error  # type: ignore[misc]
 
 
+def _url_exists(url: str) -> bool:
+    """Return True if a HEAD request for url succeeds (following redirects)."""
+    try:
+        req = urllib.request.Request(url, headers=REQUEST_HEADERS, method="HEAD")
+        with urllib.request.urlopen(req, timeout=60) as response:
+            return bool(200 <= response.status < 300)
+    except (HTTPError, URLError, TimeoutError) as e:
+        logging.warning("Mirror check failed for %s: %s", url, e)
+        return False
+
+
+def _mirror_urls(filename: str) -> list[str]:
+    """Return fallback URLs for a package given its archive `Filename` field."""
+    basename = filename.rsplit("/", 1)[-1]
+    return [f"{LAUNCHPAD_LIBRARIAN_URL}/{basename}"]
+
+
 def _compute_integrity(data: bytes) -> str:
     """Compute SRI integrity hash (sha256)."""
     digest = hashlib.sha256(data).digest()
@@ -260,7 +286,12 @@ def _resolve_packages(
     packages_index: dict[str, dict[str, str]],
     arch: str,
 ) -> list[dict[str, Any]]:
-    """Resolve required package names to .deb URLs and download for hashing."""
+    """Resolve required package names to .deb URLs and download for hashing.
+
+    The first URL for each package is the primary Ubuntu mirror the package
+    was downloaded and hashed from. Additional mirror URLs are appended after
+    confirming they are reachable.
+    """
     mirror = MIRROR_MAP[arch]
     resolved: list[dict[str, Any]] = []
 
@@ -281,10 +312,19 @@ def _resolve_packages(
         data = _download_with_retry(url)
         integrity = _compute_integrity(data)
 
+        urls = [url]
+        for mirror_url in _mirror_urls(filename):
+            if _url_exists(mirror_url):
+                urls.append(mirror_url)
+            else:
+                logging.warning(
+                    "Mirror %s not available for %s, omitting", mirror_url, pkg_name
+                )
+
         resolved.append(
             {
                 "name": pkg_name,
-                "urls": [url],
+                "urls": urls,
                 "integrity": integrity,
             }
         )
@@ -306,7 +346,10 @@ def _format_packages_dict(
             lines.append("        {\n")
             lines.append(f'            "integrity": "{pkg["integrity"]}",\n')
             lines.append(f'            "name": "{pkg["name"]}",\n')
-            lines.append(f"            \"urls\": {json.dumps(pkg['urls'])},\n")
+            lines.append('            "urls": [\n')
+            for url in pkg["urls"]:
+                lines.append(f"                {json.dumps(url)},\n")
+            lines.append("            ],\n")
             lines.append("        },\n")
         lines.append("    ],\n")
 

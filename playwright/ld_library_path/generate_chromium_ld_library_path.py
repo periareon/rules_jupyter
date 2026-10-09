@@ -50,6 +50,9 @@ REQUIRED_PACKAGES_JAMMY: list[str] = [
     "libpangocairo-1.0-0",
     "libpcre3",
     "libpixman-1-0",
+    # NSS dlopens libsoftokn3.so, which links libsqlite3.so.0. Chromium aborts
+    # at startup if NSS fails to initialise.
+    "libsqlite3-0",
     "libwayland-client0",
     "libwayland-server0",
     "libx11-6",
@@ -89,11 +92,16 @@ REQUIRED_PACKAGES_NOBLE: list[str] = [
     "libpangocairo-1.0-0",
     "libpcre3",
     "libpixman-1-0",
+    # NSS dlopens libsoftokn3.so, which links libsqlite3.so.0. Chromium aborts
+    # at startup if NSS fails to initialise.
+    "libsqlite3-0",
     "libwayland-client0",
     "libwayland-server0",
     "libx11-6",
     "libxau6",
     "libxcb1",
+    # The noble libgbm.so.1 links libxcb-randr.so.0 (the jammy one does not).
+    "libxcb-randr0",
     "libxcomposite1",
     "libxdamage1",
     "libxdmcp6",

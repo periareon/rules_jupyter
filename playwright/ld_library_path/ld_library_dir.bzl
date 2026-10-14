@@ -10,9 +10,8 @@ def _playwright_ld_library_dir_impl(ctx):
     inputs = depset(transitive = all_inputs)
 
     args = ctx.actions.args()
-    args.add("--output-dir", output_dir.path)
-    for f in inputs.to_list():
-        args.add("--dep-file", f)
+    args.add_all("--output-dir", [output_dir], expand_directories = False)
+    args.add_all(inputs, before_each = "--dep-file")
 
     ctx.actions.run(
         mnemonic = "PlaywrightLdLibraryDir",
@@ -20,6 +19,8 @@ def _playwright_ld_library_dir_impl(ctx):
         arguments = [args],
         inputs = inputs,
         outputs = [output_dir],
+        execution_requirements = {"supports-path-mapping": "1"},
+        toolchain = None,
     )
 
     return [DefaultInfo(

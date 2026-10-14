@@ -1,0 +1,36 @@
+load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "jupyter_kernelspec")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["evcxr_build.patch"])
+
+# `evcxr_jupyter` is built from source by `crate_universe` (see `MODULE.bazel`),
+# so the kernel exists on every platform `rules_rust` has a toolchain for.
+alias(
+    name = "evcxr_jupyter",
+    actual = "@crates//:evcxr_jupyter__evcxr_jupyter",
+)
+
+# evcxr compiles each cell with `cargo`, which it looks up on `PATH`. The
+# `rules_rust` toolchain provides it (along with `rustc` and the standard
+# library) so no Rust installation is required on the host.
+jupyter_kernelspec(
+    name = "rust",
+    # Notebook `args` become a `Vec<&str>` named `args`.
+    args_template = "args_template.rs",
+    argv = [
+        "$(rlocationpath :evcxr_jupyter)",
+        "--control_file",
+        "{connection_file}",
+    ],
+    data = [
+        ":evcxr_jupyter",
+        "@rules_rust//rust/toolchain:current_rust_stdlib_files",
+    ],
+    display_name = "Rust",
+    interrupt_mode = "message",
+    language = "rust",
+    path_tools = ["@rules_rust//rust/toolchain:current_cargo_files"],
+    # evcxr's ZeroMQ is built with TCP transport only.
+    transport = "tcp",
+)

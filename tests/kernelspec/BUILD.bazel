@@ -1,0 +1,43 @@
+load("//jupyter:defs.bzl", "jupyter_lab", "jupyter_notebook", "jupyter_notebook_binary", "jupyter_notebook_test", "jupyter_report")
+
+# The `python_custom` kernel is defined by `//tools/toolchains:python_custom_kernel`
+# and registered on the development toolchain.
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.py",
+    kernel = "python_custom",
+    tags = ["no-pylint"],
+)
+
+ARGS = [
+    "--input=test_input",
+    "--flag",
+]
+
+# Kernel files are resolved to execpaths within build actions.
+jupyter_report(
+    name = "report",
+    args = ARGS,
+    notebook = ":notebook",
+    out_html = "report.html",
+)
+
+# Kernel files are resolved via runfiles in tests.
+jupyter_notebook_test(
+    name = "test",
+    args = ARGS,
+    notebook = ":notebook",
+    reports = ["html"],
+)
+
+jupyter_notebook_binary(
+    name = "binary",
+    args = ARGS,
+    notebook = ":notebook",
+)
+
+jupyter_lab(
+    name = "lab",
+    args = ARGS,
+    notebook = ":notebook",
+)

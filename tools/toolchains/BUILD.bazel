@@ -1,9 +1,12 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@rules_venv//python:py_binary.bzl", "py_binary")
 load("@rules_venv//python:py_library.bzl", "py_library")
 load("@rules_venv//python/black:defs.bzl", "py_black_toolchain")
 load("@rules_venv//python/isort:defs.bzl", "py_isort_toolchain")
 load("@rules_venv//python/mypy:defs.bzl", "py_mypy_toolchain")
 load("@rules_venv//python/pylint:defs.bzl", "py_pylint_toolchain")
 load("@rules_venv//python/pytest:defs.bzl", "py_pytest_toolchain")
+load("//jupyter:jupyter_kernelspec.bzl", "jupyter_kernelspec")
 load("//jupyter:jupyter_toolchain.bzl", "jupyter_toolchain")
 
 package(default_visibility = ["//visibility:public"])
@@ -77,11 +80,47 @@ toolchain(
     toolchain_type = "@rules_venv//python/pytest:toolchain_type",
 )
 
+# A kernel defined outside of the Jupyter Python environment. Any executable
+# speaking the Jupyter kernel protocol can be used here; an `ipykernel`
+# launcher keeps the example free of additional language toolchains.
+py_binary(
+    name = "ipykernel_launcher",
+    srcs = ["ipykernel_launcher.py"],
+    deps = ["@pip_jupyter//ipykernel"],
+)
+
+# The cell forwarding notebook `args`; `{args}` becomes a JSON array.
+write_file(
+    name = "python_custom_args_template",
+    out = "python_custom_args_template.py",
+    content = [
+        "import sys",
+        "sys.argv = [sys.argv[0]] + {args}",
+        "",
+    ],
+)
+
+jupyter_kernelspec(
+    name = "python_custom_kernel",
+    args_template = ":python_custom_args_template",
+    argv = [
+        "$(rlocationpath :ipykernel_launcher)",
+        "-f",
+        "{connection_file}",
+    ],
+    data = [":ipykernel_launcher"],
+    display_name = "Python (custom kernel)",
+    env = {"RULES_JUPYTER_CUSTOM_KERNEL": "1"},
+    kernel_name = "python_custom",
+    language = "python",
+)
+
 jupyter_toolchain(
     name = "py_jupyter_toolchain",
     bibtex = "@texlive//texk/bibtex-x:bibtex8",
     jupyter = "@pip_jupyter//jupyter",
     jupytext = "@pip_jupyter//jupytext",
+    kernels = [":python_custom_kernel"],
     latex_data = [
         "@texlive//:texmf/bibtex",
         "@texlive//:texmf/fonts",

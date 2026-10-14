@@ -5,6 +5,7 @@
 ---
 
 - [Rules](./rules.md)
+  - [jupyter_kernelspec](./jupyter_kernelspec.md)
   - [jupyter_lab](./jupyter_lab.md)
   - [jupyter_notebook](./jupyter_notebook.md)
   - [jupyter_notebook_binary](./jupyter_notebook_binary.md)

@@ -8,87 +8,31 @@ frontend via a tornado OutputTransform.
 
 import argparse
 import json
-import logging
 import os
-import platform
 import secrets
 import shutil
 import socket
-import sys
 import tempfile
 from pathlib import Path
-from typing import NamedTuple, Optional, Sequence
+from typing import NamedTuple, Optional
 
 from python.runfiles import Runfiles
 
-from tools.process_wrappers.reporter import (
-    CwdMode,
-    configure_jupyter_environment,
-    configure_ld_library_path,
-    configure_pandoc,
-    configure_playwright,
+from tools.process_wrappers.notebook_env import (
+    add_notebook_arguments,
+    collect_argv,
+    create_runfiles,
+    init_logging,
+    notebook_session,
+    path_type,
+    rlocation,
 )
 
 
-def _rlocation(runfiles: Runfiles, rlocationpath: str) -> Path:
-    """Look up a runfile and ensure the file exists."""
-    # TODO: https://github.com/periareon/rules_venv/issues/37
-    source_repo = None
-    if platform.system() == "Windows":
-        source_repo = ""
-    runfile = runfiles.Rlocation(rlocationpath, source_repo)
-    if not runfile:
-        raise FileNotFoundError(f"Failed to find runfile: {rlocationpath}")
-    path = Path(runfile)
-    if not path.exists():
-        raise FileNotFoundError(f"Runfile does not exist: ({rlocationpath}) {path}")
-    return path
-
-
-def parse_args(
-    argv: Optional[Sequence[str]] = None, runfiles: Optional[Runfiles] = None
-) -> argparse.Namespace:
+def parse_args(runfiles: Runfiles) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
-
-    if runfiles:
-
-        def _path(value: str) -> Path:
-            return _rlocation(runfiles, value)
-
-    else:
-
-        def _path(value: str) -> Path:
-            return Path(value)
-
-    parser.add_argument(
-        "--notebook", type=_path, required=True, help="The notebook file to execute."
-    )
-    parser.add_argument(
-        "--pandoc",
-        type=_path,
-        required=True,
-        help="The path to a pandoc binary.",
-    )
-    parser.add_argument(
-        "--playwright_browsers_dir",
-        type=_path,
-        help="The path to a playwright browsers cache.",
-    )
-    parser.add_argument(
-        "--ld_library_dir",
-        type=_path,
-        help="Directory of shared libraries to prepend to LD_LIBRARY_PATH.",
-    )
-    parser.add_argument(
-        "--cwd_mode",
-        type=CwdMode,
-        required=True,
-        help="The current working directory mode for the notebook execution.",
-    )
-    parser.add_argument(
-        "--kernel", type=str, help="An optional kernel to explicitly use."
-    )
+    add_notebook_arguments(parser, path_type(runfiles))
     parser.add_argument(
         "--execute",
         action=argparse.BooleanOptionalAction,
@@ -97,7 +41,7 @@ def parse_args(
     )
     parser.add_argument(
         "--overrides",
-        type=_path,
+        type=path_type(runfiles),
         required=True,
         help="A JupyterLab overrides.json file with default settings.",
     )
@@ -129,16 +73,8 @@ def parse_args(
         type=str,
         help="Workspace-relative path to the source notebook (source mode only).",
     )
-    parser.add_argument(
-        "params",
-        nargs="*",
-        help="Additional args to be passed to the jupyter script.",
-    )
 
-    if argv is not None:
-        return parser.parse_args(argv)
-
-    return parser.parse_args()
+    return parser.parse_args(collect_argv(runfiles, "RULES_JUPYTER_LAB_ARGS_FILE"))
 
 
 # -- Jupyter server config: session reuse --------------------------------------
@@ -263,7 +199,7 @@ def _symlink_data_files(
     """
     for entry in data_files:
         rloc, _ = entry.split("=", 1)
-        actual_path = _rlocation(runfiles, rloc)
+        actual_path = rlocation(runfiles, rloc)
         link = work_dir / rloc
         link.parent.mkdir(parents=True, exist_ok=True)
         if not link.exists():
@@ -309,9 +245,6 @@ def _prepare_runfiles_mode(
     args: argparse.Namespace, runfiles: Runfiles
 ) -> _WorkspaceLayout:
     """Create a synthetic runfiles tree for ``run_mode='runfiles'``."""
-    if not args.notebook.exists():
-        raise FileNotFoundError(f"Notebook does not exist: {args.notebook}")
-
     work_dir = Path(tempfile.mkdtemp(prefix="rules_jupyter_server_"))
 
     dest_notebook = work_dir / args.notebook_rlocationpath
@@ -375,34 +308,14 @@ def _build_lab_argv(
 
 def main() -> None:
     """The main entrypoint."""
-    if "RULES_JUPYTER_DEBUG" in os.environ:
-        logging.basicConfig(
-            format="%(levelname)s: %(message)s",
-            level=logging.DEBUG,
-        )
+    init_logging()
+    runfiles = create_runfiles()
+    args = parse_args(runfiles)
 
-    runfiles = Runfiles.Create()
-    if not runfiles:
-        logging.error("Failed to create runfiles")
-        sys.exit(1)
-
-    args_file_path = os.environ.get("RULES_JUPYTER_LAB_ARGS_FILE")
-    if not args_file_path:
-        logging.error("RULES_JUPYTER_LAB_ARGS_FILE environment variable not set")
-        sys.exit(1)
-
-    args_file = _rlocation(runfiles, args_file_path)
-    argv = args_file.read_text(encoding="utf-8").splitlines()
-    args = parse_args(argv + sys.argv[1:], runfiles)
-
-    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp_dir:
-        configure_jupyter_environment(Path(tmp_dir))
-        configure_pandoc(args.pandoc)
-        if args.playwright_browsers_dir:
-            configure_playwright(args.playwright_browsers_dir)
-        if args.ld_library_dir:
-            configure_ld_library_path(args.ld_library_dir)
-
+    # The user's own Jupyter configuration stays visible to the Lab server,
+    # so HOME is left alone. The kernel keeps using the real runfiles tree
+    # even when the notebook is served from a synthetic one below.
+    with notebook_session(args, runfiles=runfiles, redirect_home=False):
         ibazel_mode = os.environ.get("IBAZEL_NOTIFY_CHANGES") == "y"
 
         if args.run_mode == "source":

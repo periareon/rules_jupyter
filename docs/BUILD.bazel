@@ -21,6 +21,15 @@ stardoc(
 )
 
 stardoc(
+    name = "jupyter_kernelspec",
+    out = "src/jupyter_kernelspec.md",
+    input = "//jupyter:jupyter_kernelspec.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//jupyter:jupyter_kernelspec_bzl"],
+)
+
+stardoc(
     name = "jupyter_lab",
     out = "src/jupyter_lab.md",
     input = "//jupyter:jupyter_lab.bzl",
@@ -79,6 +88,7 @@ mdbook(
     srcs = glob(["src/**/*.md"]) + [
         ":defs",
         ":extensions",
+        ":jupyter_kernelspec",
         ":jupyter_lab",
         ":jupyter_notebook",
         ":jupyter_notebook_binary",

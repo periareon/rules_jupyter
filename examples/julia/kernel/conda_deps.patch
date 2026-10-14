@@ -1,0 +1,27 @@
+Conda.jl refuses to load until `Pkg.build("Conda")` has written `deps/deps.jl`.
+rules_julia never runs package build scripts and only ships `src/` and `ext/` to
+precompilation, so the constants are defined in the module itself instead.
+
+--- a/src/Conda.jl
++++ b/src/Conda.jl
+@@ -23,7 +23,19 @@
+     # Includes definition for ROOTENV, and MINICONDA_VERSION
+     include(deps_file)
+ else
+-    error("Conda is not properly configured.  Run Pkg.build(\"Conda\") before importing the Conda module.")
++    # `Pkg.build("Conda")` writes `deps/deps.jl` in a regular installation. Bazel
++    # does not run build scripts, so the constants are defined here instead.
++    # Nothing in the kernel invokes conda; IJulia only needs the module to
++    # load. `prefix` below insists on an existing directory, so the package
++    # itself stands in for the conda root.
++    const MINICONDA_VERSION = "3"
++    const ROOTENV = dirname(@__DIR__)
++    const USE_MINIFORGE = true
++    const CONDA_EXE = @static if Sys.iswindows()
++        joinpath(ROOTENV, "Scripts", "conda.exe")
++    else
++        joinpath(ROOTENV, "bin", "conda")
++    end
+ end
+ 
+ const Environment = Union{AbstractString,Symbol}

@@ -62,3 +62,49 @@ register_toolchains(
     "//:jupyter_toolchain",
 )
 ```
+
+### Kernels
+
+Notebooks are executed by the kernel named in `jupyter_notebook.kernel` (or the toolchain's default `kernel`).
+Python notebooks use the `python3` kernel from `ipykernel` in the toolchain's Python environment and need no further setup.
+
+Kernels for other languages are declared with [`jupyter_kernelspec`](./jupyter_kernelspec.md) and attached to the
+toolchain via `kernels`. The rule is language agnostic: it describes how to launch a kernel executable, like a
+`kernel.json` does, with files tracked by Bazel. A single toolchain can serve notebooks of many languages.
+
+```python
+load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "jupyter_kernelspec")
+
+jupyter_kernelspec(
+    name = "julia",
+    display_name = "Julia",
+    language = "julia",
+    argv = [
+        "$(rlocationpath :ijulia_kernel)",
+        "{connection_file}",
+    ],
+    data = [":ijulia_kernel"],
+    # How notebook `args` reach the kernel. Omit for kernels without arguments.
+    # A file containing `empty!(ARGS); append!(ARGS, {args})`.
+    args_template = "args_template.jl",
+)
+
+jupyter_toolchain(
+    name = "jupyter_toolchain",
+    kernels = [":julia"],
+    ...
+)
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.jl",
+    kernel = "julia",
+)
+```
+
+Sources in any language [Jupytext](https://jupytext.readthedocs.io/en/latest/) understands (`.py`, `.jl`, `.rs`, ...)
+are converted to notebooks with the kernel's metadata. Only the files of the selected kernel are added to a notebook's
+actions and tests. See [`examples/julia`](https://github.com/periareon/rules_jupyter/tree/main/examples/julia) for a
+Julia kernel ([IJulia](https://github.com/JuliaLang/IJulia.jl) via [rules_julia](https://github.com/periareon/rules_julia))
+and [`examples/rust`](https://github.com/periareon/rules_jupyter/tree/main/examples/rust) for a Rust kernel
+([evcxr](https://github.com/evcxr/evcxr) via [rules_rust](https://github.com/bazelbuild/rules_rust)).

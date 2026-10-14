@@ -8,7 +8,7 @@ import argparse
 import logging
 import os
 from pathlib import Path
-from typing import cast
+from typing import Optional, cast
 
 import jupytext  # type: ignore[import-untyped]
 import nbformat
@@ -33,8 +33,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--kernel",
         type=str,
-        default="python3",
         help="The kernel name to set in the notebook metadata.",
+    )
+    parser.add_argument(
+        "--kernel_display_name",
+        type=str,
+        help="The kernel display name to set in the notebook metadata.",
+    )
+    parser.add_argument(
+        "--kernel_language",
+        type=str,
+        help="The kernel language to set in the notebook metadata.",
     )
 
     return parser.parse_args()
@@ -42,18 +51,25 @@ def parse_args() -> argparse.Namespace:
 
 def convert_py_to_notebook(
     py_path: Path,
-    kernel_name: str = "python3",
+    kernel_name: Optional[str] = None,
+    kernel_display_name: Optional[str] = None,
+    kernel_language: Optional[str] = None,
 ) -> nbformat.NotebookNode:
-    """Convert a Python file to a Jupyter notebook using jupytext.
+    """Convert a script to a Jupyter notebook using jupytext.
 
     Supports various formats including:
     - Percent format (`# %%` cell markers)
     - Light format (implicit cells)
     - Sphinx-gallery format
 
+    Any language jupytext understands (`.py`, `.jl`, `.rs`, ...) is accepted.
+
     Args:
-        py_path: Path to the Python file.
-        kernel_name: The kernel name to set in notebook metadata.
+        py_path: Path to the script.
+        kernel_name: The kernel name to set in notebook metadata. Defaults to
+            `python3` when the script carries no kernelspec metadata.
+        kernel_display_name: The kernel display name to set in notebook metadata.
+        kernel_language: The kernel language to set in notebook metadata.
 
     Returns:
         A NotebookNode object.
@@ -65,14 +81,26 @@ def convert_py_to_notebook(
 
     # Ensure kernel metadata is set
     if "kernelspec" not in notebook_node.metadata:
+        name = kernel_name or "python3"
+        if kernel_language is None:
+            # jupytext records the script language when no kernel is known.
+            kernel_language = notebook_node.metadata.get("jupytext", {}).get(
+                "main_language", "python"
+            )
+        if kernel_display_name is None:
+            kernel_display_name = "Python 3" if name == "python3" else name
         notebook_node.metadata.kernelspec = {
-            "display_name": "Python 3",
-            "language": "python",
-            "name": kernel_name,
+            "display_name": kernel_display_name,
+            "language": kernel_language,
+            "name": name,
         }
-    elif kernel_name != "python3":
+    elif kernel_name:
         # Override with specified kernel if explicitly provided
         notebook_node.metadata.kernelspec["name"] = kernel_name
+        if kernel_display_name:
+            notebook_node.metadata.kernelspec["display_name"] = kernel_display_name
+        if kernel_language:
+            notebook_node.metadata.kernelspec["language"] = kernel_language
 
     # Normalize the notebook to add missing cell IDs (required in nbformat 4.5+)
     # This prevents MissingIDFieldWarning when nbformat validates the notebook
@@ -115,7 +143,12 @@ def main() -> None:
     logging.debug("Converting %s to notebook", args.notebook)
 
     # Convert Python file to notebook
-    notebook = convert_py_to_notebook(args.notebook, kernel_name=args.kernel)
+    notebook = convert_py_to_notebook(
+        args.notebook,
+        kernel_name=args.kernel,
+        kernel_display_name=args.kernel_display_name,
+        kernel_language=args.kernel_language,
+    )
 
     logging.debug("Created notebook with %d cells", len(notebook.cells))
 

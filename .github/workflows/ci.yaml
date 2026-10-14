@@ -102,6 +102,72 @@ jobs:
         run: bazel $env:BAZEL_STARTUP_FLAGS test //...
         if: startswith(runner.os, 'Windows')
 
+  ci-examples-julia:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+          - os: ubuntu-24.04
+          - os: ubuntu-24.04-arm
+    steps:
+      # Checkout the code
+      - uses: actions/checkout@v4
+
+      - uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
+      - name: Setup Bazelrc
+        working-directory: "${{ github.workspace }}/examples/julia"
+        run: |
+          echo "common --keep_going" >> ./user.bazelrc
+
+      # Build and Test the code
+      - name: Test
+        working-directory: "${{ github.workspace }}/examples/julia"
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
+
+      # Run the notebook binary which asserts args are forwarded to the kernel.
+      - name: Run notebook
+        working-directory: "${{ github.workspace }}/examples/julia"
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} run //:run
+
+  ci-examples-rust:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+          - os: ubuntu-24.04
+          - os: ubuntu-24.04-arm
+    steps:
+      # Checkout the code
+      - uses: actions/checkout@v4
+
+      - uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
+      - name: Setup Bazelrc
+        working-directory: "${{ github.workspace }}/examples/rust"
+        run: |
+          echo "common --keep_going" >> ./user.bazelrc
+
+      # Build and Test the code
+      - name: Test
+        working-directory: "${{ github.workspace }}/examples/rust"
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
+
+      # Run the notebook binary which asserts args are forwarded to the kernel.
+      - name: Run notebook
+        working-directory: "${{ github.workspace }}/examples/rust"
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} run //:run
+
   ci-format:
     runs-on: ubuntu-24.04
     steps:

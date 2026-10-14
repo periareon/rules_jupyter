@@ -1,0 +1,93 @@
+"""Example running Jupyter notebooks with a Rust kernel.
+
+The kernel is an ordinary Bazel target described with `jupyter_kernelspec`:
+`evcxr_jupyter`, built from source with `crate_universe`, driving `cargo` from
+`rules_rust`. Rust, `cargo` and the kernel are all provided by Bazel; no Rust
+installation is required on the host.
+
+This example is designed to be built from within the examples/rust directory.
+It uses local_path_override to reference the parent rules_jupyter module.
+"""
+
+module(
+    name = "jupyter_rust_example",
+    version = "0.0.0",
+)
+
+bazel_dep(name = "rules_jupyter", version = "0.0.0")
+bazel_dep(name = "rules_req_compile", version = "1.3.0")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_rust", version = "0.74.0")
+
+# Override to use local path to parent rules_jupyter module
+local_path_override(
+    module_name = "rules_jupyter",
+    path = "../..",
+)
+
+# Pandoc is used by the markdown exporter.
+jupyter = use_extension("@rules_jupyter//jupyter:extensions.bzl", "jupyter")
+jupyter.pandoc(
+    name = "pandoc",
+)
+use_repo(
+    jupyter,
+    "pandoc",
+)
+
+# Python dependencies of the Jupyter toolchain (`jupyter`, `jupytext`, `nbconvert`).
+requirements = use_extension("@rules_req_compile//extensions:python.bzl", "requirements")
+requirements.parse(
+    name = "pip_deps",
+    config_settings = {
+        "//requirements:linux_aarch64": "linux_aarch64",
+        "//requirements:linux_x86_64": "linux_x86_64",
+        "//requirements:macos_aarch64": "macos_aarch64",
+        "//requirements:windows_x86_64": "windows_x86_64",
+    },
+    requirements_locks = {
+        "//requirements:requirements_linux_aarch64.txt": "linux_aarch64",
+        "//requirements:requirements_linux_x86_64.txt": "linux_x86_64",
+        "//requirements:requirements_macos_aarch64.txt": "macos_aarch64",
+        "//requirements:requirements_windows_x86_64.txt": "windows_x86_64",
+    },
+)
+use_repo(requirements, "pip_deps")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+)
+use_repo(rust, "rust_toolchains")
+
+# `evcxr_jupyter` is built from source so the kernel is available wherever
+# `rules_rust` provides a toolchain. `kernel/Cargo.lock` started as evcxr's own
+# lockfile: resolving its dependencies afresh picks releases evcxr was never
+# built against. Repin with:
+#
+#     CARGO_BAZEL_REPIN=1 bazel build @crates//:evcxr_jupyter__evcxr_jupyter
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.spec(
+    package = "evcxr_jupyter",
+    version = "0.22.0",
+)
+crate.annotation(
+    crate = "evcxr_jupyter",
+    gen_binaries = ["evcxr_jupyter"],
+)
+crate.annotation(
+    crate = "evcxr",
+    patch_args = ["-p1"],
+    patches = ["@//kernel:evcxr_build.patch"],
+)
+crate.from_specs(
+    name = "crates",
+    cargo_lockfile = "//kernel:Cargo.lock",
+    lockfile = "//kernel:Cargo.Bazel.lock",
+)
+use_repo(crate, "crates")
+
+register_toolchains(
+    "//:jupyter_toolchain",
+    "@rust_toolchains//:all",
+)

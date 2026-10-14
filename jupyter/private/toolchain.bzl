@@ -1,6 +1,7 @@
 """Jupyter toolchain"""
 
 load("@rules_venv//python:py_info.bzl", "PyInfo")
+load(":providers.bzl", "JupyterKernelspecInfo")
 
 TOOLCHAIN_TYPE = str(Label("//jupyter:toolchain_type"))
 
@@ -72,12 +73,25 @@ def _jupyter_toolchain_impl(ctx):
             ctx.label,
         ))
 
+    kernels = {}
+    for target in ctx.attr.kernels:
+        info = target[JupyterKernelspecInfo]
+        if info.kernel_name in kernels:
+            fail("`jupyter_toolchain.kernels` contains multiple kernels named `{}` ({} and {}). Please update `{}`".format(
+                info.kernel_name,
+                kernels[info.kernel_name].spec.owner,
+                target.label,
+                ctx.label,
+            ))
+        kernels[info.kernel_name] = info
+
     providers = [
         platform_common.ToolchainInfo(
             label = ctx.label,
             default_cwd_mode = ctx.attr.cwd_mode if ctx.attr.cwd_mode else None,
             default_kernel = ctx.attr.kernel if ctx.attr.kernel else None,
             default_exporter_args = ctx.attr.exporter_args,
+            kernels = kernels,
             jupyter = jupyter_target,
             jupytext = jupytext_target,
             pandoc = pandoc,
@@ -103,7 +117,13 @@ def _jupyter_toolchain_impl(ctx):
 
 jupyter_toolchain = rule(
     doc = """\
-Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, Playwright browser, and LaTeX support.
+Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, Playwright browser, LaTeX support and
+additional kernels.
+
+Kernels for languages other than Python are defined with `jupyter_kernelspec` and attached via `kernels`.
+A single toolchain can serve notebooks of many languages; each notebook selects a kernel by name with
+`jupyter_notebook.kernel`. Kernels not listed here (such as `python3` from `ipykernel`) are expected to be
+discoverable from the `jupyter` Python environment.
 
 LaTeX (used for `pdf` reports) is optional. The [texlive](https://registry.bazel.build/modules/texlive)
 module from the Bazel Central Registry provides everything required:
@@ -157,6 +177,13 @@ jupyter_toolchain(
         ),
         "kernel": attr.string(
             doc = "Default kernel name to use for notebook execution if not specified in the notebook (e.g., 'python3', 'rust').",
+        ),
+        "kernels": attr.label_list(
+            doc = (
+                "`jupyter_kernelspec` targets made available to notebooks using this toolchain. A kernel is only added to " +
+                "the inputs of a notebook when the notebook selects it by name via `jupyter_notebook.kernel` or `kernel`."
+            ),
+            providers = [JupyterKernelspecInfo],
         ),
         "latex_data": attr.label_list(
             doc = "texmf trees (fonts, macro packages, `web2c` configuration) required by `latex_engine` at runtime. These files are only added to actions and runfiles that produce PDF output.",

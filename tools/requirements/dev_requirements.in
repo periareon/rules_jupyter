@@ -10,6 +10,6 @@ matplotlib
 # Linter and Formatters
 black
 isort
-mypy
+mypy>=2.0.0
 pylint
 pytest-cov

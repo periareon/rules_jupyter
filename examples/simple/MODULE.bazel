@@ -9,7 +9,7 @@ module(
     version = "0.0.0",
 )
 
-bazel_dep(name = "rules_req_compile", version = "1.0.0rc41")
+bazel_dep(name = "rules_req_compile", version = "1.3.0")
 bazel_dep(name = "rules_jupyter", version = "0.0.0")
 bazel_dep(name = "platforms", version = "1.0.0")
 
@@ -40,11 +40,17 @@ use_repo(playwright, "playwright_toolchains")
 requirements = use_extension("@rules_req_compile//extensions:python.bzl", "requirements")
 requirements.parse(
     name = "pip_deps",
+    config_settings = {
+        "//requirements:linux_aarch64": "linux_aarch64",
+        "//requirements:linux_x86_64": "linux_x86_64",
+        "//requirements:macos_aarch64": "macos_aarch64",
+        "//requirements:windows_x86_64": "windows_x86_64",
+    },
     requirements_locks = {
-        "//requirements:requirements_linux_aarch64.txt": "//requirements:linux-aarch64",
-        "//requirements:requirements_linux_x86_64.txt": "//requirements:linux-x86_64",
-        "//requirements:requirements_macos_aarch64.txt": "//requirements:macos-aarch64",
-        "//requirements:requirements_windows_x86_64.txt": "//requirements:windows-x86_64",
+        "//requirements:requirements_linux_aarch64.txt": "linux_aarch64",
+        "//requirements:requirements_linux_x86_64.txt": "linux_x86_64",
+        "//requirements:requirements_macos_aarch64.txt": "macos_aarch64",
+        "//requirements:requirements_windows_x86_64.txt": "windows_x86_64",
     },
 )
 use_repo(requirements, "pip_deps")

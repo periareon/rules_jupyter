@@ -1,82 +1,66 @@
+"""Third-party Python packages of the example."""
+
 load("@rules_req_compile//:defs.bzl", "py_reqs_compiler", "py_reqs_solution_test")
 
-config_setting(
-    name = "linux-aarch64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:aarch64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "linux-x86_64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "macos-aarch64",
-    constraint_values = [
-        "@platforms//os:macos",
-        "@platforms//cpu:aarch64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "macos-x86_64",
-    constraint_values = [
-        "@platforms//os:macos",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "windows-x86_64",
-    constraint_values = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-PLATFORMS = [
-    "linux-aarch64",
-    "linux-x86_64",
-    "macos-aarch64",
-    "windows-x86_64",
-]
+# Bazel constraints and the wheel platform tag each lock file is compiled for.
+PLATFORMS = {
+    "linux_aarch64": {
+        "constraints": [
+            "@platforms//os:linux",
+            "@platforms//cpu:aarch64",
+        ],
+        "wheel_tag": "manylinux_2_28_aarch64",
+    },
+    "linux_x86_64": {
+        "constraints": [
+            "@platforms//os:linux",
+            "@platforms//cpu:x86_64",
+        ],
+        "wheel_tag": "manylinux_2_28_x86_64",
+    },
+    "macos_aarch64": {
+        "constraints": [
+            "@platforms//os:macos",
+            "@platforms//cpu:aarch64",
+        ],
+        "wheel_tag": "macosx_11_0_arm64",
+    },
+    "windows_x86_64": {
+        "constraints": [
+            "@platforms//os:windows",
+            "@platforms//cpu:x86_64",
+        ],
+        "wheel_tag": "win_amd64",
+    },
+}
 
 [
-    py_reqs_compiler(
-        name = "requirements.{}.update".format(platform.replace("-", "_")),
-        requirements_in = "requirements.in",
-        requirements_txt = "requirements_{}.txt".format(platform.replace("-", "_")),
-        target_compatible_with = select({
-            ":{}".format(platform): [],
-            "//conditions:default": ["@platforms//:incompatible"],
-        }),
+    config_setting(
+        name = platform,
+        constraint_values = info["constraints"],
+        visibility = ["//visibility:public"],
     )
-    for platform in PLATFORMS
+    for platform, info in PLATFORMS.items()
+]
+
+exports_files(["requirements.in"] + ["requirements_{}.txt".format(p) for p in PLATFORMS])
+
+# Each compiler resolves the solution for its own platform regardless of the
+# host, so every lock file can be regenerated from any machine.
+[
+    py_reqs_compiler(
+        name = "requirements.{}.update".format(platform),
+        platform = info["wheel_tag"],
+        requirements_in = "requirements.in",
+        requirements_txt = "requirements_{}.txt".format(platform),
+    )
+    for platform, info in PLATFORMS.items()
 ]
 
 [
     py_reqs_solution_test(
-        name = "requirements_{}_test".format(platform.replace("-", "_")),
-        compiler = ":requirements.{}.update".format(platform.replace("-", "_")),
+        name = "requirements_{}_test".format(platform),
+        compiler = ":requirements.{}.update".format(platform),
     )
     for platform in PLATFORMS
 ]
-
-alias(
-    name = "update",
-    actual = select({
-        ":{}".format(platform): ":requirements.{}.update".format(platform.replace("-", "_"))
-        for platform in PLATFORMS
-    }),
-)

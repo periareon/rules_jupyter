@@ -1,5 +1,5 @@
 {
-  "lockFileVersion": 26,
+  "lockFileVersion": 28,
   "registryFileHashes": {
     "https://bcr.bazel.build/bazel_registry.json": "8a28e4aff06ee60aed2a8c281907fb8bcbf3b753c91fb5a5c57da3215d5b3497",
     "https://bcr.bazel.build/modules/abseil-cpp/20210324.2/MODULE.bazel": "7cd0312e064fde87c8d1cd79ba06c876bd23630c83466e9500321be55c96ace2",
@@ -18,8 +18,8 @@
     "https://bcr.bazel.build/modules/apple_support/1.15.1/MODULE.bazel": "a0556fefca0b1bb2de8567b8827518f94db6a6e7e7d632b4c48dc5f865bc7c85",
     "https://bcr.bazel.build/modules/apple_support/1.21.0/MODULE.bazel": "ac1824ed5edf17dee2fdd4927ada30c9f8c3b520be1b5fd02a5da15bc10bff3e",
     "https://bcr.bazel.build/modules/apple_support/1.21.1/MODULE.bazel": "5809fa3efab15d1f3c3c635af6974044bac8a4919c62238cce06acee8a8c11f1",
-    "https://bcr.bazel.build/modules/apple_support/1.24.2/MODULE.bazel": "0e62471818affb9f0b26f128831d5c40b074d32e6dda5a0d3852847215a41ca4",
-    "https://bcr.bazel.build/modules/apple_support/1.24.2/source.json": "2c22c9827093250406c5568da6c54e6fdf0ef06238def3d99c71b12feb057a8d",
+    "https://bcr.bazel.build/modules/apple_support/2.5.2/MODULE.bazel": "bb1b7081e390a8d3885f642cb0073dfcf8e7a36525e079fa8f5835af7079c0fe",
+    "https://bcr.bazel.build/modules/apple_support/2.5.2/source.json": "dd51ee925a550e92b55eb41c4c809a967da311a2d2520241252a238a48b39c4c",
     "https://bcr.bazel.build/modules/bazel_features/1.1.1/MODULE.bazel": "27b8c79ef57efe08efccbd9dd6ef70d61b4798320b8d3c134fd571f78963dbcd",
     "https://bcr.bazel.build/modules/bazel_features/1.10.0/MODULE.bazel": "f75e8807570484a99be90abcd52b5e1f390362c258bcb73106f4544957a48101",
     "https://bcr.bazel.build/modules/bazel_features/1.11.0/MODULE.bazel": "f9382337dd5a474c3b7d334c2f83e50b6eaedc284253334cf823044a26de03e8",
@@ -51,7 +51,8 @@
     "https://bcr.bazel.build/modules/bazel_skylib/1.7.1/MODULE.bazel": "3120d80c5861aa616222ec015332e5f8d3171e062e3e804a2a0253e1be26e59b",
     "https://bcr.bazel.build/modules/bazel_skylib/1.8.1/MODULE.bazel": "88ade7293becda963e0e3ea33e7d54d3425127e0a326e0d17da085a5f1f03ff6",
     "https://bcr.bazel.build/modules/bazel_skylib/1.8.2/MODULE.bazel": "69ad6927098316848b34a9142bcc975e018ba27f08c4ff403f50c1b6e646ca67",
-    "https://bcr.bazel.build/modules/bazel_skylib/1.8.2/source.json": "34a3c8bcf233b835eb74be9d628899bb32999d3e0eadef1947a0a562a2b16ffb",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.9.0/MODULE.bazel": "72997b29dfd95c3fa0d0c48322d05590418edef451f8db8db5509c57875fb4b7",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.9.0/source.json": "7ad77c1e8c1b84222d9b3f3cae016a76639435744c19330b0b37c0a3c9da7dc0",
     "https://bcr.bazel.build/modules/buildozer/8.5.1/MODULE.bazel": "a35d9561b3fc5b18797c330793e99e3b834a473d5fbd3d7d7634aafc9bdb6f8f",
     "https://bcr.bazel.build/modules/buildozer/8.5.1/source.json": "e3386e6ff4529f2442800dee47ad28d3e6487f36a1f75ae39ae56c70f0cd2fbd",
     "https://bcr.bazel.build/modules/google_benchmark/1.8.2/MODULE.bazel": "a70cf1bba851000ba93b58ae2f6d76490a9feb74192e57ab8e8ff13c34ec50cb",
@@ -98,6 +99,8 @@
     "https://bcr.bazel.build/modules/rules_apple/3.16.0/MODULE.bazel": "0d1caf0b8375942ce98ea944be754a18874041e4e0459401d925577624d3a54a",
     "https://bcr.bazel.build/modules/rules_apple/4.1.0/MODULE.bazel": "76e10fd4a48038d3fc7c5dc6e63b7063bbf5304a2e3bd42edda6ec660eebea68",
     "https://bcr.bazel.build/modules/rules_apple/4.1.0/source.json": "8ee81e1708756f81b343a5eb2b2f0b953f1d25c4ab3d4a68dc02754872e80715",
+    "https://bcr.bazel.build/modules/rules_batch/0.1.1/MODULE.bazel": "d86a3773a3aed23878baaf7263917ea7dd71d2100934e989d2f303246389fdcb",
+    "https://bcr.bazel.build/modules/rules_batch/0.1.1/source.json": "7280584357144d887d386f436ea0e8f9629a68d6396458f65f5fb4e49d8a185d",
     "https://bcr.bazel.build/modules/rules_cc/0.0.1/MODULE.bazel": "cb2aa0747f84c6c3a78dad4e2049c154f08ab9d166b1273835a8174940365647",
     "https://bcr.bazel.build/modules/rules_cc/0.0.10/MODULE.bazel": "ec1705118f7eaedd6e118508d3d26deba2a4e76476ada7e0e3965211be012002",
     "https://bcr.bazel.build/modules/rules_cc/0.0.13/MODULE.bazel": "0e8529ed7b323dad0775ff924d2ae5af7640b23553dfcd4d34344c7e7a867191",
@@ -113,10 +116,11 @@
     "https://bcr.bazel.build/modules/rules_cc/0.1.5/MODULE.bazel": "88dfc9361e8b5ae1008ac38f7cdfd45ad738e4fa676a3ad67d19204f045a1fd8",
     "https://bcr.bazel.build/modules/rules_cc/0.2.0/MODULE.bazel": "b5c17f90458caae90d2ccd114c81970062946f49f355610ed89bebf954f5783c",
     "https://bcr.bazel.build/modules/rules_cc/0.2.13/MODULE.bazel": "eecdd666eda6be16a8d9dc15e44b5c75133405e820f620a234acc4b1fdc5aa37",
+    "https://bcr.bazel.build/modules/rules_cc/0.2.14/MODULE.bazel": "353c99ed148887ee89c54a17d4100ae7e7e436593d104b668476019023b58df8",
+    "https://bcr.bazel.build/modules/rules_cc/0.2.15/MODULE.bazel": "6a0a4a75a57aa6dc888300d848053a58c6b12a29f89d4304e1c41448514ec6e8",
     "https://bcr.bazel.build/modules/rules_cc/0.2.17/MODULE.bazel": "1849602c86cb60da8613d2de887f9566a6d354a6df6d7009f9d04a14402f9a84",
     "https://bcr.bazel.build/modules/rules_cc/0.2.17/source.json": "3832f45d145354049137c0090df04629d9c2b5493dc5c2bf46f1834040133a07",
     "https://bcr.bazel.build/modules/rules_cc/0.2.4/MODULE.bazel": "1ff1223dfd24f3ecf8f028446d4a27608aa43c3f41e346d22838a4223980b8cc",
-    "https://bcr.bazel.build/modules/rules_cc/0.2.8/MODULE.bazel": "f1df20f0bf22c28192a794f29b501ee2018fa37a3862a1a2132ae2940a23a642",
     "https://bcr.bazel.build/modules/rules_foreign_cc/0.9.0/MODULE.bazel": "c9e8c682bf75b0e7c704166d79b599f93b72cfca5ad7477df596947891feeef6",
     "https://bcr.bazel.build/modules/rules_fuzzing/0.5.2/MODULE.bazel": "40c97d1144356f52905566c55811f13b299453a14ac7769dfba2ac38192337a8",
     "https://bcr.bazel.build/modules/rules_java/4.0.0/MODULE.bazel": "5a78a7ae82cd1a33cef56dc578c7d2a46ed0dca12643ee45edbb8417899e6f74",
@@ -129,8 +133,8 @@
     "https://bcr.bazel.build/modules/rules_java/8.3.2/MODULE.bazel": "7336d5511ad5af0b8615fdc7477535a2e4e723a357b6713af439fe8cf0195017",
     "https://bcr.bazel.build/modules/rules_java/8.5.1/MODULE.bazel": "d8a9e38cc5228881f7055a6079f6f7821a073df3744d441978e7a43e20226939",
     "https://bcr.bazel.build/modules/rules_java/8.6.1/MODULE.bazel": "f4808e2ab5b0197f094cabce9f4b006a27766beb6a9975931da07099560ca9c2",
-    "https://bcr.bazel.build/modules/rules_java/9.0.3/MODULE.bazel": "1f98ed015f7e744a745e0df6e898a7c5e83562d6b759dfd475c76456dda5ccea",
-    "https://bcr.bazel.build/modules/rules_java/9.0.3/source.json": "b038c0c07e12e658135bbc32cc1a2ded6e33785105c9d41958014c592de4593e",
+    "https://bcr.bazel.build/modules/rules_java/9.1.0/MODULE.bazel": "ee63f27e36a3fada80342869361182f120a9819c74320e8e65b1e04ba0cd7a9d",
+    "https://bcr.bazel.build/modules/rules_java/9.1.0/source.json": "da589573c1dee2c9ac4a568b301269a2e8191110ff0345c1a959fa7ea6c4dfd6",
     "https://bcr.bazel.build/modules/rules_jvm_external/4.4.2/MODULE.bazel": "a56b85e418c83eb1839819f0b515c431010160383306d13ec21959ac412d2fe7",
     "https://bcr.bazel.build/modules/rules_jvm_external/5.1/MODULE.bazel": "33f6f999e03183f7d088c9be518a63467dfd0be94a11d0055fe2d210f89aa909",
     "https://bcr.bazel.build/modules/rules_jvm_external/5.2/MODULE.bazel": "d9351ba35217ad0de03816ef3ed63f89d411349353077348a45348b096615036",
@@ -161,25 +165,23 @@
     "https://bcr.bazel.build/modules/rules_python/0.4.0/MODULE.bazel": "9208ee05fd48bf09ac60ed269791cf17fb343db56c8226a720fbb1cdf467166c",
     "https://bcr.bazel.build/modules/rules_python/1.3.0/MODULE.bazel": "8361d57eafb67c09b75bf4bbe6be360e1b8f4f18118ab48037f2bd50aa2ccb13",
     "https://bcr.bazel.build/modules/rules_python/1.4.1/MODULE.bazel": "8991ad45bdc25018301d6b7e1d3626afc3c8af8aaf4bc04f23d0b99c938b73a6",
-    "https://bcr.bazel.build/modules/rules_python/1.5.1/MODULE.bazel": "acfe65880942d44a69129d4c5c3122d57baaf3edf58ae5a6bd4edea114906bf5",
     "https://bcr.bazel.build/modules/rules_python/1.6.0/MODULE.bazel": "7e04ad8f8d5bea40451cf80b1bd8262552aa73f841415d20db96b7241bd027d8",
     "https://bcr.bazel.build/modules/rules_python/1.7.0/MODULE.bazel": "d01f995ecd137abf30238ad9ce97f8fc3ac57289c8b24bd0bf53324d937a14f8",
     "https://bcr.bazel.build/modules/rules_python/1.7.0/source.json": "028a084b65dcf8f4dc4f82f8778dbe65df133f234b316828a82e060d81bdce32",
-    "https://bcr.bazel.build/modules/rules_req_compile/1.0.0rc41/MODULE.bazel": "ddd912078da4843372b9dcf180f0c6689ff9391d71cfbafdf9fd5a23ef0bdd45",
-    "https://bcr.bazel.build/modules/rules_req_compile/1.0.0rc41/source.json": "27ddc95ea24bcdb3320b8ce20825897793392072510d530806157e5cdc1d718b",
+    "https://bcr.bazel.build/modules/rules_req_compile/1.3.0/MODULE.bazel": "1794af759a1bb7c13705ccc5c022561d9b14331023261cdb794b67ba00add663",
+    "https://bcr.bazel.build/modules/rules_req_compile/1.3.0/source.json": "0196dcce22c6ad9fd450400207d08df1e6d2e21072e0c6302f45efe47882202d",
     "https://bcr.bazel.build/modules/rules_shell/0.2.0/MODULE.bazel": "fda8a652ab3c7d8fee214de05e7a9916d8b28082234e8d2c0094505c5268ed3c",
     "https://bcr.bazel.build/modules/rules_shell/0.3.0/MODULE.bazel": "de4402cd12f4cc8fda2354fce179fdb068c0b9ca1ec2d2b17b3e21b24c1a937b",
-    "https://bcr.bazel.build/modules/rules_shell/0.5.1/MODULE.bazel": "8b61403b53a9cbfa06e52b12a4153454056472c54245b1272f6dbf3b7ab8a40c",
     "https://bcr.bazel.build/modules/rules_shell/0.6.1/MODULE.bazel": "72e76b0eea4e81611ef5452aa82b3da34caca0c8b7b5c0c9584338aa93bae26b",
-    "https://bcr.bazel.build/modules/rules_shell/0.6.1/source.json": "20ec05cd5e592055e214b2da8ccb283c7f2a421ea0dc2acbf1aa792e11c03d0c",
+    "https://bcr.bazel.build/modules/rules_shell/0.7.1/MODULE.bazel": "257dd8d667371de804918dfceb86f6ddd2e1b5e025f5d9322878d4a73dc8aa58",
+    "https://bcr.bazel.build/modules/rules_shell/0.7.1/source.json": "9e6c3ea5766b584f60a44dd36520c4be16a12bb173aad238e018f73083e8feb6",
     "https://bcr.bazel.build/modules/rules_swift/1.16.0/MODULE.bazel": "4a09f199545a60d09895e8281362b1ff3bb08bbde69c6fc87aff5b92fcc916ca",
     "https://bcr.bazel.build/modules/rules_swift/2.1.1/MODULE.bazel": "494900a80f944fc7aa61500c2073d9729dff0b764f0e89b824eb746959bc1046",
     "https://bcr.bazel.build/modules/rules_swift/2.4.0/MODULE.bazel": "1639617eb1ede28d774d967a738b4a68b0accb40650beadb57c21846beab5efd",
     "https://bcr.bazel.build/modules/rules_swift/3.1.2/MODULE.bazel": "72c8f5cf9d26427cee6c76c8e3853eb46ce6b0412a081b2b6db6e8ad56267400",
     "https://bcr.bazel.build/modules/rules_swift/3.1.2/source.json": "e85761f3098a6faf40b8187695e3de6d97944e98abd0d8ce579cb2daf6319a66",
-    "https://bcr.bazel.build/modules/rules_venv/0.12.0/MODULE.bazel": "3ebd074a24a56b1aee978ce3951a74ca460c6fb9f427fc3bae606b0fe1849e47",
-    "https://bcr.bazel.build/modules/rules_venv/0.12.0/source.json": "a7ba5a34f9b3446c1f0a808a5198fea302ab56bf3a909d7637c955982acfdc77",
-    "https://bcr.bazel.build/modules/rules_venv/0.7.0/MODULE.bazel": "20a844b0bbac189e11af899d09de249a7f766b361aa49f4870134136e6c4bd0d",
+    "https://bcr.bazel.build/modules/rules_venv/0.34.0/MODULE.bazel": "83ec485d5e6c09f7f72626b9c8300c14df9b4fd3ccea482aae2dc52dc4cf5af0",
+    "https://bcr.bazel.build/modules/rules_venv/0.34.0/source.json": "5fddf18a4d52d72ae9144621d1eb1f4510a79cc6aa22ec8b733f4fdc9383db68",
     "https://bcr.bazel.build/modules/stardoc/0.5.1/MODULE.bazel": "1a05d92974d0c122f5ccf09291442580317cdd859f07a8655f1db9a60374f9f8",
     "https://bcr.bazel.build/modules/stardoc/0.5.3/MODULE.bazel": "c7f6948dae6999bf0db32c1858ae345f112cacf98f174c7a8bb707e41b974f1c",
     "https://bcr.bazel.build/modules/stardoc/0.7.0/MODULE.bazel": "05e3d6d30c099b6770e97da986c53bd31844d7f13d41412480ea265ac9e8079c",
@@ -196,9 +198,351 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "@@rules_jupyter+//jupyter:extensions.bzl%playwright": {
+      "general": {
+        "bzlTransitiveDigest": "uMtuSEzYUGvnJIhEWwuamTf7PHuVi6/VdwCkZ9z+5nk=",
+        "usagesDigest": "qhENwjOShJU3cdaYj5jq1Fe0S8wp68nrxd8kAI79tZY=",
+        "recordedInputs": [
+          "REPO_MAPPING:rules_jupyter+,bazel_tools bazel_tools",
+          "FILE:@@//requirements/requirements_linux_x86_64.txt 1ea1889cf0387c5a144c36dca4e5cceeb62ec46e7bacd3ce0a5647cfea2cdf64"
+        ],
+        "generatedRepoSpecs": {
+          "playwright_toolchains_chromium_linux-aarch64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1134/chromium-linux-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1134/chromium-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1134/chromium-linux-arm64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_chromium_linux-aarch64\",\n    srcs = glob([\"chrome-linux*/chrome\"]),\n    data = glob(\n        include = [\"chrome-linux*/**\"],\n        exclude = [\"chrome-linux*/chrome\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_webkit_linux-aarch64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2070/webkit-ubuntu-22.04-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2070/webkit-ubuntu-22.04-arm64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2070/webkit-ubuntu-22.04-arm64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_webkit_linux-aarch64\",\n    srcs = [\"pw_run.sh\"],\n    data = glob(\n        include = [\"**\"],\n        exclude = [\"pw_run.sh\", \"*.bazel\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_ffmpeg_linux-aarch64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-linux-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-linux-arm64.zip",
+                "https://cdn.playwright.dev/builds/ffmpeg/1010/ffmpeg-linux-arm64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_ffmpeg_linux-aarch64\",\n    srcs = [\"ffmpeg-linux\"],\n    data = glob(\n        include = [\"**\"],\n        exclude = [\n            \"ffmpeg-linux\",\n            \"*.bazel\",\n            \"WORKSPACE\",\n            \"BUILD\",\n        ],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_linux_aarch64": {
+            "repoRuleId": "@@rules_jupyter+//playwright/private:extensions.bzl%playwright_toolchain_repository",
+            "attributes": {
+              "platform": "linux-aarch64",
+              "playwright_version": "1.47.0",
+              "chromium": "@@rules_jupyter++playwright+playwright_toolchains_chromium_linux-aarch64//:playwright_toolchains_chromium_linux-aarch64",
+              "chromium_version": "1134"
+            }
+          },
+          "playwright_toolchains_chromium_linux-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1134/chromium-linux.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1134/chromium-linux.zip",
+                "https://cdn.playwright.dev/builds/chromium/1134/chromium-linux.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_chromium_linux-x86_64\",\n    srcs = glob([\"chrome-linux*/chrome\"]),\n    data = glob(\n        include = [\"chrome-linux*/**\"],\n        exclude = [\"chrome-linux*/chrome\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_firefox_linux-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1463/firefox-ubuntu-20.04.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1463/firefox-ubuntu-20.04.zip",
+                "https://cdn.playwright.dev/builds/firefox/1463/firefox-ubuntu-20.04.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_firefox_linux-x86_64\",\n    srcs = [\"firefox/firefox\"],\n    data = glob(\n        include = [\"firefox/**\"],\n        exclude = [\"firefox/firefox\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_webkit_linux-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2070/webkit-ubuntu-22.04.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2070/webkit-ubuntu-22.04.zip",
+                "https://cdn.playwright.dev/builds/webkit/2070/webkit-ubuntu-22.04.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_webkit_linux-x86_64\",\n    srcs = [\"pw_run.sh\"],\n    data = glob(\n        include = [\"**\"],\n        exclude = [\"pw_run.sh\", \"*.bazel\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_ffmpeg_linux-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-linux.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-linux.zip",
+                "https://cdn.playwright.dev/builds/ffmpeg/1010/ffmpeg-linux.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_ffmpeg_linux-x86_64\",\n    srcs = [\"ffmpeg-linux\"],\n    data = glob(\n        include = [\"**\"],\n        exclude = [\n            \"ffmpeg-linux\",\n            \"*.bazel\",\n            \"WORKSPACE\",\n            \"BUILD\",\n        ],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_linux_x86_64": {
+            "repoRuleId": "@@rules_jupyter+//playwright/private:extensions.bzl%playwright_toolchain_repository",
+            "attributes": {
+              "platform": "linux-x86_64",
+              "playwright_version": "1.47.0",
+              "chromium": "@@rules_jupyter++playwright+playwright_toolchains_chromium_linux-x86_64//:playwright_toolchains_chromium_linux-x86_64",
+              "chromium_version": "1134"
+            }
+          },
+          "playwright_toolchains_chromium_macos-aarch64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1134/chromium-mac-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1134/chromium-mac-arm64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1134/chromium-mac-arm64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "CHROME = glob([\"chrome-mac*/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing\"], allow_empty = True)\nCHROMIUM = glob([\"chrome-mac*/Chromium.app/Contents/MacOS/Chromium\"], allow_empty = True)\n\nfilegroup(\n    name = \"playwright_toolchains_chromium_macos-aarch64\",\n    srcs = CHROME if CHROME else CHROMIUM,\n    data = glob(\n        include = [\"chrome-mac*/**\"],\n        exclude = CHROME + CHROMIUM,\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_firefox_macos-aarch64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1463/firefox-mac-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1463/firefox-mac-arm64.zip",
+                "https://cdn.playwright.dev/builds/firefox/1463/firefox-mac-arm64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_firefox_macos-aarch64\",\n    srcs = [\"firefox/Nightly.app/Contents/MacOS/firefox\"],\n    data = glob(\n        include = [\"firefox/**\"],\n        exclude = [\"firefox/Nightly.app/Contents/MacOS/firefox\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_ffmpeg_macos-aarch64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-mac-arm64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-mac-arm64.zip",
+                "https://cdn.playwright.dev/builds/ffmpeg/1010/ffmpeg-mac-arm64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_ffmpeg_macos-aarch64\",\n    srcs = [\"ffmpeg-mac\"],\n    data = glob(\n        include = [\"**\"],\n        exclude = [\n            \"ffmpeg-mac\",\n            \"*.bazel\",\n            \"WORKSPACE\",\n            \"BUILD\",\n        ],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_macos_aarch64": {
+            "repoRuleId": "@@rules_jupyter+//playwright/private:extensions.bzl%playwright_toolchain_repository",
+            "attributes": {
+              "platform": "macos-aarch64",
+              "playwright_version": "1.47.0",
+              "chromium": "@@rules_jupyter++playwright+playwright_toolchains_chromium_macos-aarch64//:playwright_toolchains_chromium_macos-aarch64",
+              "chromium_version": "1134"
+            }
+          },
+          "playwright_toolchains_chromium_macos-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1134/chromium-mac.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1134/chromium-mac.zip",
+                "https://cdn.playwright.dev/builds/chromium/1134/chromium-mac.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "CHROME = glob([\"chrome-mac*/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing\"], allow_empty = True)\nCHROMIUM = glob([\"chrome-mac*/Chromium.app/Contents/MacOS/Chromium\"], allow_empty = True)\n\nfilegroup(\n    name = \"playwright_toolchains_chromium_macos-x86_64\",\n    srcs = CHROME if CHROME else CHROMIUM,\n    data = glob(\n        include = [\"chrome-mac*/**\"],\n        exclude = CHROME + CHROMIUM,\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_firefox_macos-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1463/firefox-mac.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1463/firefox-mac.zip",
+                "https://cdn.playwright.dev/builds/firefox/1463/firefox-mac.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_firefox_macos-x86_64\",\n    srcs = [\"firefox/Nightly.app/Contents/MacOS/firefox\"],\n    data = glob(\n        include = [\"firefox/**\"],\n        exclude = [\"firefox/Nightly.app/Contents/MacOS/firefox\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_ffmpeg_macos-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-mac.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-mac.zip",
+                "https://cdn.playwright.dev/builds/ffmpeg/1010/ffmpeg-mac.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_ffmpeg_macos-x86_64\",\n    srcs = [\"ffmpeg-mac\"],\n    data = glob(\n        include = [\"**\"],\n        exclude = [\n            \"ffmpeg-mac\",\n            \"*.bazel\",\n            \"WORKSPACE\",\n            \"BUILD\",\n        ],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_macos_x86_64": {
+            "repoRuleId": "@@rules_jupyter+//playwright/private:extensions.bzl%playwright_toolchain_repository",
+            "attributes": {
+              "platform": "macos-x86_64",
+              "playwright_version": "1.47.0",
+              "chromium": "@@rules_jupyter++playwright+playwright_toolchains_chromium_macos-x86_64//:playwright_toolchains_chromium_macos-x86_64",
+              "chromium_version": "1134"
+            }
+          },
+          "playwright_toolchains_chromium_windows-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1134/chromium-win64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1134/chromium-win64.zip",
+                "https://cdn.playwright.dev/builds/chromium/1134/chromium-win64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_chromium_windows-x86_64\",\n    srcs = glob([\"chrome-win*/chrome.exe\"]),\n    data = glob(\n        include = [\"chrome-win*/**\"],\n        exclude = [\"chrome-win*/chrome.exe\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_firefox_windows-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1463/firefox-win64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1463/firefox-win64.zip",
+                "https://cdn.playwright.dev/builds/firefox/1463/firefox-win64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_firefox_windows-x86_64\",\n    srcs = [\"firefox/firefox.exe\"],\n    data = glob(\n        include = [\"firefox/**\"],\n        exclude = [\"firefox/firefox.exe\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_webkit_windows-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2070/webkit-win64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2070/webkit-win64.zip",
+                "https://cdn.playwright.dev/builds/webkit/2070/webkit-win64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_webkit_windows-x86_64\",\n    srcs = [\"Playwright.exe\"],\n    data = glob(\n        include = [\"**\"],\n        exclude = [\"Playwright.exe\"],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_ffmpeg_windows-x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-win64.zip",
+                "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1010/ffmpeg-win64.zip",
+                "https://cdn.playwright.dev/builds/ffmpeg/1010/ffmpeg-win64.zip"
+              ],
+              "integrity": "",
+              "strip_prefix": "",
+              "build_file_content": "filegroup(\n    name = \"playwright_toolchains_ffmpeg_windows-x86_64\",\n    srcs = [\"ffmpeg-win64.exe\"],\n    data = glob(\n        include = [\"**\"],\n        exclude = [\n            \"ffmpeg-win64.exe\",\n            \"*.bazel\",\n            \"WORKSPACE\",\n            \"BUILD\",\n        ],\n    ),\n    visibility = [\"//visibility:public\"],\n)\n"
+            }
+          },
+          "playwright_toolchains_windows_x86_64": {
+            "repoRuleId": "@@rules_jupyter+//playwright/private:extensions.bzl%playwright_toolchain_repository",
+            "attributes": {
+              "platform": "windows-x86_64",
+              "playwright_version": "1.47.0",
+              "chromium": "@@rules_jupyter++playwright+playwright_toolchains_chromium_windows-x86_64//:playwright_toolchains_chromium_windows-x86_64",
+              "chromium_version": "1134"
+            }
+          },
+          "playwright_toolchains": {
+            "repoRuleId": "@@rules_jupyter+//playwright/private:extensions.bzl%_playwright_toolchain_hub",
+            "attributes": {
+              "toolchain_labels": {
+                "playwright_toolchains_linux_aarch64": "@playwright_toolchains_linux_aarch64",
+                "playwright_toolchains_linux_x86_64": "@playwright_toolchains_linux_x86_64",
+                "playwright_toolchains_macos_aarch64": "@playwright_toolchains_macos_aarch64",
+                "playwright_toolchains_macos_x86_64": "@playwright_toolchains_macos_x86_64",
+                "playwright_toolchains_windows_x86_64": "@playwright_toolchains_windows_x86_64"
+              },
+              "exec_compatible_with": {
+                "playwright_toolchains_linux_aarch64": [
+                  "@platforms//os:linux",
+                  "@platforms//cpu:aarch64"
+                ],
+                "playwright_toolchains_linux_x86_64": [
+                  "@platforms//os:linux",
+                  "@platforms//cpu:x86_64"
+                ],
+                "playwright_toolchains_macos_aarch64": [
+                  "@platforms//os:macos",
+                  "@platforms//cpu:aarch64"
+                ],
+                "playwright_toolchains_macos_x86_64": [
+                  "@platforms//os:macos",
+                  "@platforms//cpu:x86_64"
+                ],
+                "playwright_toolchains_windows_x86_64": [
+                  "@platforms//os:windows",
+                  "@platforms//cpu:x86_64"
+                ]
+              },
+              "target_compatible_with": {
+                "playwright_toolchains_linux_aarch64": [
+                  "@platforms//os:linux",
+                  "@platforms//cpu:aarch64"
+                ],
+                "playwright_toolchains_linux_x86_64": [
+                  "@platforms//os:linux",
+                  "@platforms//cpu:x86_64"
+                ],
+                "playwright_toolchains_macos_aarch64": [
+                  "@platforms//os:macos",
+                  "@platforms//cpu:aarch64"
+                ],
+                "playwright_toolchains_macos_x86_64": [
+                  "@platforms//os:macos",
+                  "@platforms//cpu:x86_64"
+                ],
+                "playwright_toolchains_windows_x86_64": [
+                  "@platforms//os:windows",
+                  "@platforms//cpu:x86_64"
+                ]
+              }
+            }
+          }
+        },
+        "moduleExtensionMetadata": {
+          "explicitRootModuleDirectDeps": [
+            "playwright_toolchains"
+          ],
+          "explicitRootModuleDirectDevDeps": [],
+          "useAllRepos": "NO",
+          "reproducible": false
+        }
+      }
+    },
     "@@rules_kotlin+//src/main/starlark/core/repositories:bzlmod_setup.bzl%rules_kotlin_extensions": {
       "general": {
-        "bzlTransitiveDigest": "ABI1D/sbS1ovwaW/kHDoj8nnXjQ0oKU9fzmzEG4iT8o=",
+        "bzlTransitiveDigest": "WDuVCwqV73DvcHB5Of+02lhUZgPxr9MqtpvMRyUi0eQ=",
         "usagesDigest": "QI2z8ZUR+mqtbwsf2fLqYdJAkPOHdOV+tF2yVAUgRzw=",
         "recordedInputs": [
           "REPO_MAPPING:rules_kotlin+,bazel_tools bazel_tools"
@@ -255,7 +599,7 @@
     },
     "@@rules_python+//python/extensions:config.bzl%config": {
       "general": {
-        "bzlTransitiveDigest": "2hLgIvNVTLgxus0ZuXtleBe70intCfo0cHs8qvt6cdM=",
+        "bzlTransitiveDigest": "L+2ZCpb7GIJqvWaXpzkfk/80d916sIFVmSPzrSm6of8=",
         "usagesDigest": "ZVSXMAGpD+xzVNPuvF1IoLBkty7TROO0+akMapt1pAg=",
         "recordedInputs": [
           "REPO_MAPPING:rules_python+,bazel_tools bazel_tools",
@@ -423,7 +767,7 @@
     },
     "@@rules_python+//python/uv:uv.bzl%uv": {
       "general": {
-        "bzlTransitiveDigest": "ijW9KS7qsIY+yBVvJ+Nr1mzwQox09j13DnE3iIwaeTM=",
+        "bzlTransitiveDigest": "IgkgxNrtlAec7OnaFrWoCC5NQhHcY/aIz4jsqcNMm8Y=",
         "usagesDigest": "H8dQoNZcoqP+Mu0tHZTi4KHATzvNkM5ePuEqoQdklIU=",
         "recordedInputs": [
           "REPO_MAPPING:rules_python+,bazel_tools bazel_tools",
@@ -452,5 +796,6 @@
       }
     }
   },
-  "facts": {}
+  "facts": {},
+  "factsVersions": {}
 }

@@ -1,3 +1,4 @@
+load("@rules_venv//python:py_library.bzl", "py_library")
 load("@rules_venv//python/black:defs.bzl", "py_black_toolchain")
 load("@rules_venv//python/isort:defs.bzl", "py_isort_toolchain")
 load("@rules_venv//python/mypy:defs.bzl", "py_mypy_toolchain")
@@ -9,7 +10,7 @@ package(default_visibility = ["//visibility:public"])
 
 py_black_toolchain(
     name = "py_black_toolchain",
-    black = "@pip_deps//black",
+    black = "@pip_jupyter//black",
 )
 
 toolchain(
@@ -20,7 +21,7 @@ toolchain(
 
 py_isort_toolchain(
     name = "py_isort_toolchain",
-    isort = "@pip_deps//isort",
+    isort = "@pip_jupyter//isort",
 )
 
 toolchain(
@@ -29,9 +30,23 @@ toolchain(
     toolchain_type = "@rules_venv//python/isort:toolchain_type",
 )
 
+# mypy 2.x imports `psutil` opportunistically to size its parser thread pool.
+# The mypy aspect replaces dependency sources with caches but keeps their data
+# files, so a target that depends on `psutil` (e.g. via `ipykernel`) leaves
+# behind only its extension module. That imports as an empty namespace package
+# and mypy crashes on `psutil.cpu_count`. Supplying `psutil` with the tool
+# itself keeps its sources in the runner's closure, where they are never pruned.
+py_library(
+    name = "mypy",
+    deps = [
+        "@pip_jupyter//mypy",
+        "@pip_jupyter//psutil",
+    ],
+)
+
 py_mypy_toolchain(
     name = "py_mypy_toolchain",
-    mypy = "@pip_deps//mypy",
+    mypy = ":mypy",
 )
 
 toolchain(
@@ -42,7 +57,7 @@ toolchain(
 
 py_pylint_toolchain(
     name = "py_pylint_toolchain",
-    pylint = "@pip_deps//pylint",
+    pylint = "@pip_jupyter//pylint",
 )
 
 toolchain(
@@ -53,7 +68,7 @@ toolchain(
 
 py_pytest_toolchain(
     name = "py_pytest_toolchain",
-    pytest = "@pip_deps//pytest_cov",
+    pytest = "@pip_jupyter//pytest_cov",
 )
 
 toolchain(
@@ -64,8 +79,18 @@ toolchain(
 
 jupyter_toolchain(
     name = "py_jupyter_toolchain",
-    jupyter = "@pip_deps//jupyter",
-    jupytext = "@pip_deps//jupytext",
+    bibtex = "@texlive//texk/bibtex-x:bibtex8",
+    jupyter = "@pip_jupyter//jupyter",
+    jupytext = "@pip_jupyter//jupytext",
+    latex_data = [
+        "@texlive//:texmf/bibtex",
+        "@texlive//:texmf/fonts",
+        "@texlive//:texmf/tex_inputs",
+        "@texlive//:texmf/web2c_data",
+    ],
+    latex_engine = "@texlive//texk/web2c:pdftex",
+    latex_format = "@texlive//:pdflatex_fmt",
+    latex_texmf_cnf = "@texlive-texmf//:web2c/texmf.cnf",
     pandoc = "@pandoc",
     playwright_browsers_dir = "//playwright:current_browsers_dir",
     playwright_ld_library_dir = "//playwright:current_ld_library_dir",

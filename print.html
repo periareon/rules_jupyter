@@ -203,8 +203,49 @@ toolchain(
     "//:jupyter_toolchain",
 )
 </code></pre>
+<h3 id="kernels"><a class="header" href="#kernels">Kernels</a></h3>
+<p>Notebooks are executed by the kernel named in <code>jupyter_notebook.kernel</code> (or the toolchain's default <code>kernel</code>).
+Python notebooks use the <code>python3</code> kernel from <code>ipykernel</code> in the toolchain's Python environment and need no further setup.</p>
+<p>Kernels for other languages are declared with <a href="./jupyter_kernelspec.html"><code>jupyter_kernelspec</code></a> and attached to the
+toolchain via <code>kernels</code>. The rule is language agnostic: it describes how to launch a kernel executable, like a
+<code>kernel.json</code> does, with files tracked by Bazel. A single toolchain can serve notebooks of many languages.</p>
+<pre><code class="language-python">load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "jupyter_kernelspec")
+
+jupyter_kernelspec(
+    name = "julia",
+    display_name = "Julia",
+    language = "julia",
+    argv = [
+        "$(rlocationpath :ijulia_kernel)",
+        "{connection_file}",
+    ],
+    data = [":ijulia_kernel"],
+    # How notebook `args` reach the kernel. Omit for kernels without arguments.
+    # A file containing `empty!(ARGS); append!(ARGS, {args})`.
+    args_template = "args_template.jl",
+)
+
+jupyter_toolchain(
+    name = "jupyter_toolchain",
+    kernels = [":julia"],
+    ...
+)
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.jl",
+    kernel = "julia",
+)
+</code></pre>
+<p>Sources in any language <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> understands (<code>.py</code>, <code>.jl</code>, <code>.rs</code>, ...)
+are converted to notebooks with the kernel's metadata. Only the files of the selected kernel are added to a notebook's
+actions and tests. See <a href="https://github.com/periareon/rules_jupyter/tree/main/examples/julia"><code>examples/julia</code></a> for a
+Julia kernel (<a href="https://github.com/JuliaLang/IJulia.jl">IJulia</a> via <a href="https://github.com/periareon/rules_julia">rules_julia</a>)
+and <a href="https://github.com/periareon/rules_jupyter/tree/main/examples/rust"><code>examples/rust</code></a> for a Rust kernel
+(<a href="https://github.com/evcxr/evcxr">evcxr</a> via <a href="https://github.com/bazelbuild/rules_rust">rules_rust</a>).</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="jupyter-rules"><a class="header" href="#jupyter-rules">Jupyter Rules</a></h1>
 <ul>
+<li><a href="./jupyter_kernelspec.html#jupyter_kernelspec">jupyter_kernelspec</a></li>
 <li><a href="./jupyter_lab.html#jupyter_lab">jupyter_lab</a></li>
 <li><a href="./jupyter_notebook.html#jupyter_notebook">jupyter_notebook</a></li>
 <li><a href="./jupyter_notebook_binary.html#jupyter_notebook_binary">jupyter_notebook_binary</a></li>
@@ -213,8 +254,102 @@ toolchain(
 <li><a href="./jupyter_toolchain.html#jupyter_toolchain">jupyter_toolchain</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
-<h1 id="jupyter_lab"><a class="header" href="#jupyter_lab">jupyter_lab</a></h1>
+<h1 id="jupyter_kernelspec"><a class="header" href="#jupyter_kernelspec">jupyter_kernelspec</a></h1>
 <h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
+<ul>
+<li><a href="jupyter_kernelspec.html#jupyter_kernelspec">jupyter_kernelspec</a></li>
+</ul>
+<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
+<ul>
+<li><a href="jupyter_kernelspec.html#JupyterKernelspecInfo">JupyterKernelspecInfo</a></li>
+</ul>
+<p><a id="jupyter_kernelspec"></a></p>
+<h2 id="jupyter_kernelspec-1"><a class="header" href="#jupyter_kernelspec-1">jupyter_kernelspec</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "jupyter_kernelspec")
+
+jupyter_kernelspec(<a href="jupyter_kernelspec.html#jupyter_kernelspec-name">name</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-data">data</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-args_template">args_template</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-argv">argv</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-display_name">display_name</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-env">env</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-interrupt_mode">interrupt_mode</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-kernel_name">kernel_name</a>,
+                   <a href="jupyter_kernelspec.html#jupyter_kernelspec-language">language</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-path_tools">path_tools</a>, <a href="jupyter_kernelspec.html#jupyter_kernelspec-transport">transport</a>)
+</pre>
+<p>Defines a <a href="https://jupyter-client.readthedocs.io/en/latest/kernels.html">Jupyter kernel</a> that notebooks can be executed with.</p>
+<p>The rule is language agnostic. It describes how to launch a kernel process in the same way a
+<code>kernel.json</code> file does, but with files tracked by Bazel. Kernels are attached to a
+<code>jupyter_toolchain</code> via its <code>kernels</code> attribute and selected by notebooks using
+<code>jupyter_notebook.kernel</code> (or <code>jupyter_toolchain.kernel</code> for a default).</p>
+<p>File references in <code>argv</code> and <code>env</code> use <code>$(rlocationpath ...)</code> expansion over the targets in
+<code>data</code>. The rules resolve them to real paths wherever the notebook is executed (build actions,
+tests, <code>bazel run</code> and Jupyter Lab). Jupyter's own <code>{connection_file}</code> placeholder and <code>${VAR}</code>
+environment substitution continue to work.</p>
+<p>Example:</p>
+<pre><code class="language-python">jupyter_kernelspec(
+    name = "julia",
+    display_name = "Julia",
+    language = "julia",
+    argv = [
+        "$(rlocationpath :ijulia_kernel)",
+        "{connection_file}",
+    ],
+    data = [":ijulia_kernel"],
+    # A file containing `empty!(ARGS); append!(ARGS, {args})`.
+    args_template = "args_template.jl",
+)
+
+jupyter_toolchain(
+    name = "jupyter_toolchain",
+    kernels = [":julia"],
+    ...
+)
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.jl",
+    kernel = "julia",
+)
+</code></pre>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-data"></a>data</td><td style="text-align: left">Files and executables required by the kernel at runtime. These are the targets available for <code>$(rlocationpath ...)</code> expansion.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-args_template"></a>args_template</td><td style="text-align: left">A file holding a code cell template used to forward <code>args</code> of <code>jupyter_notebook_test</code>, <code>jupyter_notebook_binary</code>, <code>jupyter_report</code> and <code>jupyter_lab</code> to the notebook. The cell is prepended to the notebook before execution. The only placeholder is <code>{args}</code>, replaced by a JSON array of the arguments (e.g. a file containing <code>empty!(ARGS); append!(ARGS, {args})</code> for Julia); other braces are left as they are. When unset, notebooks using this kernel cannot be given <code>args</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-argv"></a>argv</td><td style="text-align: left">The command used to launch the kernel. Supports <code>$(rlocationpath ...)</code> expansion for targets in <code>data</code> and <code>path_tools</code> as well as Jupyter's <code>{connection_file}</code> placeholder.</td><td style="text-align: left">List of strings</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-display_name"></a>display_name</td><td style="text-align: left">The human readable name of the kernel. Defaults to <code>kernel_name</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-env"></a>env</td><td style="text-align: left">Environment variables for the kernel process. Values support <code>$(rlocationpath ...)</code> expansion and Jupyter's <code>${VAR}</code> substitution with the environment of the process launching the kernel.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-interrupt_mode"></a>interrupt_mode</td><td style="text-align: left">How the kernel is interrupted. <code>signal</code> sends <code>SIGINT</code>, <code>message</code> sends an <code>interrupt_request</code>. Defaults to Jupyter's default (<code>signal</code>).</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-kernel_name"></a>kernel_name</td><td style="text-align: left">The name of the kernel as referenced by <code>jupyter_notebook.kernel</code> and notebook metadata. Defaults to the target name.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-language"></a>language</td><td style="text-align: left">The language of the kernel (e.g. <code>python</code>, <code>julia</code>, <code>rust</code>). Recorded in notebook metadata and used by exporters for syntax highlighting.</td><td style="text-align: left">String</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-path_tools"></a>path_tools</td><td style="text-align: left">Executables whose parent directories are prepended to <code>PATH</code> for the kernel process. Useful for kernels that shell out to compilers or interpreters. Each target must provide exactly one file.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-transport"></a>transport</td><td style="text-align: left">The ZeroMQ transport used to talk to the kernel. Defaults to <code>ipc</code> on Unix, which avoids port collisions between notebooks Bazel runs in parallel, and <code>tcp</code> on Windows. Kernels whose ZeroMQ lacks IPC support (e.g. prebuilt <code>evcxr_jupyter</code> binaries) must set <code>tcp</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="JupyterKernelspecInfo"></a></p>
+<h2 id="jupyterkernelspecinfo"><a class="header" href="#jupyterkernelspecinfo">JupyterKernelspecInfo</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "JupyterKernelspecInfo")
+
+JupyterKernelspecInfo(<a href="jupyter_kernelspec.html#JupyterKernelspecInfo-args_template">args_template</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-argv">argv</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-display_name">display_name</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-env">env</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-files">files</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-interrupt_mode">interrupt_mode</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-kernel_name">kernel_name</a>,
+                      <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-language">language</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-path_tools">path_tools</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-rlocations">rlocations</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-runfiles">runfiles</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-spec">spec</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-tools">tools</a>, <a href="jupyter_kernelspec.html#JupyterKernelspecInfo-transport">transport</a>)
+</pre>
+<p>Provider describing a Jupyter kernel that notebooks can be executed with.</p>
+<p><strong>FIELDS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-args_template"></a>args_template</td><td style="text-align: left">File: A code cell template used to forward notebook <code>args</code> to the kernel, or <code>None</code> when the kernel does not support args.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-argv"></a>argv</td><td style="text-align: left">List[str]: The kernel launch command. File references are rlocationpaths which are resolved at runtime.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-display_name"></a>display_name</td><td style="text-align: left">str: The human readable kernel name.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-env"></a>env</td><td style="text-align: left">Dict[str, str]: Environment variables set for the kernel process.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-files"></a>files</td><td style="text-align: left">Depset[File]: All files required by the kernel at runtime.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-interrupt_mode"></a>interrupt_mode</td><td style="text-align: left">str: The Jupyter interrupt mode (<code>signal</code> or <code>message</code>) or an empty string for the Jupyter default.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-kernel_name"></a>kernel_name</td><td style="text-align: left">str: The kernel name used by <code>jupyter_notebook.kernel</code> and notebook metadata.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-language"></a>language</td><td style="text-align: left">str: The language of the kernel (e.g. <code>python</code>, <code>julia</code>, <code>rust</code>).</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-path_tools"></a>path_tools</td><td style="text-align: left">List[str]: rlocationpaths of the <code>path_tools</code> executables. The directory of each resolved file is prepended to <code>PATH</code> for the kernel process.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-rlocations"></a>rlocations</td><td style="text-align: left">Dict[str, File]: Every file referenced by <code>argv</code>, <code>env</code> or <code>path_tools</code>, keyed by rlocationpath.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-runfiles"></a>runfiles</td><td style="text-align: left">runfiles: The runfiles of the kernel.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-spec"></a>spec</td><td style="text-align: left">File: A json file describing the kernelspec, consumed by the rules_jupyter process wrappers.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-tools"></a>tools</td><td style="text-align: left">List[FilesToRunProvider]: Executables used by the kernel. Passed as tools to build actions so their runfiles are available.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-transport"></a>transport</td><td style="text-align: left">str: The ZeroMQ transport (<code>ipc</code> or <code>tcp</code>) used to talk to the kernel, or an empty string for the platform default.</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter_lab"><a class="header" href="#jupyter_lab">jupyter_lab</a></h1>
+<h2 id="rules-1"><a class="header" href="#rules-1">Rules</a></h2>
 <ul>
 <li><a href="jupyter_lab.html#jupyter_lab">jupyter_lab</a></li>
 </ul>
@@ -257,7 +392,7 @@ jupyter_lab(
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="jupyter_notebook"><a class="header" href="#jupyter_notebook">jupyter_notebook</a></h1>
-<h2 id="rules-1"><a class="header" href="#rules-1">Rules</a></h2>
+<h2 id="rules-2"><a class="header" href="#rules-2">Rules</a></h2>
 <ul>
 <li><a href="jupyter_notebook.html#jupyter_notebook">jupyter_notebook</a></li>
 </ul>
@@ -270,8 +405,12 @@ jupyter_notebook(<a href="jupyter_notebook.html#jupyter_notebook-name">name</a>,
 </pre>
 <p>Compiles a Jupyter notebook from source and prepares it for execution.</p>
 <p>This rule processes notebook source files and converts them to the standard <code>.ipynb</code> format.
-If the source is a .py file in Jupytext format (with <code># %%</code> cell markers), it will be converted
+If the source is a script in <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> format
+(e.g. a <code>.py</code>, <code>.jl</code> or <code>.rs</code> file with <code># %%</code> / <code>// %%</code> cell markers), it will be converted
 to <code>.ipynb</code> format. If the source is already a <code>.ipynb</code> file, it is used directly.</p>
+<p>The kernel a notebook runs with is selected by name. Kernels defined with <code>jupyter_kernelspec</code>
+and registered on the <code>jupyter_toolchain</code> are used when their name matches; otherwise the kernel
+must be discoverable from the toolchain's Jupyter Python environment (e.g. <code>python3</code>).</p>
 <p>Example:</p>
 <pre><code class="language-python">jupyter_notebook(
     name = "my_notebook",
@@ -285,13 +424,13 @@ to <code>.ipynb</code> format. If the source is already a <code>.ipynb</code> fi
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="jupyter_notebook-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook-deps"></a>deps</td><td style="text-align: left">Python dependencies required by the notebook. These are typically Python packages needed for code execution.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="jupyter_notebook-src"></a>src</td><td style="text-align: left">The notebook source file. Can be either a .ipynb file or a <code>.py</code> file in <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> format (with <code># %%</code> cell markers).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook-src"></a>src</td><td style="text-align: left">The notebook source file. Can be either a <code>.ipynb</code> file or a script in <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> format (e.g. <code>.py</code>, <code>.jl</code>, <code>.rs</code> with <code># %%</code> or <code>// %%</code> cell markers).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook-data"></a>data</td><td style="text-align: left">Additional data files required by the notebook (e.g., input data files, images, configuration files).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="jupyter_notebook-kernel"></a>kernel</td><td style="text-align: left">The name of the Jupyter kernel to use for executing the notebook (e.g., <code>python3</code>, <code>rust</code>). If not specified, the default kernel from the toolchain is used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook-kernel"></a>kernel</td><td style="text-align: left">The name of the Jupyter kernel to use for executing the notebook (e.g., <code>python3</code>, <code>rust</code>). Matches <code>jupyter_kernelspec.kernel_name</code> of the kernels registered on the toolchain. If not specified, the default kernel from the toolchain is used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="jupyter_notebook_binary"><a class="header" href="#jupyter_notebook_binary">jupyter_notebook_binary</a></h1>
-<h2 id="rules-2"><a class="header" href="#rules-2">Rules</a></h2>
+<h2 id="rules-3"><a class="header" href="#rules-3">Rules</a></h2>
 <ul>
 <li><a href="jupyter_notebook_binary.html#jupyter_notebook_binary">jupyter_notebook_binary</a></li>
 </ul>
@@ -331,11 +470,11 @@ jupyter_notebook_binary(
 <tr><td style="text-align: left"><a id="jupyter_notebook_binary-exporter_args"></a>exporter_args</td><td style="text-align: left">Traitlets-style flags forwarded to nbconvert exporters (e.g. <code>--WebPDFExporter.exclude_input=true</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook_binary-notebook"></a>notebook</td><td style="text-align: left">The notebook to execute. Must be a <code>jupyter_notebook</code> target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook_binary-out_dir"></a>out_dir</td><td style="text-align: left">Directory to write output files to. If not specified, outputs are written to a subdirectory named after the target under the caller's working directory (e.g., <code>bazel run :run_notebook</code> writes to <code>./run_notebook/</code>). Absolute paths (e.g., <code>/tmp</code>) are used as-is; relative paths are resolved against the caller's working directory.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="jupyter_notebook_binary-reports"></a>reports</td><td style="text-align: left">List of report types to generate after successful notebook execution. Valid values: <code>html</code>, <code>markdown</code>, <code>latex</code>, <code>pdf</code> (requires <code>jupyter_toolchain.latex_engine</code>), <code>webpdf</code> (requires <code>jupyter_toolchain.playwright_browsers_dir</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_binary-reports"></a>reports</td><td style="text-align: left">List of report types to generate after successful notebook execution. Valid values: <code>html</code>, <code>latex</code>, <code>markdown</code> (requires <code>jupyter_toolchain.pandoc</code>), <code>pdf</code> (requires <code>jupyter_toolchain.latex_engine</code>), <code>rst</code>, <code>webpdf</code> (requires <code>jupyter_toolchain.playwright_browsers_dir</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="jupyter_notebook_test"><a class="header" href="#jupyter_notebook_test">jupyter_notebook_test</a></h1>
-<h2 id="rules-3"><a class="header" href="#rules-3">Rules</a></h2>
+<h2 id="rules-4"><a class="header" href="#rules-4">Rules</a></h2>
 <ul>
 <li><a href="jupyter_notebook_test.html#jupyter_notebook_test">jupyter_notebook_test</a></li>
 </ul>
@@ -356,11 +495,11 @@ jupyter_notebook_test(<a href="jupyter_notebook_test.html#jupyter_notebook_test-
 <tr><td style="text-align: left"><a id="jupyter_notebook_test-env_inherit"></a>env_inherit</td><td style="text-align: left">Specifies additional environment variables to inherit from the external environment when the test is executed by <code>bazel test</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook_test-exporter_args"></a>exporter_args</td><td style="text-align: left">Traitlets-style flags forwarded to nbconvert exporters (e.g. <code>--WebPDFExporter.exclude_input=true</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook_test-notebook"></a>notebook</td><td style="text-align: left">The notebook to execute and test. Must be a jupyter_notebook target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="jupyter_notebook_test-reports"></a>reports</td><td style="text-align: left">List of report types to generate after successful notebook execution. Valid values: <code>html</code>, <code>markdown</code>, <code>latex</code>, <code>pdf</code> (requires <code>jupyter_toolchain.latex_engine</code>), <code>webpdf</code> (requires <code>jupyter_toolchain.playwright_browsers_dir</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>["webpdf"]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook_test-reports"></a>reports</td><td style="text-align: left">List of report types to generate after successful notebook execution. Valid values: <code>html</code>, <code>latex</code>, <code>markdown</code> (requires <code>jupyter_toolchain.pandoc</code>), <code>pdf</code> (requires <code>jupyter_toolchain.latex_engine</code>), <code>rst</code>, <code>webpdf</code> (requires <code>jupyter_toolchain.playwright_browsers_dir</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>["webpdf"]</code></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="jupyter_report"><a class="header" href="#jupyter_report">jupyter_report</a></h1>
-<h2 id="rules-4"><a class="header" href="#rules-4">Rules</a></h2>
+<h2 id="rules-5"><a class="header" href="#rules-5">Rules</a></h2>
 <ul>
 <li><a href="jupyter_report.html#jupyter_report">jupyter_report</a></li>
 </ul>
@@ -387,15 +526,15 @@ jupyter_report(<a href="jupyter_report.html#jupyter_report-name">name</a>, <a hr
 <tr><td style="text-align: left"><a id="jupyter_report-out_html_template_type"></a>out_html_template_type</td><td style="text-align: left">Template type for HTML output.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_report-out_latex"></a>out_latex</td><td style="text-align: left">Output path for a LaTeX report. If specified, the notebook will be converted to LaTeX format.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_report-out_latex_template_type"></a>out_latex_template_type</td><td style="text-align: left">Document layout for LaTeX output. <code>article</code> (the nbconvert default) or <code>report</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="jupyter_report-out_markdown"></a>out_markdown</td><td style="text-align: left">Output path for a Markdown report. If specified, the notebook will be converted to Markdown format.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_markdown"></a>out_markdown</td><td style="text-align: left">Output path for a Markdown report. If specified, the notebook will be converted to Markdown format. Requires <code>jupyter_toolchain.pandoc</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_report-out_notebook"></a>out_notebook</td><td style="text-align: left">Output path for the executed notebook (<code>.ipynb</code> file with cell outputs). If not specified, a default name is generated.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_report-out_pdf"></a>out_pdf</td><td style="text-align: left">Output path for a PDF report generated via LaTeX. Requires <code>jupyter_toolchain.latex_engine</code>. For a browser rendered PDF that does not need LaTeX see <code>out_webpdf</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_report-out_rst"></a>out_rst</td><td style="text-align: left">Output path for a reStructuredText report. If specified, the notebook will be converted to RST format.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="jupyter_report-out_webpdf"></a>out_webpdf</td><td style="text-align: left">Output path for a WebPDF report (generated via Playwright/Chromium). If specified, the notebook will be converted to PDF format using headless browser rendering.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_report-out_webpdf"></a>out_webpdf</td><td style="text-align: left">Output path for a WebPDF report (generated via Playwright/Chromium). If specified, the notebook will be converted to PDF format using headless browser rendering. Requires <code>jupyter_toolchain.playwright_browsers_dir</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="jupyter_toolchain"><a class="header" href="#jupyter_toolchain">jupyter_toolchain</a></h1>
-<h2 id="rules-5"><a class="header" href="#rules-5">Rules</a></h2>
+<h2 id="rules-6"><a class="header" href="#rules-6">Rules</a></h2>
 <ul>
 <li><a href="jupyter_toolchain.html#jupyter_toolchain">jupyter_toolchain</a></li>
 </ul>
@@ -404,11 +543,16 @@ jupyter_report(<a href="jupyter_report.html#jupyter_report-name">name</a>, <a hr
 <pre>
 load("@rules_jupyter//jupyter:jupyter_toolchain.bzl", "jupyter_toolchain")
 
-jupyter_toolchain(<a href="jupyter_toolchain.html#jupyter_toolchain-name">name</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-bibtex">bibtex</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-cwd_mode">cwd_mode</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-exporter_args">exporter_args</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-jupyter">jupyter</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-jupytext">jupytext</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-kernel">kernel</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-latex_data">latex_data</a>,
-                  <a href="jupyter_toolchain.html#jupyter_toolchain-latex_engine">latex_engine</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-latex_format">latex_format</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-latex_texmf_cnf">latex_texmf_cnf</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-pandoc">pandoc</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-playwright_browsers_dir">playwright_browsers_dir</a>,
-                  <a href="jupyter_toolchain.html#jupyter_toolchain-playwright_ld_library_dir">playwright_ld_library_dir</a>)
+jupyter_toolchain(<a href="jupyter_toolchain.html#jupyter_toolchain-name">name</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-bibtex">bibtex</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-cwd_mode">cwd_mode</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-exporter_args">exporter_args</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-jupyter">jupyter</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-jupytext">jupytext</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-kernel">kernel</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-kernels">kernels</a>,
+                  <a href="jupyter_toolchain.html#jupyter_toolchain-latex_data">latex_data</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-latex_engine">latex_engine</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-latex_format">latex_format</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-latex_texmf_cnf">latex_texmf_cnf</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-pandoc">pandoc</a>,
+                  <a href="jupyter_toolchain.html#jupyter_toolchain-playwright_browsers_dir">playwright_browsers_dir</a>, <a href="jupyter_toolchain.html#jupyter_toolchain-playwright_ld_library_dir">playwright_ld_library_dir</a>)
 </pre>
-<p>Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, Playwright browser, and LaTeX support.</p>
+<p>Defines a Jupyter toolchain that provides Jupyter, Jupytext, Pandoc, Playwright browser, LaTeX support and
+additional kernels.</p>
+<p>Kernels for languages other than Python are defined with <code>jupyter_kernelspec</code> and attached via <code>kernels</code>.
+A single toolchain can serve notebooks of many languages; each notebook selects a kernel by name with
+<code>jupyter_notebook.kernel</code>. Kernels not listed here (such as <code>python3</code> from <code>ipykernel</code>) are expected to be
+discoverable from the <code>jupyter</code> Python environment.</p>
 <p>LaTeX (used for <code>pdf</code> reports) is optional. The <a href="https://registry.bazel.build/modules/texlive">texlive</a>
 module from the Bazel Central Registry provides everything required:</p>
 <pre><code class="language-python">jupyter_toolchain(
@@ -436,6 +580,7 @@ module from the Bazel Central Registry provides everything required:</p>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-jupyter"></a>jupyter</td><td style="text-align: left">The Jupyter Python package providing notebook execution capabilities.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-jupytext"></a>jupytext</td><td style="text-align: left">The <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> Python package for converting between notebook formats (e.g., .py to .ipynb).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-kernel"></a>kernel</td><td style="text-align: left">Default kernel name to use for notebook execution if not specified in the notebook (e.g., 'python3', 'rust').</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_toolchain-kernels"></a>kernels</td><td style="text-align: left"><code>jupyter_kernelspec</code> targets made available to notebooks using this toolchain. A kernel is only added to the inputs of a notebook when the notebook selects it by name via <code>jupyter_notebook.kernel</code> or <code>kernel</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-latex_data"></a>latex_data</td><td style="text-align: left">texmf trees (fonts, macro packages, <code>web2c</code> configuration) required by <code>latex_engine</code> at runtime. These files are only added to actions and runfiles that produce PDF output.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-latex_engine"></a>latex_engine</td><td style="text-align: left">A TeX engine executable used for <code>pdf</code> reports (e.g. <code>@texlive//texk/web2c:pdftex</code>). Requires <code>latex_format</code> and <code>latex_texmf_cnf</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_toolchain-latex_format"></a>latex_format</td><td style="text-align: left">A precompiled LaTeX format file for <code>latex_engine</code> (e.g. <code>@texlive//:pdflatex_fmt</code>). The engine is invoked with <code>-fmt=&lt;stem&gt;</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>

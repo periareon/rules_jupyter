@@ -170,8 +170,12 @@ jupyter_notebook(<a href="#jupyter_notebook-name">name</a>, <a href="#jupyter_no
 </pre>
 <p>Compiles a Jupyter notebook from source and prepares it for execution.</p>
 <p>This rule processes notebook source files and converts them to the standard <code>.ipynb</code> format.
-If the source is a .py file in Jupytext format (with <code># %%</code> cell markers), it will be converted
+If the source is a script in <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> format
+(e.g. a <code>.py</code>, <code>.jl</code> or <code>.rs</code> file with <code># %%</code> / <code>// %%</code> cell markers), it will be converted
 to <code>.ipynb</code> format. If the source is already a <code>.ipynb</code> file, it is used directly.</p>
+<p>The kernel a notebook runs with is selected by name. Kernels defined with <code>jupyter_kernelspec</code>
+and registered on the <code>jupyter_toolchain</code> are used when their name matches; otherwise the kernel
+must be discoverable from the toolchain's Jupyter Python environment (e.g. <code>python3</code>).</p>
 <p>Example:</p>
 <pre><code class="language-python">jupyter_notebook(
     name = "my_notebook",
@@ -185,9 +189,9 @@ to <code>.ipynb</code> format. If the source is already a <code>.ipynb</code> fi
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="jupyter_notebook-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook-deps"></a>deps</td><td style="text-align: left">Python dependencies required by the notebook. These are typically Python packages needed for code execution.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="jupyter_notebook-src"></a>src</td><td style="text-align: left">The notebook source file. Can be either a .ipynb file or a <code>.py</code> file in <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> format (with <code># %%</code> cell markers).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook-src"></a>src</td><td style="text-align: left">The notebook source file. Can be either a <code>.ipynb</code> file or a script in <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> format (e.g. <code>.py</code>, <code>.jl</code>, <code>.rs</code> with <code># %%</code> or <code>// %%</code> cell markers).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="jupyter_notebook-data"></a>data</td><td style="text-align: left">Additional data files required by the notebook (e.g., input data files, images, configuration files).</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="jupyter_notebook-kernel"></a>kernel</td><td style="text-align: left">The name of the Jupyter kernel to use for executing the notebook (e.g., <code>python3</code>, <code>rust</code>). If not specified, the default kernel from the toolchain is used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_notebook-kernel"></a>kernel</td><td style="text-align: left">The name of the Jupyter kernel to use for executing the notebook (e.g., <code>python3</code>, <code>rust</code>). Matches <code>jupyter_kernelspec.kernel_name</code> of the kernels registered on the toolchain. If not specified, the default kernel from the toolchain is used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 </tbody></table>
 </div>
                     </main>

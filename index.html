@@ -202,6 +202,46 @@ toolchain(
     "//:jupyter_toolchain",
 )
 </code></pre>
+<h3 id="kernels"><a class="header" href="#kernels">Kernels</a></h3>
+<p>Notebooks are executed by the kernel named in <code>jupyter_notebook.kernel</code> (or the toolchain's default <code>kernel</code>).
+Python notebooks use the <code>python3</code> kernel from <code>ipykernel</code> in the toolchain's Python environment and need no further setup.</p>
+<p>Kernels for other languages are declared with <a href="./jupyter_kernelspec.html"><code>jupyter_kernelspec</code></a> and attached to the
+toolchain via <code>kernels</code>. The rule is language agnostic: it describes how to launch a kernel executable, like a
+<code>kernel.json</code> does, with files tracked by Bazel. A single toolchain can serve notebooks of many languages.</p>
+<pre><code class="language-python">load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "jupyter_kernelspec")
+
+jupyter_kernelspec(
+    name = "julia",
+    display_name = "Julia",
+    language = "julia",
+    argv = [
+        "$(rlocationpath :ijulia_kernel)",
+        "{connection_file}",
+    ],
+    data = [":ijulia_kernel"],
+    # How notebook `args` reach the kernel. Omit for kernels without arguments.
+    # A file containing `empty!(ARGS); append!(ARGS, {args})`.
+    args_template = "args_template.jl",
+)
+
+jupyter_toolchain(
+    name = "jupyter_toolchain",
+    kernels = [":julia"],
+    ...
+)
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.jl",
+    kernel = "julia",
+)
+</code></pre>
+<p>Sources in any language <a href="https://jupytext.readthedocs.io/en/latest/">Jupytext</a> understands (<code>.py</code>, <code>.jl</code>, <code>.rs</code>, ...)
+are converted to notebooks with the kernel's metadata. Only the files of the selected kernel are added to a notebook's
+actions and tests. See <a href="https://github.com/periareon/rules_jupyter/tree/main/examples/julia"><code>examples/julia</code></a> for a
+Julia kernel (<a href="https://github.com/JuliaLang/IJulia.jl">IJulia</a> via <a href="https://github.com/periareon/rules_julia">rules_julia</a>)
+and <a href="https://github.com/periareon/rules_jupyter/tree/main/examples/rust"><code>examples/rust</code></a> for a Rust kernel
+(<a href="https://github.com/evcxr/evcxr">evcxr</a> via <a href="https://github.com/bazelbuild/rules_rust">rules_rust</a>).</p>
 
                     </main>
 

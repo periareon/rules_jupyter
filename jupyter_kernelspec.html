@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>jupyter_kernelspec - rules_jupyter</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rules_jupyter</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/periareon/rules_jupyter" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="jupyter_kernelspec"><a class="header" href="#jupyter_kernelspec">jupyter_kernelspec</a></h1>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
+<ul>
+<li><a href="#jupyter_kernelspec">jupyter_kernelspec</a></li>
+</ul>
+<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
+<ul>
+<li><a href="#JupyterKernelspecInfo">JupyterKernelspecInfo</a></li>
+</ul>
+<p><a id="jupyter_kernelspec"></a></p>
+<h2 id="jupyter_kernelspec-1"><a class="header" href="#jupyter_kernelspec-1">jupyter_kernelspec</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "jupyter_kernelspec")
+
+jupyter_kernelspec(<a href="#jupyter_kernelspec-name">name</a>, <a href="#jupyter_kernelspec-data">data</a>, <a href="#jupyter_kernelspec-args_template">args_template</a>, <a href="#jupyter_kernelspec-argv">argv</a>, <a href="#jupyter_kernelspec-display_name">display_name</a>, <a href="#jupyter_kernelspec-env">env</a>, <a href="#jupyter_kernelspec-interrupt_mode">interrupt_mode</a>, <a href="#jupyter_kernelspec-kernel_name">kernel_name</a>,
+                   <a href="#jupyter_kernelspec-language">language</a>, <a href="#jupyter_kernelspec-path_tools">path_tools</a>, <a href="#jupyter_kernelspec-transport">transport</a>)
+</pre>
+<p>Defines a <a href="https://jupyter-client.readthedocs.io/en/latest/kernels.html">Jupyter kernel</a> that notebooks can be executed with.</p>
+<p>The rule is language agnostic. It describes how to launch a kernel process in the same way a
+<code>kernel.json</code> file does, but with files tracked by Bazel. Kernels are attached to a
+<code>jupyter_toolchain</code> via its <code>kernels</code> attribute and selected by notebooks using
+<code>jupyter_notebook.kernel</code> (or <code>jupyter_toolchain.kernel</code> for a default).</p>
+<p>File references in <code>argv</code> and <code>env</code> use <code>$(rlocationpath ...)</code> expansion over the targets in
+<code>data</code>. The rules resolve them to real paths wherever the notebook is executed (build actions,
+tests, <code>bazel run</code> and Jupyter Lab). Jupyter's own <code>{connection_file}</code> placeholder and <code>${VAR}</code>
+environment substitution continue to work.</p>
+<p>Example:</p>
+<pre><code class="language-python">jupyter_kernelspec(
+    name = "julia",
+    display_name = "Julia",
+    language = "julia",
+    argv = [
+        "$(rlocationpath :ijulia_kernel)",
+        "{connection_file}",
+    ],
+    data = [":ijulia_kernel"],
+    # A file containing `empty!(ARGS); append!(ARGS, {args})`.
+    args_template = "args_template.jl",
+)
+
+jupyter_toolchain(
+    name = "jupyter_toolchain",
+    kernels = [":julia"],
+    ...
+)
+
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.jl",
+    kernel = "julia",
+)
+</code></pre>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-data"></a>data</td><td style="text-align: left">Files and executables required by the kernel at runtime. These are the targets available for <code>$(rlocationpath ...)</code> expansion.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-args_template"></a>args_template</td><td style="text-align: left">A file holding a code cell template used to forward <code>args</code> of <code>jupyter_notebook_test</code>, <code>jupyter_notebook_binary</code>, <code>jupyter_report</code> and <code>jupyter_lab</code> to the notebook. The cell is prepended to the notebook before execution. The only placeholder is <code>{args}</code>, replaced by a JSON array of the arguments (e.g. a file containing <code>empty!(ARGS); append!(ARGS, {args})</code> for Julia); other braces are left as they are. When unset, notebooks using this kernel cannot be given <code>args</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-argv"></a>argv</td><td style="text-align: left">The command used to launch the kernel. Supports <code>$(rlocationpath ...)</code> expansion for targets in <code>data</code> and <code>path_tools</code> as well as Jupyter's <code>{connection_file}</code> placeholder.</td><td style="text-align: left">List of strings</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-display_name"></a>display_name</td><td style="text-align: left">The human readable name of the kernel. Defaults to <code>kernel_name</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-env"></a>env</td><td style="text-align: left">Environment variables for the kernel process. Values support <code>$(rlocationpath ...)</code> expansion and Jupyter's <code>${VAR}</code> substitution with the environment of the process launching the kernel.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-interrupt_mode"></a>interrupt_mode</td><td style="text-align: left">How the kernel is interrupted. <code>signal</code> sends <code>SIGINT</code>, <code>message</code> sends an <code>interrupt_request</code>. Defaults to Jupyter's default (<code>signal</code>).</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-kernel_name"></a>kernel_name</td><td style="text-align: left">The name of the kernel as referenced by <code>jupyter_notebook.kernel</code> and notebook metadata. Defaults to the target name.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-language"></a>language</td><td style="text-align: left">The language of the kernel (e.g. <code>python</code>, <code>julia</code>, <code>rust</code>). Recorded in notebook metadata and used by exporters for syntax highlighting.</td><td style="text-align: left">String</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-path_tools"></a>path_tools</td><td style="text-align: left">Executables whose parent directories are prepended to <code>PATH</code> for the kernel process. Useful for kernels that shell out to compilers or interpreters. Each target must provide exactly one file.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="jupyter_kernelspec-transport"></a>transport</td><td style="text-align: left">The ZeroMQ transport used to talk to the kernel. Defaults to <code>ipc</code> on Unix, which avoids port collisions between notebooks Bazel runs in parallel, and <code>tcp</code> on Windows. Kernels whose ZeroMQ lacks IPC support (e.g. prebuilt <code>evcxr_jupyter</code> binaries) must set <code>tcp</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="JupyterKernelspecInfo"></a></p>
+<h2 id="jupyterkernelspecinfo"><a class="header" href="#jupyterkernelspecinfo">JupyterKernelspecInfo</a></h2>
+<pre>
+load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "JupyterKernelspecInfo")
+
+JupyterKernelspecInfo(<a href="#JupyterKernelspecInfo-args_template">args_template</a>, <a href="#JupyterKernelspecInfo-argv">argv</a>, <a href="#JupyterKernelspecInfo-display_name">display_name</a>, <a href="#JupyterKernelspecInfo-env">env</a>, <a href="#JupyterKernelspecInfo-files">files</a>, <a href="#JupyterKernelspecInfo-interrupt_mode">interrupt_mode</a>, <a href="#JupyterKernelspecInfo-kernel_name">kernel_name</a>,
+                      <a href="#JupyterKernelspecInfo-language">language</a>, <a href="#JupyterKernelspecInfo-path_tools">path_tools</a>, <a href="#JupyterKernelspecInfo-rlocations">rlocations</a>, <a href="#JupyterKernelspecInfo-runfiles">runfiles</a>, <a href="#JupyterKernelspecInfo-spec">spec</a>, <a href="#JupyterKernelspecInfo-tools">tools</a>, <a href="#JupyterKernelspecInfo-transport">transport</a>)
+</pre>
+<p>Provider describing a Jupyter kernel that notebooks can be executed with.</p>
+<p><strong>FIELDS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-args_template"></a>args_template</td><td style="text-align: left">File: A code cell template used to forward notebook <code>args</code> to the kernel, or <code>None</code> when the kernel does not support args.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-argv"></a>argv</td><td style="text-align: left">List[str]: The kernel launch command. File references are rlocationpaths which are resolved at runtime.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-display_name"></a>display_name</td><td style="text-align: left">str: The human readable kernel name.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-env"></a>env</td><td style="text-align: left">Dict[str, str]: Environment variables set for the kernel process.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-files"></a>files</td><td style="text-align: left">Depset[File]: All files required by the kernel at runtime.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-interrupt_mode"></a>interrupt_mode</td><td style="text-align: left">str: The Jupyter interrupt mode (<code>signal</code> or <code>message</code>) or an empty string for the Jupyter default.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-kernel_name"></a>kernel_name</td><td style="text-align: left">str: The kernel name used by <code>jupyter_notebook.kernel</code> and notebook metadata.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-language"></a>language</td><td style="text-align: left">str: The language of the kernel (e.g. <code>python</code>, <code>julia</code>, <code>rust</code>).</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-path_tools"></a>path_tools</td><td style="text-align: left">List[str]: rlocationpaths of the <code>path_tools</code> executables. The directory of each resolved file is prepended to <code>PATH</code> for the kernel process.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-rlocations"></a>rlocations</td><td style="text-align: left">Dict[str, File]: Every file referenced by <code>argv</code>, <code>env</code> or <code>path_tools</code>, keyed by rlocationpath.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-runfiles"></a>runfiles</td><td style="text-align: left">runfiles: The runfiles of the kernel.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-spec"></a>spec</td><td style="text-align: left">File: A json file describing the kernelspec, consumed by the rules_jupyter process wrappers.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-tools"></a>tools</td><td style="text-align: left">List[FilesToRunProvider]: Executables used by the kernel. Passed as tools to build actions so their runfiles are available.</td></tr>
+<tr><td style="text-align: left"><a id="JupyterKernelspecInfo-transport"></a>transport</td><td style="text-align: left">str: The ZeroMQ transport (<code>ipc</code> or <code>tcp</code>) used to talk to the kernel, or an empty string for the platform default.</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="rules.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="jupyter_lab.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="rules.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="jupyter_lab.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

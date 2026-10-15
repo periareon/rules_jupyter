@@ -1,0 +1,53 @@
+load("@rules_julia//julia:julia_binary.bzl", "julia_binary")
+load("@rules_julia//julia/pkg:defs.bzl", "julia_pkg_resolve", "julia_pkg_resolve_test")
+load("@rules_jupyter//jupyter:jupyter_kernelspec.bzl", "jupyter_kernelspec")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "Project.toml",
+    "Manifest.toml",
+    "conda_deps.patch",
+    "ijulia_deps.patch",
+])
+
+# Resolve `Manifest.toml` from `Project.toml`:
+#
+#     bazel run //kernel:pkg_update
+#
+# The `pkg` extension in `MODULE.bazel` turns the manifest into `@julia_deps//:<Package>`.
+julia_pkg_resolve(
+    name = "pkg_update",
+    manifests = {"Manifest.toml": "1.12"},
+    project_toml = "Project.toml",
+)
+
+julia_pkg_resolve_test(
+    name = "pkg_test",
+    resolver = ":pkg_update",
+)
+
+# The kernel is an ordinary Julia binary. Packages notebooks should be able to
+# `using` are added to `deps` here; they are precompiled at build time.
+julia_binary(
+    name = "ijulia_kernel",
+    srcs = ["ijulia_kernel.jl"],
+    # IJulia's own kernelspec launches `julia --color=yes`; without it
+    # `Base.have_color` is `nothing`, which IJulia's error reporting cannot
+    # handle on Julia 1.12 and the kernel stops answering after a cell fails.
+    julia_flags = ["--color=yes"],
+    deps = ["@julia_deps//:IJulia"],
+)
+
+jupyter_kernelspec(
+    name = "julia",
+    # Notebook `args` are exposed as `ARGS`, like a Julia script.
+    args_template = "args_template.jl",
+    argv = [
+        "$(rlocationpath :ijulia_kernel)",
+        "{connection_file}",
+    ],
+    data = [":ijulia_kernel"],
+    display_name = "Julia",
+    language = "julia",
+)

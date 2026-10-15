@@ -1,6 +1,11 @@
 """# Jupyter rules"""
 
 load(
+    ":jupyter_kernelspec.bzl",
+    _JupyterKernelspecInfo = "JupyterKernelspecInfo",
+    _jupyter_kernelspec = "jupyter_kernelspec",
+)
+load(
     ":jupyter_lab.bzl",
     _jupyter_lab = "jupyter_lab",
 )
@@ -25,6 +30,8 @@ load(
     _jupyter_toolchain = "jupyter_toolchain",
 )
 
+JupyterKernelspecInfo = _JupyterKernelspecInfo
+jupyter_kernelspec = _jupyter_kernelspec
 jupyter_lab = _jupyter_lab
 jupyter_notebook = _jupyter_notebook
 jupyter_notebook_binary = _jupyter_notebook_binary

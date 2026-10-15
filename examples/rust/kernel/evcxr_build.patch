@@ -1,0 +1,27 @@
+evcxr's build script records where `rustc` and `cargo` live by searching PATH,
+which Bazel build scripts do not have. rules_rust hands them the toolchain's
+binaries through `RUSTC` and `CARGO` instead; at run time evcxr still prefers
+whatever is on PATH, so the recorded paths are only fallbacks.
+
+--- a/build.rs
++++ b/build.rs
+@@ -3,11 +3,17 @@
+ fn main() {
+     let out_dir = PathBuf::from(std::env::var("OUT_DIR").expect("OUT_DIR must be set"));
+ 
+-    let path = which::which("rustc").expect("Couldn't find rustc on path");
++    let path = std::env::var_os("RUSTC")
++        .map(PathBuf::from)
++        .or_else(|| which::which("rustc").ok())
++        .expect("Couldn't find rustc on path");
+     let utf8_path = path.to_str().expect("Path isn't valid UTF-8");
+     std::fs::write(out_dir.join("rustc_path"), utf8_path).unwrap();
+ 
+-    let path = which::which("cargo").expect("Couldn't find cargo on path");
++    let path = std::env::var_os("CARGO")
++        .map(PathBuf::from)
++        .or_else(|| which::which("cargo").ok())
++        .expect("Couldn't find cargo on path");
+     let utf8_path = path.to_str().expect("Path isn't valid UTF-8");
+     std::fs::write(out_dir.join("cargo_path"), utf8_path).unwrap();
+ }

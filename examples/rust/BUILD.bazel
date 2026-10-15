@@ -1,0 +1,55 @@
+load("@rules_jupyter//jupyter:defs.bzl", "jupyter_lab", "jupyter_notebook", "jupyter_notebook_binary", "jupyter_notebook_test", "jupyter_report", "jupyter_toolchain")
+
+# The toolchain lists the kernels a notebook may select by name
+# (`jupyter_notebook.kernel`). Only the files of the selected kernel become
+# inputs of the notebook's actions and tests.
+jupyter_toolchain(
+    name = "py_jupyter_toolchain",
+    jupyter = "@pip_deps//jupyter",
+    jupytext = "@pip_deps//jupytext",
+    kernels = ["//kernel:rust"],
+    pandoc = "@pandoc",
+)
+
+toolchain(
+    name = "jupyter_toolchain",
+    toolchain = ":py_jupyter_toolchain",
+    toolchain_type = "@rules_jupyter//jupyter:toolchain_type",
+)
+
+ARGS = ["--trials=3"]
+
+# A `.rs` script is converted to a notebook with the kernel's metadata.
+jupyter_notebook(
+    name = "notebook",
+    src = "notebook.rs",
+    kernel = "rust",
+)
+
+jupyter_notebook_test(
+    name = "notebook_test",
+    args = ARGS,
+    notebook = ":notebook",
+    reports = ["html"],
+)
+
+jupyter_report(
+    name = "report",
+    args = ARGS,
+    notebook = ":notebook",
+    out_html = "report.html",
+    out_markdown = "report.md",
+)
+
+jupyter_notebook_binary(
+    name = "run",
+    args = ARGS,
+    notebook = ":notebook",
+    reports = ["html"],
+)
+
+jupyter_lab(
+    name = "lab",
+    args = ARGS,
+    notebook = ":notebook",
+)

@@ -24,32 +24,41 @@ py_binary(
     deps = ["//jupyter:current_jupytext_toolchain"],
 )
 
+# The runtime shared by every wrapper: environment setup, kernelspecs,
+# notebook execution and report export.
+py_library(
+    name = "notebook_env",
+    srcs = [
+        "exporters.py",
+        "kernels.py",
+        "notebook_env.py",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//jupyter:current_jupyter_toolchain",
+        "@rules_venv//python/runfiles",
+    ],
+)
+
 py_binary(
     name = "reporter",
     srcs = ["reporter.py"],
     visibility = ["//visibility:public"],
-    deps = ["//jupyter:current_jupyter_toolchain"],
+    deps = [":notebook_env"],
 )
 
 py_binary(
     name = "tester",
     srcs = ["tester.py"],
     visibility = ["//visibility:public"],
-    deps = [
-        ":reporter",
-        "@rules_venv//python/runfiles",
-    ],
+    deps = [":notebook_env"],
 )
 
 py_binary(
     name = "runner",
     srcs = ["runner.py"],
     visibility = ["//visibility:public"],
-    deps = [
-        ":reporter",
-        ":tester",
-        "@rules_venv//python/runfiles",
-    ],
+    deps = [":notebook_env"],
 )
 
 py_binary(
@@ -63,15 +72,14 @@ py_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":ibazel_handler",
-        ":reporter",
-        "@rules_venv//python/runfiles",
+        ":notebook_env",
     ],
 )
 
 py_pytest_test(
-    name = "reporter_test",
-    srcs = ["reporter_test.py"],
-    deps = [":reporter"],
+    name = "notebook_env_test",
+    srcs = ["notebook_env_test.py"],
+    deps = [":notebook_env"],
 )
 
 py_library(

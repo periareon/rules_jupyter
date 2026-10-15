@@ -1,31 +1,22 @@
-"""The `jupyter_notebook_binary` runner."""
+"""The `jupyter_notebook_binary` runner.
+
+Executes a notebook from runfiles and writes the executed notebook and any
+requested reports to an output directory next to the user.
+"""
 
 import argparse
 import logging
 import os
-import sys
-import tempfile
 from pathlib import Path
-from typing import Optional, Sequence
 
-from nbclient.exceptions import CellExecutionError
-from python.runfiles import Runfiles
-
-from tools.process_wrappers.reporter import (
-    CwdMode,
-    configure_jupyter_environment,
-    configure_latex,
-    configure_ld_library_path,
-    configure_pandoc,
-    configure_playwright,
-    execute_notebook,
-    postprocess_notebook_outputs,
-    save_notebook,
-)
-from tools.process_wrappers.tester import (
+from tools.process_wrappers.exporters import save_notebook
+from tools.process_wrappers.notebook_env import (
+    add_notebook_arguments,
     collect_argv,
-    create_arg_parser,
-    generate_reports,
+    create_runfiles,
+    init_logging,
+    notebook_session,
+    path_type,
 )
 
 
@@ -49,109 +40,39 @@ def _resolve_out_dir(value: str) -> Path:
     return _working_directory() / path
 
 
-def parse_args(
-    argv: Optional[Sequence[str]] = None, runfiles: Optional[Runfiles] = None
-) -> argparse.Namespace:
-    """Parse command line arguments, extending the base parser with --output-dir."""
+def main() -> None:
+    """The main entrypoint."""
+    init_logging()
+    runfiles = create_runfiles()
 
-    basename, _, _ = Path(__file__).name.rpartition(".")
-    basename = os.environ.get("RULES_JUPYTER_BINARY_NAME", basename)
-    output_dir = _working_directory() / basename
+    basename = os.environ.get("RULES_JUPYTER_BINARY_NAME", Path(__file__).stem)
 
-    parser = create_arg_parser(runfiles=runfiles, description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__)
+    add_notebook_arguments(parser, path_type(runfiles))
     parser.add_argument(
         "--out-dir",
         "--out_dir",
         "--output_dir",
         dest="out_dir",
         type=_resolve_out_dir,
-        default=output_dir,
+        default=_working_directory() / basename,
         help="Directory to write output files to. Relative paths are resolved against BUILD_WORKING_DIRECTORY.",
     )
+    args = parser.parse_args(collect_argv(runfiles, "RULES_JUPYTER_ARGS_FILE"))
 
-    if argv is not None:
-        return parser.parse_args(argv)
-
-    return parser.parse_args()
-
-
-def main() -> None:
-    """The main entrypoint."""
-    if "RULES_JUPYTER_DEBUG" in os.environ:
-        logging.basicConfig(
-            format="%(levelname)s: %(message)s",
-            level=logging.DEBUG,
-        )
-
-    runfiles = Runfiles.Create()
-    if not runfiles:
-        logging.error("Failed to create runfiles")
-        sys.exit(1)
-
-    args = parse_args(collect_argv(runfiles, "RULES_JUPYTER_ARGS_FILE"), runfiles)
-
-    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp_dir:
-        configure_jupyter_environment(Path(tmp_dir))
-
-        configure_pandoc(args.pandoc)
-
-        if args.playwright_browsers_dir:
-            configure_playwright(args.playwright_browsers_dir)
-        if args.ld_library_dir:
-            configure_ld_library_path(args.ld_library_dir)
-        if args.latex_engine:
-            configure_latex(
-                args.latex_engine,
-                args.latex_format,
-                args.latex_texmf_cnf,
-                args.bibtex,
-                Path(tmp_dir),
-            )
-
-        if not args.notebook.exists():
-            raise FileNotFoundError(f"Notebook does not exist: {args.notebook}")
-
-        if args.cwd_mode == CwdMode.NOTEBOOK_ROOT:
-            cwd = args.notebook.parent
-        elif args.cwd_mode == CwdMode.EXECUTION_ROOT:
-            cwd = Path.cwd()
-        else:
-            raise ValueError(f"Unexpected cwd mode: {args.cwd_mode}")
-
-        logging.debug("Executing notebook: %s", args.notebook)
-        try:
-            notebook = execute_notebook(
-                args.notebook,
-                cwd,
-                kernel_name=args.kernel,
-                suppress_log=False,
-                params=args.params,
-            )
-        except CellExecutionError as e:
-            print(f"\nCellExecutionError: {e}", file=sys.stderr)
-            sys.exit(1)
-        logging.debug("Notebook execution completed successfully")
-
-        postprocess_notebook_outputs(notebook)
+    with notebook_session(args, runfiles=runfiles) as session:
+        notebook = session.execute(suppress_log=False)
 
         args.out_dir.mkdir(parents=True, exist_ok=True)
-        notebook_name = args.notebook.stem
-
-        executed_notebook_path = args.out_dir / f"{notebook_name}_executed.ipynb"
+        stem = args.notebook.stem
+        executed_notebook_path = args.out_dir / f"{stem}_executed.ipynb"
         save_notebook(notebook, executed_notebook_path)
         logging.info("Saved executed notebook: %s", executed_notebook_path)
 
-        for report_type in args.reports:
-            output = generate_reports(
-                notebook,
-                notebook_name,
-                report_type,
-                args.out_dir,
-                exporter_args=args.exporter_args or None,
-            )
-            print(f"{report_type.capitalize()} report written to: {output}")
-
-    sys.exit(0)
+        for request, output in zip(
+            session.reports, session.write_reports(notebook, args.out_dir, stem)
+        ):
+            print(f"{request.format.name.capitalize()} report written to: {output}")
 
 
 if __name__ == "__main__":

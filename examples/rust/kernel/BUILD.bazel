@@ -11,9 +11,10 @@ alias(
     actual = "@crates//:evcxr_jupyter__evcxr_jupyter",
 )
 
-# evcxr compiles each cell with `cargo`, which it looks up on `PATH`. The
-# `rules_rust` toolchain provides it (along with `rustc` and the standard
-# library) so no Rust installation is required on the host.
+# evcxr compiles each cell with `cargo`, which it looks up on `PATH`, and
+# `cargo` in turn looks up `rustc` there. The `rules_rust` toolchains provide
+# both (along with the standard library) so no Rust installation is required
+# on the host.
 jupyter_kernelspec(
     name = "rust",
     # Notebook `args` become a `Vec<&str>` named `args`.
@@ -26,11 +27,15 @@ jupyter_kernelspec(
     data = [
         ":evcxr_jupyter",
         "@rules_rust//rust/toolchain:current_rust_stdlib_files",
+        "@rules_rust//rust/toolchain:current_rustc_lib_files",
     ],
     display_name = "Rust",
     interrupt_mode = "message",
     language = "rust",
-    path_tools = ["@rules_rust//rust/toolchain:current_cargo_files"],
+    path_tools = [
+        "@rules_rust//cargo:current_cargo_toolchain",
+        "@rules_rust//rust/toolchain:current_rustc_files",
+    ],
     # evcxr's ZeroMQ is built with TCP transport only.
     transport = "tcp",
 )

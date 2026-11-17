@@ -6,7 +6,7 @@
 ##
 ## To regenerate this file, use the following command:
 ##
-##    bazel run "@@//tools/requirements:requirements.macos_aarch64.update"
+##    bazel run "@@//tools/requirements:requirements.update"
 ##
 ################################################################################
 

@@ -2,7 +2,7 @@
   "binary_crates": [
     "evcxr_jupyter 0.22.0"
   ],
-  "checksum": "e627561928ff5b31edda40f1e0d71a95ead031281f0fc07c565742a77cd04a31",
+  "checksum": "db58c1b4047d0710640652981550d2b27c95c715d4d1a1c9cbf407c104725db8",
   "conditions": {
     "aarch64-apple-darwin": [
       "aarch64-apple-darwin"

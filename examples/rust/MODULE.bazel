@@ -15,9 +15,9 @@ module(
 )
 
 bazel_dep(name = "rules_jupyter", version = "0.0.0")
-bazel_dep(name = "rules_req_compile", version = "1.3.0")
-bazel_dep(name = "platforms", version = "1.0.0")
-bazel_dep(name = "rules_rust", version = "0.74.0")
+bazel_dep(name = "rules_req_compile", version = "1.7.1")
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "rules_rust", version = "0.75.0")
 
 # Override to use local path to parent rules_jupyter module
 local_path_override(

@@ -1,6 +1,5 @@
 """Third-party Python packages of the converter (development only)."""
 
-load("@rules_multirun//:defs.bzl", "multirun")
 load("@rules_req_compile//:defs.bzl", "py_reqs_compiler", "py_reqs_solution_test")
 
 # Bazel constraints and the wheel platform tag each lock file is compiled for.
@@ -56,30 +55,19 @@ filegroup(
     ],
 )
 
-# Each compiler resolves the solution for its own platform regardless of the
-# host, so every lock file can be regenerated from any machine.
-[
-    py_reqs_compiler(
-        name = "requirements.{}.update".format(platform),
-        platform = info["wheel_tag"],
-        requirements_in = "requirements_in",
-        requirements_txt = "requirements_{}.txt".format(platform),
-    )
-    for platform, info in PLATFORMS.items()
-]
-
-[
-    py_reqs_solution_test(
-        name = "requirements_{}_test".format(platform),
-        compiler = ":requirements.{}.update".format(platform),
-    )
-    for platform in PLATFORMS
-]
-
-multirun(
+# One compiler resolves the solution for every platform regardless of the
+# host, so all lock files can be regenerated from any machine and always
+# agree on the version of each package.
+py_reqs_compiler(
     name = "requirements.update",
-    commands = [
-        "requirements.{}.update".format(platform)
+    requirements_in = "requirements_in",
+    requirements_txts = {
+        "requirements_{}.txt".format(platform): info["wheel_tag"]
         for platform, info in PLATFORMS.items()
-    ],
+    },
+)
+
+py_reqs_solution_test(
+    name = "requirements_test",
+    compiler = ":requirements.update",
 )
